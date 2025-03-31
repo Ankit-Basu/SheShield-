@@ -1,0 +1,27 @@
+# Ignore email configuration file with credentials
+config/email_config.php
+
+# Ignore environment files
+.env
+*.env
+
+# Ignore log files
+logs/
+*.log
+php_error.log
+php_errors.log
+
+# Ignore user uploads
+uploads/
+
+# Ignore vendor dependencies
+vendor/
+
+# Ignore IDE and editor files
+.idea/
+.vscode/
+*.sublime-*
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
