@@ -41,7 +41,7 @@
                     <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='report.php'">
                         <i class="fa-solid fa-file"></i> <span>Reports</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer">
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='analytics.php'">
                         <i class="fa-solid fa-chart-bar"></i> <span>Analytics</span>
                     </li>
                     <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='map.php'">
@@ -59,6 +59,9 @@
                     <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='settings.php'">
                         <i class="fa-solid fa-gear"></i> <span>Settings</span>
                     </li>
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='auth/logout.php'">
+                        <i class="fa-solid fa-sign-out-alt"></i> <span>Logout</span>
+                    </li>
                 </ul>
             </nav>
         </aside>
@@ -73,6 +76,69 @@
             <div id="content">
                 <h1 class="text-3xl font-bold">Dashboard Overview</h1>
                 <p class="mt-2">Welcome to the Campus Safety Monitoring Dashboard.</p>
+                
+                <!-- Dashboard Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                    <!-- Analytics Card -->
+                    <a href="analytics.php" class="block">
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                            <div class="bg-[#D12E79] h-2"></div>
+                            <div class="p-6">
+                                <div class="flex items-center justify-between">
+                                    <h2 class="text-xl font-semibold text-gray-800">Analytics Dashboard</h2>
+                                    <div class="bg-[#F9E9F0] p-3 rounded-full">
+                                        <i class="fa-solid fa-chart-bar text-[#D12E79] text-xl"></i>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 mt-4">View comprehensive analytics, case statistics, and data visualizations.</p>
+                                <div class="mt-6 flex items-center text-[#D12E79]">
+                                    <span>Explore Analytics</span>
+                                    <i class="fa-solid fa-arrow-right ml-2"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <!-- Reports Card -->
+                    <a href="report.php" class="block">
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                            <div class="bg-[#D12E79] h-2"></div>
+                            <div class="p-6">
+                                <div class="flex items-center justify-between">
+                                    <h2 class="text-xl font-semibold text-gray-800">Reports</h2>
+                                    <div class="bg-[#F9E9F0] p-3 rounded-full">
+                                        <i class="fa-solid fa-file text-[#D12E79] text-xl"></i>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 mt-4">Access and manage incident reports and case documentation.</p>
+                                <div class="mt-6 flex items-center text-[#D12E79]">
+                                    <span>View Reports</span>
+                                    <i class="fa-solid fa-arrow-right ml-2"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <!-- Map Card -->
+                    <a href="map.php" class="block">
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                            <div class="bg-[#D12E79] h-2"></div>
+                            <div class="p-6">
+                                <div class="flex items-center justify-between">
+                                    <h2 class="text-xl font-semibold text-gray-800">Safety Map</h2>
+                                    <div class="bg-[#F9E9F0] p-3 rounded-full">
+                                        <i class="fa-solid fa-map text-[#D12E79] text-xl"></i>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 mt-4">View incident locations and safety information on an interactive map.</p>
+                                <div class="mt-6 flex items-center text-[#D12E79]">
+                                    <span>Open Map</span>
+                                    <i class="fa-solid fa-arrow-right ml-2"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
             </div>
         </main>
     </div>

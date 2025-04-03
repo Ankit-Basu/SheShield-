@@ -1,6 +1,13 @@
 <?php
 require_once 'mysqli_db.php';
 
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    die('User not logged in');
+}
+$user_id = $_SESSION['user_id'];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate required fields
     $required = ['incident_type', 'description', 'date', 'time'];
@@ -27,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date_time = $incident_date . ' ' . $incident_time;
     
     // Insert into database
-    $stmt = $conn->prepare("INSERT INTO incidents (incident_type, description, location, date_time, status) VALUES (?, ?, ?, ?, 'pending')");
-    $stmt->bind_param("ssss", $incident_type, $description, $location_name, $date_time);
+    $stmt = $conn->prepare("INSERT INTO incidents (user_id, incident_type, description, location, date_time, status) VALUES (?, ?, ?, ?, ?, 'pending')");
+    $stmt->bind_param("issss", $user_id, $incident_type, $description, $location_name, $date_time);
 
 // Execute the statement
 if ($stmt->execute()) {

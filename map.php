@@ -36,6 +36,11 @@
                     <i class="fa-solid fa-shield-halved text-3xl"></i>
                     <span class="text-lg font-bold"><?php 
                     session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    die('User not logged in');
+}
+$user_id = $_SESSION['user_id'];
                     echo isset($_SESSION['first_name']) ? 'Welcome ' . htmlspecialchars($_SESSION['first_name']) : 'User Name'; 
                     ?></span>
                 </div>

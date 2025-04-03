@@ -1,5 +1,10 @@
 <?php
 session_start();
+// Redirect if already logged in
+if (isset($_SESSION['user_id'])) {
+    header('Location: /dashboard.php');
+    exit();
+}
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");

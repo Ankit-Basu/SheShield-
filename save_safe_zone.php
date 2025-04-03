@@ -5,8 +5,11 @@ header('Content-Type: application/json');
 
 session_start();
 
-// User ID is optional for now
-$user_id = null;
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'message' => 'User not logged in']);
+    exit;
+}
+$user_id = $_SESSION['user_id'];
 
 // Get POST data
 $data = json_decode(file_get_contents('php://input'), true);
@@ -63,10 +66,11 @@ try {
         exit;
     }
 
-    $stmt = $conn->prepare("INSERT INTO safe_spaces (latitude, longitude, description, time_active) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO safe_spaces (user_id, latitude, longitude, description, time_active) VALUES (?, ?, ?, ?, ?)");
     
-    // Bind parameters without user_id
-    $stmt->bind_param("ddsi", 
+    // Bind parameters including user_id
+    $stmt->bind_param("iddsi", 
+        $user_id,
         $center_lat,
         $center_lng,
         $data['description'],

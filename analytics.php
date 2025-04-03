@@ -1,36 +1,13 @@
 <?php
 session_start();
-require_once 'mysql_db.php';
+require_once 'database/mysqli_db.php';
 
-// Get the latest active emergency response with alert status
-$sql = "SELECT er.*, ea.status as alert_status 
-        FROM emergency_responses er 
-        LEFT JOIN emergency_alerts ea ON er.alert_id = ea.id 
-        WHERE er.case_resolved = 0 
-        ORDER BY er.id DESC LIMIT 1";
-$result = mysqli_query($conn, $sql);
-$response = mysqli_fetch_assoc($result);
+// Initialize database connection
+$conn = get_mysqli_connection();
 
-// Set default values if no response exists
-if (!$response) {
-    // Clear any existing progress
-    echo '<div class="bg-white p-8 rounded-2xl shadow-xl opacity-75 col-span-1 md:col-span-2 text-center">
-            <div class="flex items-center justify-center mb-4">
-                <i class="fas fa-exclamation-circle text-4xl text-gray-400 mr-3"></i>
-                <h2 class="text-2xl font-bold text-gray-500">No Active Emergency</h2>
-            </div>
-            <p class="text-gray-500">There are currently no active emergency cases.</p>
-         </div>';
-    exit();
-} else if ($response['case_resolved'] == 1) {
-    // Show case resolved message
-    echo '<div class="bg-white p-8 rounded-2xl shadow-xl col-span-1 md:col-span-2 text-center">
-            <div class="flex items-center justify-center mb-4">
-                <i class="fas fa-check-circle text-4xl text-green-500 mr-3"></i>
-                <h2 class="text-2xl font-bold text-gray-700">Case Successfully Resolved</h2>
-            </div>
-            <p class="text-gray-600">No active emergency cases at the moment.</p>
-        </div>';
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: auth/login.php');
     exit();
 }
 ?>
@@ -39,322 +16,272 @@ if (!$response) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics - Women Safety</title>
+    <title>Analytics Dashboard</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+
+    <!-- FontAwesome Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
+
     <style>
-        #sidebar {
-            transition: transform 0.3s ease-in-out;
-        }
-        .sidebar-hidden {
-            transform: translateX(-100%);
-        }
-        .content-full {
-            margin-left: 0 !important;
-        }
-        .toggle-default {
-            transform: translateX(0) translateY(-50%) !important;
-        }
-        .progress-bar {
-            transition: width 0.3s ease-in-out;
-        }
-        .case-resolved {
-            opacity: 0.7;
-            pointer-events: none;
-        }
+        .sidebar-hidden { transform: translateX(-100%); }
+        .sidebar-visible { transform: translateX(0); }
+        .toggle-moved { transform: translateX(16rem) translateY(-50%); }
+        .toggle-default { transform: translateX(0) translateY(-50%); }
+        .content-shifted { margin-left: 16rem; }
+        .content-full { margin-left: 0; }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="flex min-h-screen">
+<body class="bg-[#F9E9F0] text-[#333333]">
+    <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed w-64 bg-[#D12E79] text-white p-5 flex flex-col h-full z-40">
+        <aside id="sidebar" class="fixed w-64 bg-[#D12E79] text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-hidden md:sidebar-visible">
             <div class="flex items-center justify-between mb-5">
                 <div class="flex items-center space-x-3">
                     <i class="fa-solid fa-shield-halved text-3xl"></i>
-                    <span class="text-lg font-bold">Women Safety</span>
+                    <span class="text-lg font-bold"><?php 
+                    // Get user's name from session
+                    echo isset($_SESSION['first_name']) ? 'Welcome ' . htmlspecialchars($_SESSION['first_name']) : 'User Name'; 
+                    ?></span>
                 </div>
             </div>
-            <nav class="sidebar-content">
+            <nav>
                 <ul>
-                    <li onclick="window.location.href='dashboard.php'" class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer">
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='dashboard.php'">
                         <i class="fa-solid fa-house"></i> <span>Home</span>
                     </li>
-                    <li onclick="window.location.href='report.php'" class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer">
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='report.php'">
                         <i class="fa-solid fa-file"></i> <span>Reports</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 bg-[#AB1E5C]">
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='analytics.php'">
                         <i class="fa-solid fa-chart-bar"></i> <span>Analytics</span>
                     </li>
-                    <li onclick="window.location.href='map.php'" class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer">
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='map.php'">
                         <i class="fa-solid fa-map"></i> <span>Map</span>
                     </li>
-                                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='settings.php'">
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='safespace.php'">
+                        <i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span>
+                    </li>
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='walkwithus.php'">
+                        <i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span>
+                    </li>
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='templates.php'">
+                        <i class="fa-solid fa-file-lines"></i> <span>Templates</span>
+                    </li>
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='settings.php'">
                         <i class="fa-solid fa-gear"></i> <span>Settings</span>
+                    </li>
+                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='auth/logout.php'">
+                        <i class="fa-solid fa-sign-out-alt"></i> <span>Logout</span>
                     </li>
                 </ul>
             </nav>
         </aside>
-
+        
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 bg-[#D12E79] text-white p-2 rounded-r z-50 transition-transform duration-300 ease-in-out" style="transform: translateX(16rem) translateY(-50%)">
-            <i class="fas fa-bars"></i>
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 bg-[#D12E79] text-white p-2 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-default md:toggle-moved">
+            <i class="fa-solid fa-bars"></i>
         </button>
 
         <!-- Main Content -->
-        <main id="mainContent" class="flex-1 p-10 ml-64 transition-all duration-300">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Emergency Response Progress Tile -->
-                <div class="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 <?php echo (!$response || $response['id'] == 0) ? 'case-resolved' : ''; ?>">
-                    <h2 class="text-xl font-bold text-[#D12E79] mb-4 flex items-center gap-2">
-                        <i class="fas fa-shield-alt text-lg"></i>
-                        <span>Emergency Response Progress</span>
-                    </h2>
-                    <div class="relative">
-                        <!-- Vertical Timeline Line -->
-                        <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-                        
-                        <!-- Progress Steps -->
-                        <div class="space-y-4 relative">
-                            <!-- Alert Sent Step -->
-                            <div class="flex items-center group" data-status="notified">
-                                <div class="w-12 h-12 <?php echo $response['notified_time'] ? 'bg-[#D12E79]' : 'bg-gray-300'; ?> rounded-full flex items-center justify-center text-white shadow-lg transform transition-transform group-hover:scale-110 z-10">
-                                    <i class="fas fa-bell text-xl"></i>
-                                </div>
-                                <div class="ml-8 flex-1 bg-gray-50 rounded-xl p-6 transform transition-all duration-300 hover:translate-x-2">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <p class="font-semibold <?php echo $response['notified_time'] ? 'text-[#D12E79]' : 'text-gray-500'; ?> text-lg">Alert Sent</p>
-                                            <p class="text-sm text-gray-500 mt-1"><?php echo $response['notified_time'] ? date('h:i A', strtotime($response['notified_time'])) : '--:-- --'; ?></p>
-                                        </div>
-                                        <button onclick="updateStatus('notified')" class="px-6 py-3 rounded-lg <?php echo $response['notified_time'] ? 'bg-[#D12E79]' : 'bg-gray-200 hover:bg-[#D12E79]'; ?> text-white transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#D12E79] focus:ring-opacity-50">
-                                            <i class="fas fa-check mr-2"></i>Confirm
-                                        </button>
-                                    </div>
-                                    <div class="mt-3 h-1 <?php echo $response['notified_time'] ? 'bg-[#D12E79]' : 'bg-gray-200'; ?> rounded-full progress-bar"></div>
-                                </div>
-                            </div>
+        <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-full md:content-shifted">
+            <div id="content">
+                <h1 class="text-3xl font-bold">Analytics Dashboard</h1>
+                
+                <!-- Case Tracking Section -->
+<div class="mt-8 bg-white rounded-lg shadow p-6">
+    <h2 class="text-xl font-semibold mb-4">Case Tracking</h2>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Case ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complaint Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Reported</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Personnel</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <?php
+                // Query to get cases based on user permissions
+                $user_id = $_SESSION['user_id'];
+                $user_role = $_SESSION['role'] ?? 'user';
+                
+                // Build query based on user role
+                $query = "SELECT 
+                            i.id AS case_id, 
+                            i.incident_type AS complaint_type, 
+                            i.date_time AS date_reported, 
+                            CONCAT(u.first_name, ' ', u.last_name) AS assigned_personnel, 
+                            i.status
+                          FROM incidents i
+                          LEFT JOIN users u ON i.user_id = u.id
+                          WHERE 1=1";
+                
+                // Filter based on user role
+                if ($user_role != 'admin') {
+                    $query .= " AND i.user_id = $user_id";
+                }
+                
+                $query .= " ORDER BY i.date_time DESC";
+                
+                $result = $conn->query($query);
+                $rows = [];
+                if ($result) {
+                    while ($row = $result->fetch_assoc()) {
+                        $rows[] = $row;
+                    }
+                }
+                
+                if (count($rows) > 0) {
+                    foreach($rows as $row) {
+                        echo '<tr>';
+                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . htmlspecialchars($row['case_id']) . '</td>';
+                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . htmlspecialchars($row['complaint_type']) . '</td>';
+                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . htmlspecialchars($row['date_reported']) . '</td>';
+                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . htmlspecialchars($row['assigned_personnel'] ?? 'Unassigned') . '</td>';
+                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . htmlspecialchars($row['status']) . '</td>';
+                        echo '</tr>';
+                    }
+                } else {
+                    echo '<tr><td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No cases found</td></tr>';
+                }
+                $conn = null;
+                ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-                            <!-- Team Dispatched Step -->
-                            <div class="flex items-center group" data-status="dispatched">
-                                <div class="w-10 h-10 <?php echo $response['dispatched_time'] ? 'bg-[#D12E79]' : 'bg-gray-300'; ?> rounded-full flex items-center justify-center text-white shadow-lg transform transition-transform group-hover:scale-110 z-10">
-                                    <i class="fas fa-running text-lg"></i>
-                                </div>
-                                <div class="ml-6 flex-1 bg-gray-50 rounded-xl p-4 transform transition-all duration-300 hover:translate-x-2">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <p class="font-semibold <?php echo $response['dispatched_time'] ? 'text-[#D12E79]' : 'text-gray-500'; ?> text-lg">Help on the way</p>
-                                            <p class="text-sm text-gray-500 mt-1"><?php echo $response['dispatched_time'] ? date('h:i A', strtotime($response['dispatched_time'])) : '--:-- --'; ?></p>
-                                        </div>
-                                        <button onclick="updateStatus('dispatched')" 
-                                                class="px-4 py-2 rounded-lg <?php echo $response['dispatched_time'] ? 'bg-[#D12E79]' : 'bg-gray-200 hover:bg-[#D12E79]'; ?> text-white transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#D12E79] focus:ring-opacity-50"
-                                                <?php echo !$response['notified_time'] ? 'disabled' : ''; ?>>
-                                            <i class="fas fa-check mr-2"></i>Confirm
-                                        </button>
-                                    </div>
-                                    <div class="mt-3 h-1 <?php echo $response['dispatched_time'] ? 'bg-[#D12E79]' : 'bg-gray-200'; ?> rounded-full progress-bar"></div>
-                                </div>
-                            </div>
+<!-- Analytics Charts Section -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Case Status Distribution -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Case Status Distribution</h2>
+        <canvas id="statusChart"></canvas>
+    </div>
 
-                            <!-- Team Arrived Step -->
-                            <div class="flex items-center group" data-status="arrived">
-                                <div class="w-10 h-10 <?php echo $response['arrived_time'] ? 'bg-[#D12E79]' : 'bg-gray-300'; ?> rounded-full flex items-center justify-center text-white shadow-lg transform transition-transform group-hover:scale-110 z-10">
-                                    <i class="fas fa-location-dot text-lg"></i>
-                                </div>
-                                <div class="ml-6 flex-1 bg-gray-50 rounded-xl p-4 transform transition-all duration-300 hover:translate-x-2">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <p class="font-semibold <?php echo $response['arrived_time'] ? 'text-[#D12E79]' : 'text-gray-500'; ?> text-lg">Have responders arrived?</p>
-                                            <p class="text-sm text-gray-500 mt-1"><?php echo $response['arrived_time'] ? date('h:i A', strtotime($response['arrived_time'])) : '--:-- --'; ?></p>
-                                        </div>
-                                        <button onclick="updateStatus('arrived')" 
-                                                class="px-4 py-2 rounded-lg <?php echo $response['arrived_time'] ? 'bg-[#D12E79]' : 'bg-gray-200 hover:bg-[#D12E79]'; ?> text-white transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#D12E79] focus:ring-opacity-50"
-                                                <?php echo !$response['dispatched_time'] ? 'disabled' : ''; ?>>
-                                            <i class="fas fa-check mr-2"></i>Confirm
-                                        </button>
-                                    </div>
-                                    <div class="mt-3 h-1 <?php echo $response['arrived_time'] ? 'bg-[#D12E79]' : 'bg-gray-200'; ?> rounded-full progress-bar"></div>
-                                </div>
-                            </div>
+    <!-- Incident Types Distribution -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Incident Types Distribution</h2>
+        <canvas id="incidentTypeChart"></canvas>
+    </div>
+</div>
 
-                            <!-- Resolved Step -->
-                            <div class="flex items-center group" data-status="resolved">
-                                <div class="w-10 h-10 <?php echo $response['resolved_time'] ? 'bg-[#D12E79]' : 'bg-gray-300'; ?> rounded-full flex items-center justify-center text-white shadow-lg transform transition-transform group-hover:scale-110 z-10">
-                                    <i class="fas fa-check-double text-lg"></i>
-                                </div>
-                                <div class="ml-6 flex-1 bg-gray-50 rounded-xl p-4 transform transition-all duration-300 hover:translate-x-2">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <p class="font-semibold <?php echo $response['resolved_time'] ? 'text-[#D12E79]' : 'text-gray-500'; ?> text-lg">Issue resolved?</p>
-                                            <p class="text-sm text-gray-500 mt-1"><?php echo $response['resolved_time'] ? date('h:i A', strtotime($response['resolved_time'])) : '--:-- --'; ?></p>
-                                        </div>
-                                        <button onclick="updateStatus('resolved')" 
-                                                class="px-4 py-2 rounded-lg <?php echo $response['resolved_time'] ? 'bg-[#D12E79]' : 'bg-gray-200 hover:bg-[#D12E79]'; ?> text-white transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#D12E79] focus:ring-opacity-50"
-                                                <?php echo !$response['arrived_time'] ? 'disabled' : ''; ?>>
-                                            <i class="fas fa-check mr-2"></i>Confirm
-                                        </button>
-                                    </div>
-                                    <div class="mt-3 h-1 <?php echo $response['resolved_time'] ? 'bg-[#D12E79]' : 'bg-gray-200'; ?> rounded-full progress-bar"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-                    <?php if ($response['resolved_time'] && !$response['case_resolved']): ?>
-                    <div class="mt-8 text-center">
-                        <button onclick="markCaseResolved(<?php echo $response['id']; ?>)" 
-                                class="px-6 py-3 bg-[#D12E79] text-white rounded-xl hover:bg-[#AB1E5C] transition-colors duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#D12E79] focus:ring-opacity-50">
-                            <i class="fas fa-flag-checkered mr-2"></i>Mark Case as Resolved
-                        </button>
-                    </div>
-                    <?php endif; ?>
-                </div>
+<script>
+    // Fetch data for charts
+    <?php
+    // Reconnect to database since it was closed earlier
+    $conn = get_mysqli_connection();
+    
+    // Query for case status distribution
+    $statusQuery = "SELECT status, COUNT(*) as count FROM incidents ";
+    if ($user_role != 'admin') {
+        $statusQuery .= "WHERE user_id = $user_id OR assigned_to = $user_id ";
+    }
+    $statusQuery .= "GROUP BY status";
+    $statusResult = $conn->query($statusQuery);
+
+    $statusLabels = [];
+    $statusData = [];
+    if ($statusResult) {
+        while($row = $statusResult->fetch_assoc()) {
+            $statusLabels[] = $row['status'];
+            $statusData[] = $row['count'];
+        }
+    }
+
+    // Query for incident types distribution
+    $typeQuery = "SELECT incident_type, COUNT(*) as count FROM incidents ";
+    if ($user_role != 'admin') {
+        $typeQuery .= "WHERE user_id = $user_id OR assigned_to = $user_id ";
+    }
+    $typeQuery .= "GROUP BY incident_type";
+    $typeResult = $conn->query($typeQuery);
+
+    $typeLabels = [];
+    $typeData = [];
+    if ($typeResult) {
+        while($row = $typeResult->fetch_assoc()) {
+            $typeLabels[] = $row['incident_type'];
+            $typeData[] = $row['count'];
+        }
+    }
+    $conn = null;
+    ?>
+
+    // Case Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: <?php echo json_encode($statusLabels); ?>,
+            datasets: [{
+                data: <?php echo json_encode($statusData); ?>,
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Incident Types Chart
+    const typeCtx = document.getElementById('incidentTypeChart').getContext('2d');
+    new Chart(typeCtx, {
+        type: 'bar',
+        data: {
+            labels: <?php echo json_encode($typeLabels); ?>,
+            datasets: [{
+                label: 'Number of Cases',
+                data: <?php echo json_encode($typeData); ?>,
+                backgroundColor: '#D12E79',
+                borderColor: '#AB1E5C',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+                
             </div>
         </main>
     </div>
 
-    <script>
-        // Function to show case resolved button
-        function showCaseResolvedButton(responseId) {
-            const resolvedStep = document.querySelector('[data-status="resolved"]');
-            const buttonContainer = document.createElement('div');
-            buttonContainer.className = 'mt-6 text-center';
-            buttonContainer.innerHTML = `
-                <button onclick="markCaseResolved(${responseId})" 
-                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                    Mark Case as Resolved
-                </button>
-            `;
-            resolvedStep.parentNode.insertBefore(buttonContainer, resolvedStep.nextSibling);
-        }
+    <!-- Sidebar Script -->
+    <script src="sidebar.js"></script>
 
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
-            const toggle = document.getElementById('sidebarToggle');
-            
-            sidebar.classList.toggle('sidebar-hidden');
-            mainContent.classList.toggle('content-full');
-            toggle.classList.toggle('toggle-default');
-        });
-
-        function updateStatus(status) {
-            if (!confirm(`Confirm updating status to: ${status}?`)) return;
-
-            const responseId = <?php echo $response['id']; ?>;
-            if (!responseId) {
-                alert('No active emergency response found');
-                return;
-            }
-
-            fetch('update_status.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    status: status,
-                    response_id: responseId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update UI elements
-                    const statusElement = document.querySelector(`[data-status="${status}"]`);
-                    const iconCircle = statusElement.querySelector('.w-10');
-                    const progressBar = statusElement.querySelector('.h-1');
-                    const statusText = statusElement.querySelector('.font-semibold');
-                    const timeText = statusElement.querySelector('.text-sm');
-                    const button = statusElement.querySelector('button');
-                    
-                    // Update time display
-                    if (timeText) {
-                        timeText.textContent = new Date().toLocaleTimeString('en-US', { 
-                            hour: 'numeric', 
-                            minute: '2-digit', 
-                            hour12: true 
-                        });
-                    }
-
-                    // Update visual elements
-                    iconCircle.classList.remove('bg-gray-300');
-                    iconCircle.classList.add('bg-[#D12E79]');
-                    if (progressBar) {
-                        progressBar.classList.remove('bg-gray-200');
-                        progressBar.classList.add('bg-[#D12E79]');
-                    }
-                    if (statusText) {
-                        statusText.classList.remove('text-gray-500');
-                        statusText.classList.add('text-[#D12E79]');
-                    }
-                    if (button) {
-                        button.classList.remove('bg-gray-200');
-                        button.classList.add('bg-[#D12E79]');
-                    }
-
-                    // Enable next step if exists
-                    const nextStatus = {
-                        'notified': 'dispatched',
-                        'dispatched': 'arrived',
-                        'arrived': 'resolved'
-                    };
-                    
-                    if (nextStatus[status]) {
-                        const nextButton = document.querySelector(`[data-status="${nextStatus[status]}"] button`);
-                        if (nextButton) {
-                            nextButton.removeAttribute('disabled');
-                        }
-                    }
-
-                    if (status === 'resolved') {
-                        showCaseResolvedButton(responseId);
-                    }
-                } else {
-                    console.error('Failed to update status:', data.message || 'Unknown error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-
-        function markCaseResolved(id) {
-            if (!confirm('Are you sure you want to mark this case as completely resolved? This will clear the progress tracking.')) return;
-
-            fetch('mark_case_resolved.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    response_id: id
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Instead of reloading, update the UI to show case resolved state
-                    const progressContainer = document.querySelector('.grid');
-                    const noActiveMessage = document.createElement('div');
-                    noActiveMessage.className = 'bg-white p-8 rounded-2xl shadow-xl col-span-1 md:col-span-2 text-center';
-                    noActiveMessage.innerHTML = `
-                        <div class="flex items-center justify-center mb-4">
-                            <i class="fas fa-check-circle text-4xl text-green-500 mr-3"></i>
-                            <h2 class="text-2xl font-bold text-gray-700">Case Successfully Resolved</h2>
-                        </div>
-                        <p class="text-gray-600">No active emergency cases at the moment.</p>
-                    `;
-                    progressContainer.innerHTML = '';
-                    progressContainer.appendChild(noActiveMessage);
-                } else {
-                    alert('Failed to mark case as resolved: ' + (data.message || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error marking case as resolved');
-            });
-        }
-    </script>
 </body>
 </html>

@@ -1,5 +1,12 @@
 <?php
 require_once 'mysqli_db.php';
+require_once 'PHPMailer/Exception.php';
+require_once 'PHPMailer/PHPMailer.php';
+require_once 'PHPMailer/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
 
 header('Content-Type: application/json');
 
@@ -14,91 +21,106 @@ try {
         throw new Exception("Database connection failed");
     }
 
-    // If preferred time is provided, use it; otherwise use current time
-    if ($preferredTime) {
-        $requestDateTime = new DateTime($preferredTime);
-    } else {
-        $requestDateTime = new DateTime();
-    }
+    // Query to find active escorts
+    $query = "SELECT * FROM escorts 
+              WHERE status = 'active' 
+              ORDER BY rating DESC, completed_walks DESC LIMIT 1";
     
-    // Get day of week in lowercase to match ENUM values in database
-    $dayOfWeek = strtolower($requestDateTime->format('l')); // 'l' returns full day name
-    
-    // Get time in 24-hour format for comparison
-    $requestTime = $requestDateTime->format('H:i:s');
-    
-    // Log the request details for debugging
-    error_log("Escort request - Day: $dayOfWeek, Time: $requestTime");
-    
-    // First try to find escorts with exact day and time match
-    $query = "SELECT e.* FROM escorts e 
-              INNER JOIN escorts_schedule es ON e.escort_id = es.escort_id 
-               WHERE e.status = 'active' 
-              AND es.day_of_week = ? 
-              AND es.start_time <= ? 
-d              AND es.end_time >= ? 
-              AND (es.status = 'active' OR es.status = 'available' OR es.status = '' OR es.status IS NULL) 
-              ORDER BY e.rating DESC, e.completed_walks DESC LIMIT 1";
-    
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("sss", $dayOfWeek, $requestTime, $requestTime);
-    
-    error_log("Query parameters - Day: $dayOfWeek, Time: $requestTime");
-    
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $result = $conn->query($query);
     
     if (!$result) {
         throw new Exception("Query failed: " . $conn->error);
     }
-
-    $escort = $result->fetch_assoc();
-
-    if ($escort) {
-        // Format response
-        $response = [
-            'success' => true,
-            'escort' => [
-                'id' => $escort['escort_id'],
-                'name' => $escort['name'],
-                'type' => $escort['type'],
-                'rating' => floatval($escort['rating']),
-                'completedWalks' => intval($escort['completed_walks']),
-                'profilePic' => "https://ui-avatars.com/api/?name=" . urlencode($escort['name']) . "&background=random"
-            ]
-        ];
-        
-        error_log("Found escort: " . json_encode($response));
-    } else {
-        // Debug query
-        error_log("No escorts found. Checking total escorts in system...");
-        $debug_query = "SELECT COUNT(*) as total FROM escorts";
-        $debug_result = $conn->query($debug_query);
-        $total_escorts = $debug_result->fetch_assoc()['total'];
-        
-        error_log("Total escorts in system: " . $total_escorts);
-        
-        // Check schedules
-        $debug_query = "SELECT COUNT(*) as total FROM escorts_schedule WHERE day_of_week = ? AND status = 'active'";
-        $debug_stmt = $conn->prepare($debug_query);
-        $debug_stmt->bind_param("s", $dayOfWeek);
-        $debug_stmt->execute();
-        $debug_result = $debug_stmt->get_result();
-        $total_schedules = $debug_result->fetch_assoc()['total'];
-        
-        error_log("Total active schedules for $dayOfWeek: " . $total_schedules);
-        
-        $response = [
-            'success' => false,
-            'message' => 'No escorts are available at the moment. Please try again later.'
-        ];
+    
+    if ($result->num_rows === 0) {
+        throw new Exception("No active escorts available at this time");
     }
-} catch (Exception $e) {
-    error_log("Error in get_escort.php: " . $e->getMessage());
+    
+    $escort = $result->fetch_assoc();
+    
+    // Initialize email variables
+    $emailSent = false;
+    $emailMessage = '';
+    
+    // Try to send email to the escort
+    if ($escort && isset($escort['email'])) {
+        try {
+            $mail = new PHPMailer(true);
+            
+            // Server settings
+            $mail->SMTPDebug = 0; // Disable debug output
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'arshchouhan004@gmail.com';
+            $mail->Password = 'qvgs zzeh aiiy iplc';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port = 465;
+            
+            // Recipients
+            $mail->setFrom('arshchouhan004@gmail.com', 'SheShield');
+            $mail->addAddress($escort['email'], $escort['name']);
+            
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'New Walk Request - SheShield';
+            
+            // Generate a unique walk ID for this request
+            $walkId = 'WALK-' . date('Ymd') . '-' . substr(uniqid(), -6);
+            
+            // Simple email body
+            $mail->Body = "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <h2 style='color: #d946ef;'>New Walk Request</h2>
+                    <p>Hello {$escort['name']},</p>
+                    <p>You have received a new walk request with the following details:</p>
+                    
+                    <div style='background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+                        <p><strong>Walk ID:</strong> {$walkId}</p>
+                        <p><strong>Pickup Location:</strong> {$location}</p>
+                        <p><strong>Destination:</strong> {$destination}</p>
+                        <p><strong>Preferred Time:</strong> {$preferredTime}</p>
+                    </div>
+                    
+                    <p>Please respond to this request as soon as possible through your SheShield dashboard.</p>
+                    
+                    <div style='margin-top: 30px;'>
+                        <p>Best regards,<br>SheShield Team</p>
+                    </div>
+                </div>
+            ";
+            
+            $mail->send();
+            $emailSent = true;
+            $emailMessage = 'Email notification sent successfully to escort.';
+        } catch (Exception $e) {
+            $emailMessage = 'Failed to send email notification to escort: ' . $mail->ErrorInfo;
+            error_log("Failed to send email to escort ID: {$escort['escort_id']} - Error: " . $e->getMessage());
+        }
+    } else {
+        $emailMessage = 'No valid email address found for the escort.';
+    }
+    
+    // Format response with email status
     $response = [
-        'success' => false,
-        'message' => 'An error occurred while finding an escort. Please try again.'
+        'success' => true,
+        'emailSent' => $emailSent,
+        'emailMessage' => $emailMessage,
+        'escort' => [
+            'id' => $escort['escort_id'],
+            'name' => $escort['name'],
+            'type' => $escort['type'] ?? 'student',
+            'rating' => floatval($escort['rating'] ?? 5.0),
+            'completedWalks' => intval($escort['completed_walks'] ?? 0),
+            'profilePic' => "https://ui-avatars.com/api/?name=" . urlencode($escort['name']) . "&background=random"
+        ]
     ];
+    
+    echo json_encode($response);
+    
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
-
-echo json_encode($response);

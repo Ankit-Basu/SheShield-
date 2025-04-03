@@ -1,12 +1,34 @@
+<?php
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: Thu, 01 Jan 1970 00:00:00 GMT");
+session_start();
+
+// Immediate session validation before any output
+if(isset($_SESSION['user_id'])) {
+    header('Location: ../dashboard.php');
+    exit();
+}
+
+// Prevent session fixation
+session_regenerate_id(true);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Login - SheShield</title>
     <link href="/src/output.css" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        // Check if user is already logged in via sessionStorage (client-side check)
+        window.addEventListener('DOMContentLoaded', function() {
+            // Removed client-side redirect to prevent race condition
+            // Server-side validation in PHP handles redirects exclusively
+        });
+    </script>
 </head>
 <body class="bg-gray-50" x-data="{ isMenuOpen: false }">
     <!-- Navigation -->
@@ -15,15 +37,15 @@
             <div class="flex justify-between h-16">
                 <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="index.html" class="text-2xl font-bold text-pink-600">SheShield</a>
+                    <a href="index.php" class="text-2xl font-bold text-pink-600">SheShield</a>
                 </div>
                 
                 <!-- Desktop Navigation -->
                 <div class="hidden sm:ml-auto sm:flex sm:items-center sm:space-x-8">
-                    <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
-                    <a href="about.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
-                    <a href="report.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Report</a>
-                    <a href="login.html" class="border-pink-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Login</a>
+                    <a href="index.php" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                    <a href="about.php" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
+                    <a href="report.php" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Report</a>
+                    <a href="login.php" class="border-pink-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Login</a>
                 </div>
 
                 <!-- Mobile menu button -->
@@ -40,10 +62,10 @@
         <!-- Mobile menu -->
         <div x-show="isMenuOpen" class="sm:hidden bg-white border-t border-gray-200">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="index.html" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">Home</a>
-                <a href="about.html" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">About</a>
-                <a href="report.html" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">Report</a>
-                <a href="login.html" class="block px-3 py-2 text-pink-600 font-semibold">Login</a>
+                <a href="index.php" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">Home</a>
+                <a href="about.php" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">About</a>
+                <a href="report.php" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">Report</a>
+                <a href="login.php" class="block px-3 py-2 text-pink-600 font-semibold">Login</a>
             </div>
         </div>
     </nav>
@@ -58,7 +80,7 @@
                 </div>
 
                 <!-- Error Alert -->
-                <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <div id="server-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
                     <span class="block sm:inline"></span>
                 </div>
 
@@ -108,30 +130,6 @@
     </div>
 
     <script>
-        // Check session status when page loads
-        fetch('check_session.php', {headers: {'Cache-Control': 'no-cache'}})
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'redirect') {
-                    window.history.replaceState(null, null, data.url);
-window.location.href = data.url;
-                }
-            })
-            .catch(error => console.error('Session check error:', error));
-
-        // Check session on pageshow event (including when navigating back)
-        window.addEventListener('pageshow', function(event) {
-            fetch('check_session.php', {headers: {'Cache-Control': 'no-cache'}})
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'redirect') {
-                        window.history.replaceState(null, null, data.url);
-window.location.href = data.url;
-                    }
-                })
-                .catch(error => console.error('Session check error:', error));
-        });
-
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -150,14 +148,8 @@ window.location.href = data.url;
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    // Store user data in session storage
-                    sessionStorage.setItem('user_id', data.user.id);
-                    sessionStorage.setItem('email', data.user.email);
-                    sessionStorage.setItem('first_name', data.user.first_name);
-                    
-                    // Redirect to dashboard
-                    window.history.replaceState(null, null, '../dashboard.php');
-window.location.href = '../dashboard.php';
+                    // Server-side session already established
+                    window.location.href = data.redirect || '../dashboard.php';
                 } else {
                     alert(data.message || 'Invalid email or password');
                 }

@@ -70,10 +70,33 @@ function requestWalk(escortId) {
         document.getElementById('loadingAnimation').classList.add('hidden');
 
         if (data.success) {
+            // Show the active walk card immediately
+            showActiveWalkCard({
+                walkId: data.walkId,
+                escortId: escortId,
+                pickupLocation: pickupLocation,
+                destination: destination,
+                status: 'pending'
+            });
+            
+            // Determine message based on email status
+            let message = 'Your walk request has been submitted successfully.';
+            let icon = 'success';
+            
+            // Check if email was sent
+            if (data.hasOwnProperty('emailSent')) {
+                if (data.emailSent === true) {
+                    message += ' The escort has been notified via email.';
+                } else {
+                    message += ' However, the email notification to the escort failed. They will still see your request when they log in.';
+                    icon = 'warning';
+                }
+            }
+            
             Swal.fire({
-                icon: 'success',
+                icon: icon,
                 title: 'Walk Requested!',
-                text: 'Your walk request has been submitted successfully. The escort will be notified.',
+                text: message,
                 showConfirmButton: true
             });
 
@@ -95,6 +118,52 @@ function requestWalk(escortId) {
         });
     });
 }
+
+// Function to display the active walk card
+function showActiveWalkCard(walkData) {
+    // Get the active walk card and request section elements
+    const activeWalkCard = document.getElementById('activeWalk');
+    const requestSection = document.getElementById('requestSection');
+    
+    if (!activeWalkCard) return;
+    
+    // Save walk data to localStorage for persistence
+    localStorage.setItem('activeWalk', JSON.stringify(walkData));
+    
+    // Update the active walk card with walk details
+    document.getElementById('walkId').textContent = walkData.walkId || 'N/A';
+    document.getElementById('walkStatus').textContent = walkData.status || 'pending';
+    document.getElementById('walkPickup').textContent = walkData.pickupLocation || 'N/A';
+    document.getElementById('walkDestination').textContent = walkData.destination || 'N/A';
+    
+    // Set current time as start time
+    const startTimeElement = document.getElementById('activeStartTime');
+    if (startTimeElement) {
+        const now = new Date();
+        startTimeElement.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+    
+    // Hide request section and show active walk card
+    if (requestSection) requestSection.classList.add('hidden');
+    activeWalkCard.classList.remove('hidden');
+    
+    // Scroll to the active walk card
+    activeWalkCard.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Check for active walk on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const activeWalkData = localStorage.getItem('activeWalk');
+    if (activeWalkData) {
+        try {
+            const walkData = JSON.parse(activeWalkData);
+            showActiveWalkCard(walkData);
+        } catch (e) {
+            console.error('Error parsing active walk data:', e);
+            localStorage.removeItem('activeWalk');
+        }
+    }
+});
 
 function showEscortProfile(escortId) {
     fetch('get_escort.php?escort_id=' + escortId)
@@ -569,8 +638,8 @@ echo isset($_SESSION['first_name']) ? 'Welcome ' . htmlspecialchars($_SESSION['f
                         <div class="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-6">
                             <div class="flex-shrink-0 relative group">
                                 <img id="escortImage" src="" alt="Escort" class="w-32 h-32 rounded-full object-cover">
-                                <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span class="text-white text-sm">Verified</span>
+                                <div class="absolute bottom-0 right-0 bg-green-500 w-6 h-6 rounded-full border-4 border-gray-900 flex items-center justify-center">
+                                    <i class="fas fa-check text-white text-xs"></i>
                                 </div>
                             </div>
                             <div class="flex-grow">
