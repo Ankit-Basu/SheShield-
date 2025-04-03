@@ -183,7 +183,7 @@ if (!isset($_SESSION['user_id'])) {
     // Query for case status distribution
     $statusQuery = "SELECT status, COUNT(*) as count FROM incidents ";
     if ($user_role != 'admin') {
-        $statusQuery .= "WHERE user_id = $user_id OR assigned_to = $user_id ";
+        $statusQuery .= "WHERE user_id = $user_id ";
     }
     $statusQuery .= "GROUP BY status";
     $statusResult = $conn->query($statusQuery);
@@ -200,7 +200,7 @@ if (!isset($_SESSION['user_id'])) {
     // Query for incident types distribution
     $typeQuery = "SELECT incident_type, COUNT(*) as count FROM incidents ";
     if ($user_role != 'admin') {
-        $typeQuery .= "WHERE user_id = $user_id OR assigned_to = $user_id ";
+        $typeQuery .= "WHERE user_id = $user_id ";
     }
     $typeQuery .= "GROUP BY incident_type";
     $typeResult = $conn->query($typeQuery);
