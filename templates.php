@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,31 +15,100 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
     <style>
+        body {
+            background: linear-gradient(135deg, #1E1E2E 0%, #2E2E4E 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphic Effects */
+        .glass-effect {
+            background: rgba(46, 46, 78, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(74, 30, 115, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        .trae-sidebar {
+            background: rgba(46, 46, 78, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(74, 30, 115, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        .trae-sidebar-item {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            background: rgba(46, 46, 78, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .trae-sidebar-item.active {
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
+            border: 1px solid rgba(215, 109, 119, 0.3);
+        }
+        
+        .trae-sidebar-item:hover {
+            background: rgba(215, 109, 119, 0.15);
+            border: 1px solid rgba(215, 109, 119, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
+        }
+
         .sidebar-hidden { transform: translateX(-100%); }
         .sidebar-visible { transform: translateX(0); }
         .toggle-moved { transform: translateX(16rem) translateY(-50%); }
         .toggle-default { transform: translateX(0) translateY(-50%); }
         .content-shifted { margin-left: 16rem; }
         .content-full { margin-left: 0; }
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        .scrollbar-none::-webkit-scrollbar {
-            display: none;
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        /* Hide scrollbar for IE, Edge and Firefox */
-        .scrollbar-none {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+        ::-webkit-scrollbar-track {
+            background: rgba(46, 46, 78, 0.3);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.7), rgba(215, 109, 119, 0.7));
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.9), rgba(215, 109, 119, 0.9));
         }
     </style>
 </head>
-<body class="bg-[#F9E9F0] text-[#333333]">
-    <div class="flex h-screen">
+<body class="bg-[#1E1E2E] text-[#F0F0F0]">
+    <div class="flex h-screen overflow-hidden relative z-0">
+        <!-- Background gradient shapes -->
+        <div class="absolute -top-[300px] -right-[300px] w-[600px] h-[600px] bg-gradient-to-r from-[rgba(74,30,115,0.3)] to-[rgba(215,109,119,0.3)] rounded-full blur-3xl -z-10 animate-pulse-slow"></div>
+        <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed w-64 bg-[#D12E79] text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-hidden md:sidebar-visible">
+        <aside id="sidebar" class="trae-sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-hidden md:sidebar-visible">
             <div class="flex items-center justify-between mb-5">
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-shield-halved text-3xl"></i>
-                    <span class="text-lg font-bold"><?php 
+                <div class="flex items-center space-x-4 w-full">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-[#4A1E73] to-[#D76D77] flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <?php
+                        if (isset($_SESSION['profile_image']) && !empty($_SESSION['profile_image'])) {
+                            echo '<img src="' . htmlspecialchars($_SESSION['profile_image']) . '" class="w-full h-full object-cover profile-image" alt="Profile Picture">';
+                        } else {
+                            echo '<i class="fa-solid fa-user text-xl text-white"></i>';
+                        }
+                        ?>
+                    </div>
+                    <div class="flex-grow">
+                        <span class="text-lg font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php 
+                        if (!isset($_SESSION)) { session_start(); }
+                        $firstName = isset($_SESSION['first_name']) ? htmlspecialchars($_SESSION['first_name']) : '';
+                        $lastName = isset($_SESSION['last_name']) ? htmlspecialchars($_SESSION['last_name']) : '';
+                        echo !empty($firstName) || !empty($lastName) ? trim("$firstName $lastName") : 'User Name';
+                        ?></span>
+                    </div>
+                    <span class="text-lg font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php 
                     if (!isset($_SESSION)) { session_start(); }
                     echo isset($_SESSION['first_name']) ? 'Welcome ' . htmlspecialchars($_SESSION['first_name']) : 'User Name'; 
                     ?></span>
@@ -44,36 +116,39 @@
             </div>
             <nav>
                 <ul>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='dashboard.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='dashboard.php'">
                         <i class="fa-solid fa-house"></i> <span>Home</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='report.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='report.php'">
                         <i class="fa-solid fa-file"></i> <span>Reports</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='analytics.php'">
                         <i class="fa-solid fa-chart-bar"></i> <span>Analytics</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='map.php'">
                         <i class="fa-solid fa-map"></i> <span>Map</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='safespace.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='safespace.php'">
                         <i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='walkwithus.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='walkwithus.php'">
                         <i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='templates.php'">
+                    <li class="trae-sidebar-item active p-3 rounded flex items-center space-x-2">
                         <i class="fa-solid fa-file-lines"></i> <span>Templates</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='settings.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='settings.php'">
                         <i class="fa-solid fa-gear"></i> <span>Settings</span>
+                    </li>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='auth/logout.php'">
+                        <i class="fa-solid fa-sign-out-alt"></i> <span>Logout</span>
                     </li>
                 </ul>
             </nav>
         </aside>
 
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 bg-[#D12E79] text-white p-2 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-default md:toggle-moved">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-default md:toggle-moved hover:shadow-lg">
             <i class="fa-solid fa-bars"></i>
         </button>
 
@@ -83,58 +158,71 @@
                 <h1 class="text-4xl font-bold bg-gradient-to-r from-[#D12E79] to-[#AB1E5C] bg-clip-text text-transparent">Templates</h1>
                 <div class="absolute top-8 right-8 z-10 w-72">
                     <div class="relative">
-                        <select class="w-full px-4 py-2 rounded-lg border-2 border-[#D12E79] focus:outline-none focus:ring-2 focus:ring-[#AB1E5C] text-[#D12E79]" id="categoryFilter">
-                            <option value="all">All Categories</option>
-                            <option value="Harassment">Harassment</option>
-                            <option value="Stalking">Stalking</option>
-                            <option value="Theft">Theft</option>
-                            <option value="Assault">Assault</option>
+                        <select class="w-full px-4 py-2 rounded-lg glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.3)] to-[rgba(215,109,119,0.3)] text-white border-2 border-[rgba(215,109,119,0.3)] focus:outline-none focus:ring-2 focus:ring-[#D12E79] hover:border-[rgba(215,109,119,0.5)] transition-all duration-300" id="categoryFilter">
+                            <option value="all" class="bg-[#1E1E2E]">All Categories</option>
+                            <option value="Harassment" class="bg-[#1E1E2E]">Harassment</option>
+                            <option value="Stalking" class="bg-[#1E1E2E]">Stalking</option>
+                            <option value="Theft" class="bg-[#1E1E2E]">Theft</option>
+                            <option value="Assault" class="bg-[#1E1E2E]">Assault</option>
                         </select>
-                        <i class="fa-solid fa-search absolute right-3 top-3 text-[#D12E79]"></i>
+                        <i class="fa-solid fa-search absolute right-3 top-3 text-white"></i>
                     </div>
                 </div>
                 <p class="mt-2">Manage your templates here.</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
-                    <div class="bg-gradient-to-b from-blue-100 to-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2" data-category="Harassment">
-                        <h2 class="text-xl font-semibold mb-3">Complaint Regarding Inadequate Response to Safety Concerns by University Staff</h2>
-                        <p class="text-gray-600 mb-4">Formal complaint template for reporting inadequate responses to safety concerns by university authorities.</p>
-                        <div class="h-12 flex items-center">
-                            <button class="bg-[#D12E79] text-white px-6 py-3 rounded-lg hover:bg-[#AB1E5C] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10 p-4">
+                    <!-- Template Cards with enhanced styling -->
+                    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl flex flex-col h-[280px]" data-category="Harassment">
+                        <div class="flex-grow">
+                            <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Inadequate Response to Safety Concerns by University Staff</h2>
+                            <p class="text-gray-300">Formal complaint template for reporting inadequate responses to safety concerns by university authorities.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button w-full">Use Template</button>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-b from-blue-100 to-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:bg-white" data-category="Assault">
-                        <h2 class="text-xl font-semibold mb-3">Complaint Regarding Blackmail and Threat</h2>
-                        <p class="text-gray-600 mb-4">Template for reporting blackmail and and threat on campus.</p>
-                        <div class="h-12 flex items-center">
-                            <button class="bg-[#D12E79] text-white px-6 py-3 rounded-lg hover:bg-[#AB1E5C] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+                    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl flex flex-col h-[280px]" data-category="Assault">
+                        <div class="flex-grow">
+                            <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Blackmail and Threat</h2>
+                            <p class="text-gray-300">Template for reporting blackmail and and threat on campus.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button w-full">Use Template</button>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-b from-blue-100 to-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:bg-white" data-category="Assault">
-                        <h2 class="text-xl font-semibold mb-3">Complaint Regarding Sexual Harassment Incident</h2>
-                        <p class="text-gray-600 mb-4">Formal template for documenting and reporting sexual harassment incidents with evidentiary support.</p>
-                        <div class="h-12 flex items-center">
-                            <button class="bg-[#D12E79] text-white px-6 py-3 rounded-lg hover:bg-[#AB1E5C] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+                    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl flex flex-col h-[280px]" data-category="Assault">
+                        <div class="flex-grow">
+                            <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Sexual Harassment Incident</h2>
+                            <p class="text-gray-300">Formal template for documenting and reporting sexual harassment incidents with evidentiary support.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button w-full">Use Template</button>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-b from-blue-100 to-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:bg-white mt-6 md:mt-0" data-category="Stalking">
-                        <h2 class="text-xl font-semibold mb-3">Complaint Regarding Stalking Incident</h2>
-                        <p class="text-gray-600 mb-4">Template for reporting persistent stalking behavior with timeline documentation.</p>
-                        <div class="h-12 flex items-center">
-                            <button class="bg-[#D12E79] text-white px-6 py-3 rounded-lg hover:bg-[#AB1E5C] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+                    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] mt-6 md:mt-0 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl flex flex-col h-[280px]" data-category="Stalking">
+                        <div class="flex-grow">
+                            <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Stalking Incident</h2>
+                            <p class="text-gray-300">Template for reporting persistent stalking behavior with timeline documentation.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button w-full">Use Template</button>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-b from-blue-100 to-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:bg-white mt-6 md:mt-0" data-category="Stalking">
-                        <h2 class="text-xl font-semibold mb-3">Complaint Regarding Eve-Teasing</h2>
-                        <p class="text-gray-600 mb-4">Template for reporting instances of eve-teasing and street harassment.</p>
-                        <div class="h-12 flex items-center">
-                            <button class="bg-[#D12E79] text-white px-6 py-3 rounded-lg hover:bg-[#AB1E5C] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+                    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] mt-6 md:mt-0 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl flex flex-col h-[280px]" data-category="Stalking">
+                        <div class="flex-grow">
+                            <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Eve-Teasing</h2>
+                            <p class="text-gray-300">Template for reporting instances of eve-teasing and street harassment.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button w-full">Use Template</button>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-b from-blue-100 to-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:bg-white mt-6 md:mt-0" data-category="Stalking">
-                        <h2 class="text-xl font-semibold mb-3">Complaint Regarding Offensive Comments or Remarks</h2>
-                        <p class="text-gray-600 mb-4">Template for documenting and reporting offensive verbal comments or derogatory remarks.</p>
-                        <div class="h-12 flex items-center">
-                            <button class="bg-[#D12E79] text-white px-6 py-3 rounded-lg hover:bg-[#AB1E5C] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+                    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] mt-6 md:mt-0 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl flex flex-col h-[280px]" data-category="Stalking">
+                        <div class="flex-grow">
+                            <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Offensive Comments or Remarks</h2>
+                            <p class="text-gray-300">Template for documenting and reporting offensive verbal comments or derogatory remarks.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button w-full">Use Template</button>
                         </div>
                     </div>
                 </div>
@@ -328,6 +416,7 @@
                                     </div>
                                 </div>
                             `;
+                            break;
                         case 'Complaint Regarding Sexual Harassment Incident':
                             templateHTML = `
                                 <h2 class="text-2xl font-bold mb-6 text-[#D12E79]">Complaint Regarding Sexual Harassment Incident</h2>
@@ -612,3 +701,63 @@
         }
     </style>
 </html>
+.trae-card {
+    background: rgba(46, 46, 78, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(74, 30, 115, 0.25);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.trae-card:hover {
+    transform: translateY(-5px);
+    border: 1px solid rgba(215, 109, 119, 0.4);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10 p-4">
+                    <!-- Template Cards with enhanced styling -->
+    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Harassment">
+        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Inadequate Response to Safety Concerns by University Staff</h2>
+        <p class="text-gray-300 mb-4">Formal complaint template for reporting inadequate responses to safety concerns by university authorities.</p>
+        <div class="h-12 flex items-center">
+            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+        </div>
+    </div>
+    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Assault">
+        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Blackmail and Threat</h2>
+        <p class="text-gray-300 mb-4">Template for reporting blackmail and and threat on campus.</p>
+        <div class="h-12 flex items-center">
+            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+        </div>
+    </div>
+    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Assault">
+        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Sexual Harassment Incident</h2>
+        <p class="text-gray-300 mb-4">Formal template for documenting and reporting sexual harassment incidents with evidentiary support.</p>
+        <div class="h-12 flex items-center">
+            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+        </div>
+    </div>
+    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] mt-6 md:mt-0 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Stalking">
+        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Stalking Incident</h2>
+        <p class="text-gray-300 mb-4">Template for reporting persistent stalking behavior with timeline documentation.</p>
+        <div class="h-12 flex items-center">
+            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+        </div>
+    </div>
+    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] mt-6 md:mt-0 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Stalking">
+        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Eve-Teasing</h2>
+        <p class="text-gray-300 mb-4">Template for reporting instances of eve-teasing and street harassment.</p>
+        <div class="h-12 flex items-center">
+            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+        </div>
+    </div>
+    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] mt-6 md:mt-0 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Stalking">
+        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Offensive Comments or Remarks</h2>
+        <p class="text-gray-300 mb-4">Template for documenting and reporting offensive verbal comments or derogatory remarks.</p>
+        <div class="h-12 flex items-center">
+            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D12E79] focus:ring-offset-2 template-button">Use Template</button>
+        </div>
+    </div>
+</div>

@@ -1,3 +1,12 @@
+<?php
+require_once 'utils/session.php';
+Session::start();
+
+if (!isset($_SESSION['user_id'])) {
+    die('User not logged in');
+}
+$user_id = $_SESSION['user_id'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,77 +20,194 @@
     <!-- FontAwesome Icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
 
+    <!-- Trae AI Theme -->
+    <link href="/src/trae-theme.css" rel="stylesheet">
+
     <style>
-        .sidebar-hidden { transform: translateX(-100%); }
-        .sidebar-visible { transform: translateX(0); }
-        .toggle-moved { transform: translateX(16rem) translateY(-50%); }
-        .toggle-default { transform: translateX(0) translateY(-50%); }
-        .content-shifted { margin-left: 16rem; }
-        .content-full { margin-left: 0; }
+        body {
+            background: linear-gradient(135deg, #1E1E2E 0%, #2E2E4E 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphic Effects */
+        .glass-effect {
+            background: rgba(46, 46, 78, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(74, 30, 115, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        .trae-sidebar {
+            background: rgba(46, 46, 78, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(74, 30, 115, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .trae-sidebar-item {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            background: rgba(46, 46, 78, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            color: #F0F0F0;
+        }
+
+        .trae-sidebar-item.active {
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
+            border: 1px solid rgba(215, 109, 119, 0.3);
+        }
+        
+        .trae-sidebar-item:hover {
+            background: rgba(215, 109, 119, 0.15);
+            border: 1px solid rgba(215, 109, 119, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            color: #F0F0F0;
+        }
+        
+        .trae-card {
+            background: rgba(46, 46, 78, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(74, 30, 115, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s ease;
+        }
+
         #map { height: 100%; width: 100%; }
+
+        /* Sidebar behavior */
+        .sidebar-hidden { 
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        .sidebar-visible { 
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .toggle-moved { 
+            transform: translateX(16rem) translateY(-50%);
+        }
+        .toggle-default { 
+            transform: translateX(0) translateY(-50%);
+        }
+        .content-shifted { 
+            margin-left: 16rem;
+            transition: all 0.3s ease-in-out;
+        }
+        .content-full { 
+            margin-left: 0;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        #sidebar {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
+        }
+        
+        #sidebarToggle {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+        
+        @media (min-width: 768px) {
+            #sidebar {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            #sidebarToggle {
+                transform: translateX(16rem) translateY(-50%);
+            }
+            #mainContent {
+                margin-left: 16rem;
+            }
+        }
     </style>
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <!-- Leaflet.markercluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     
     <!-- Load locations data -->
     <script src="locations.js"></script>
 </head>
-<body class="bg-[#F9E9F0] text-[#333333] overflow-y-auto">
-    <div class="flex h-screen">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="fixed w-64 bg-[#D12E79] text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-hidden md:sidebar-visible">
-            <div class="flex items-center justify-between mb-5">
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-shield-halved text-3xl"></i>
-                    <span class="text-lg font-bold"><?php 
-                    session_start();
+<body class="text-white overflow-x-hidden">
+    <div class="flex h-screen relative z-0">
+        <!-- Background gradient shapes -->
+        <div class="absolute -top-[200px] -right-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(74,30,115,0.2)] to-[rgba(215,109,119,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
+        <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
 
-if (!isset($_SESSION['user_id'])) {
-    die('User not logged in');
-}
-$user_id = $_SESSION['user_id'];
-                    echo isset($_SESSION['first_name']) ? 'Welcome ' . htmlspecialchars($_SESSION['first_name']) : 'User Name'; 
-                    ?></span>
+        <!-- Sidebar -->
+        <aside id="sidebar" class="trae-sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center space-x-4 w-full">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-[#4A1E73] to-[#D76D77] flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <?php
+                        require_once 'includes/profile_image_handler.php';
+                        $profileImage = null;
+                        if (isset($_SESSION['user_id'])) {
+                            $profileImage = getProfileImage($_SESSION['user_id']);
+                        }
+                        if ($profileImage) {
+                            echo '<img src="' . htmlspecialchars($profileImage) . '" class="w-full h-full object-cover profile-image" alt="Profile Picture">';
+                        } else {
+                            echo '<i class="fa-solid fa-user text-xl text-white"></i>';
+                        }
+                        ?>
+                    </div>
+                    <div class="flex-grow">
+                        <span class="text-lg font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php 
+                        if (!isset($_SESSION)) { session_start(); }
+                        $firstName = isset($_SESSION['first_name']) ? htmlspecialchars($_SESSION['first_name']) : '';
+                        $lastName = isset($_SESSION['last_name']) ? htmlspecialchars($_SESSION['last_name']) : '';
+                        echo !empty($firstName) || !empty($lastName) ? trim("$firstName $lastName") : 'User Name';
+                        ?></span>
+                    </div>
                 </div>
             </div>
             <nav>
                 <ul>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='dashboard.php'">
-                        <i class="fa-solid fa-house"></i> <span>Home</span>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <a href="dashboard.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-house"></i> <span>Home</span></a>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='report.php'">
-                        <i class="fa-solid fa-file"></i> <span>Reports</span>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <a href="report.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-file"></i> <span>Reports</span></a>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer">
-                        <i class="fa-solid fa-chart-bar"></i> <span>Analytics</span>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <a href="analytics.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-chart-bar"></i> <span>Analytics</span></a>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='map.php'">
-                        <i class="fa-solid fa-map"></i> <span>Map</span>
+                    <li class="trae-sidebar-item active p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <a href="map.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-map"></i> <span>Map</span></a>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='safespace.php'">
-                        <i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <a href="safespace.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span></a>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='walkwithus.php'">
-                        <i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <a href="walkwithus.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span></a>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='templates.php'">
-                        <i class="fa-solid fa-file-lines"></i> <span>Templates</span>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <a href="templates.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-file-lines"></i> <span>Templates</span></a>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='settings.php'">
-                        <i class="fa-solid fa-gear"></i> <span>Settings</span>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <a href="settings.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-gear"></i> <span>Settings</span></a>
                     </li>
                 </ul>
             </nav>
         </aside>
         
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 bg-[#D12E79] text-white p-2 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-default md:toggle-moved">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 text-white p-3 rounded-r z-50 transition-all duration-300 ease-in-out toggle-default md:toggle-moved hover:shadow-lg hover:translate-x-1 bg-gradient-to-r from-[rgba(74,30,115,0.8)] to-[rgba(215,109,119,0.8)] backdrop-blur-md border border-[rgba(215,109,119,0.3)]">
             <i class="fa-solid fa-bars"></i>
         </button>
 
         <!-- Main Content -->
-        <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-full md:content-shifted">
+        <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out">
             <div id="content" class="flex flex-col md:flex-row gap-6 w-full max-w-screen-xl mx-auto px-4">
                 <!-- Map Section -->
                 <div class="w-full md:w-[70%] h-[calc(100vh-10rem)] rounded-lg shadow-lg bg-white">
@@ -100,7 +226,7 @@ $user_id = $_SESSION['user_id'];
                             <?php
 require_once 'mysqli_db.php';
 
-$sql = "SELECT * FROM incidents WHERE status='pending' ORDER BY created_at DESC";
+$sql = "SELECT * FROM incidents WHERE status='pending' AND user_id = " . Session::getUserId() . " ORDER BY created_at DESC";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
@@ -135,11 +261,13 @@ function getSeverityClass($severity) {
                     </div>
 
                     <!-- Heat Map Insights Tile -->
-                    <div class="bg-white p-4 rounded-lg shadow-lg mb-6">
-                        <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
-                            <i class="fa-solid fa-fire text-orange-500"></i>
-                            <span>Heat Map Insights</span>
-                        </h2>
+                    <div class="trae-card p-6 rounded-xl overflow-hidden group mb-6 animate-fade-in">
+                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
+                        <div class="p-4 relative overflow-hidden z-10">
+                            <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
+                                <i class="fa-solid fa-fire text-orange-500"></i>
+                                <span>Heat Map Insights</span>
+                            </h2>
                         <div class="space-y-2">
                             <div class="flex items-center space-x-2">
                                 <div class="w-4 h-4 bg-red-500 rounded-full"></div>
@@ -151,11 +279,13 @@ function getSeverityClass($severity) {
                     </div>
 
                     <!-- Recent Reports Tile -->
-                    <div class="bg-white p-4 rounded-lg shadow-lg mb-6">
-                        <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
-                            <i class="fa-solid fa-chart-line text-purple-500"></i>
-                            <span>Recent Reports</span>
-                        </h2>
+                    <div class="trae-card p-6 rounded-xl overflow-hidden group mb-6 animate-fade-in">
+                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
+                        <div class="p-4 relative overflow-hidden z-10">
+                            <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
+                                <i class="fa-solid fa-chart-line text-purple-500"></i>
+                                <span>Recent Reports</span>
+                            </h2>
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span>Today</span>
@@ -186,11 +316,13 @@ function getSeverityClass($severity) {
                     </div>
 
                     <!-- Location Risk Tile -->
-                    <div class="bg-white p-4 rounded-lg shadow-lg mb-6">
-                        <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
-                            <i class="fa-solid fa-location-dot text-blue-500"></i>
-                            <span>Location Risk</span>
-                        </h2>
+                    <div class="trae-card p-6 rounded-xl overflow-hidden group mb-6 animate-fade-in">
+                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
+                        <div class="p-4 relative overflow-hidden z-10">
+                            <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
+                                <i class="fa-solid fa-location-dot text-blue-500"></i>
+                                <span>Location Risk</span>
+                            </h2>
                         <div class="space-y-2">
                             <div class="flex justify-between items-center">
                                 <span>Hostel Area</span>
@@ -208,44 +340,52 @@ function getSeverityClass($severity) {
             const sidebar = document.getElementById('sidebar');
             const toggleButton = document.getElementById('sidebarToggle');
             const mainContent = document.getElementById('mainContent');
+            
+            // Get initial state from localStorage or screen size
+            let isSidebarVisible = localStorage.getItem('sidebarVisible') !== null ?
+                localStorage.getItem('sidebarVisible') === 'true' :
+                window.innerWidth >= 768;
 
-            function setInitialState() {
-                if (window.innerWidth < 768) {
-                    sidebar.classList.add('sidebar-hidden');
-                    sidebar.classList.remove('sidebar-visible');
-                    toggleButton.classList.add('toggle-default');
-                    toggleButton.classList.remove('toggle-moved');
-                    mainContent.classList.add('content-full');
-                    mainContent.classList.remove('content-shifted');
+            function updateSidebarState(visible, saveState = true) {
+                isSidebarVisible = visible;
+                
+                // Save state to localStorage
+                if (saveState) {
+                    localStorage.setItem('sidebarVisible', visible);
+                }
+
+                // Update DOM with CSS classes
+                if (visible) {
+                    sidebar.style.transform = 'translateX(0)';
+                    sidebar.style.opacity = '1';
+                    toggleButton.style.transform = 'translateX(16rem) translateY(-50%)';
+                    mainContent.style.marginLeft = '16rem';
                 } else {
-                    sidebar.classList.remove('sidebar-hidden');
-                    sidebar.classList.add('sidebar-visible');
-                    toggleButton.classList.remove('toggle-default');
-                    toggleButton.classList.add('toggle-moved');
-                    mainContent.classList.remove('content-full');
-                    mainContent.classList.add('content-shifted');
+                    sidebar.style.transform = 'translateX(-100%)';
+                    sidebar.style.opacity = '0';
+                    toggleButton.style.transform = 'translateX(0) translateY(-50%)';
+                    mainContent.style.marginLeft = '0';
                 }
             }
-            
-            setInitialState();
-            window.addEventListener('resize', setInitialState);
 
+            // Set initial state without saving
+            updateSidebarState(isSidebarVisible, false);
+
+            // Handle window resize
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    const shouldBeVisible = window.innerWidth >= 768;
+                    if (shouldBeVisible !== isSidebarVisible) {
+                        updateSidebarState(shouldBeVisible);
+                    }
+                }, 250);
+            });
+
+            // Handle toggle button click
             toggleButton.addEventListener('click', function() {
-                if (sidebar.classList.contains('sidebar-hidden')) {
-                    sidebar.classList.remove('sidebar-hidden');
-                    sidebar.classList.add('sidebar-visible');
-                    toggleButton.classList.remove('toggle-default');
-                    toggleButton.classList.add('toggle-moved');
-                    mainContent.classList.remove('content-full');
-                    mainContent.classList.add('content-shifted');
-                } else {
-                    sidebar.classList.add('sidebar-hidden');
-                    sidebar.classList.remove('sidebar-visible');
-                    toggleButton.classList.add('toggle-default');
-                    toggleButton.classList.remove('toggle-moved');
-                    mainContent.classList.add('content-full');
-                    mainContent.classList.remove('content-shifted');
-                }
+                updateSidebarState(!isSidebarVisible);
             });
         });
     </script>
@@ -276,6 +416,8 @@ function getSeverityClass($severity) {
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <!-- Leaflet.markercluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
     <script>
         // Initialize the map
@@ -337,14 +479,47 @@ function getSeverityClass($severity) {
         `;
         document.head.appendChild(style);
 
-        // Create a red marker icon for incidents
-        const incidentIcon = L.divIcon({
-            className: 'custom-div-icon',
-            html: '<div class="incident-marker" style="padding: 10px; border-radius: 50%;"><i class="fa-solid fa-exclamation text-white" style="font-size: 16px;"></i></div>',
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
+        // Define incident type icons with different colors
+        const incidentTypeIcons = {
+            assault: L.divIcon({
+                className: 'custom-div-icon',
+                html: '<div class="incident-marker" style="background-color: #FF0000; padding: 10px; border-radius: 50%;"><i class="fa-solid fa-exclamation text-white" style="font-size: 16px;"></i></div>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
+            harassment: L.divIcon({
+                className: 'custom-div-icon',
+                html: '<div class="incident-marker" style="background-color: #FF6B00; padding: 10px; border-radius: 50%;"><i class="fa-solid fa-exclamation text-white" style="font-size: 16px;"></i></div>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
+            suspicious_activity: L.divIcon({
+                className: 'custom-div-icon',
+                html: '<div class="incident-marker" style="background-color: #FFB700; padding: 10px; border-radius: 50%;"><i class="fa-solid fa-exclamation text-white" style="font-size: 16px;"></i></div>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
+            other: L.divIcon({
+                className: 'custom-div-icon',
+                html: '<div class="incident-marker" style="background-color: #9C27B0; padding: 10px; border-radius: 50%;"><i class="fa-solid fa-exclamation text-white" style="font-size: 16px;"></i></div>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            })
+        };
+
+
+        // Create a marker cluster group
+        const markerClusterGroup = L.markerClusterGroup({
+            showCoverageOnHover: false,
+            spiderfyOnMaxZoom: true,
+            removeOutsideVisibleBounds: true,
+            maxClusterRadius: 35
         });
 
+        // Create a map to store user-specific colors
+        const userColors = {};
+        let colorIndex = 0;
+        const colors = ['#FF0000', '#00FF00', '#0000FF', '#FF00FF', '#00FFFF', '#FFFF00'];
 
         // Fetch and add incident markers
         fetch('fetch_incidents.php')
@@ -352,23 +527,47 @@ function getSeverityClass($severity) {
             .then(incidents => {
                 incidents.forEach(incident => {
                     if (incident.latitude && incident.longitude) {
+                        // Assign a unique color for each user
+                        if (!userColors[incident.user_id]) {
+                            userColors[incident.user_id] = colors[colorIndex % colors.length];
+                            colorIndex++;
+                        }
+
+                        // Create custom icon with user-specific color
+                        const customIcon = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `<div class="incident-marker" style="background-color: ${userColors[incident.user_id]}; padding: 10px; border-radius: 50%;"><i class="fa-solid fa-exclamation text-white" style="font-size: 16px;"></i></div>`,
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20]
+                        });
+
                         const marker = L.marker([incident.latitude, incident.longitude], {
-                            icon: incidentIcon
-                        }).addTo(map);
+                            icon: customIcon
+                        });
 
                         marker.bindPopup(`
                             <div class="p-2">
-                                <h3 class="font-bold text-lg mb-1 text-red-600">${incident.incident_type}</h3>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div style="background-color: ${userColors[incident.user_id]}" class="w-3 h-3 rounded-full"></div>
+                                    <span class="font-medium">${incident.first_name} ${incident.last_name}</span>
+                                </div>
+                                <h3 class="font-bold text-lg mb-1" style="color: ${userColors[incident.user_id]}">${incident.incident_type.replace('_', ' ').toUpperCase()}</h3>
                                 <p class="text-gray-600">${incident.description || 'No description available'}</p>
                                 <p class="text-sm text-gray-500 mt-1">Location: ${incident.location}</p>
-                                <p class="text-sm text-gray-500">Reported: ${new Date(incident.created_at).toLocaleString()}</p>
+                                <p class="text-sm text-gray-500">Time: ${new Date(incident.created_at).toLocaleString()}</p>
                             </div>
                         `, {
                             maxWidth: 300,
                             className: 'custom-popup'
                         });
+                        
+                        // Add marker to cluster group instead of directly to map
+                        markerClusterGroup.addLayer(marker);
                     }
                 });
+                
+                // Add the cluster group to the map
+                map.addLayer(markerClusterGroup);
             })
             .catch(error => console.error('Error fetching incidents:', error));
 

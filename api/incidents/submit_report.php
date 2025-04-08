@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../../utils/session.php';
+Session::start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('error_log', __DIR__ . '/../../logs/php_error.log');
@@ -45,7 +46,10 @@ try {
     }
     
     // Get user_id from session if logged in
-    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+    if (!Session::isLoggedIn()) {
+        throw new Exception("User not logged in. Please log in to submit a report.");
+    }
+    $user_id = Session::getUserId();
     
     // Prepare SQL statement with optional personal information fields
     $query = "INSERT INTO incidents 

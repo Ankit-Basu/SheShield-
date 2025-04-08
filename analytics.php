@@ -1,22 +1,33 @@
 <?php
-session_start();
 require_once 'database/mysqli_db.php';
-
-// Initialize database connection
 $conn = get_mysqli_connection();
+session_start();
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header('Location: auth/login.php');
-    exit();
-}
+// Get current user ID from session
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
+
+// Fetch total incidents for current user
+$total_incidents_query = "SELECT COUNT(*) as count FROM incidents WHERE user_id = $user_id";
+$result = mysqli_query($conn, $total_incidents_query);
+$total_incidents = mysqli_fetch_assoc($result)['count'];
+
+// Fetch resolved incidents for resolution rate
+$resolved_incidents_query = "SELECT COUNT(*) as count FROM incidents WHERE status = 'resolved' AND user_id = $user_id";
+$result = mysqli_query($conn, $resolved_incidents_query);
+$resolved_incidents = mysqli_fetch_assoc($result)['count'];
+$resolution_rate = $total_incidents > 0 ? round(($resolved_incidents / $total_incidents) * 100) : 0;
+
+// Fetch recent incidents (last 7 days)
+$recent_incidents_query = "SELECT COUNT(*) as count FROM incidents WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND user_id = $user_id";
+$result = mysqli_query($conn, $recent_incidents_query);
+$recent_incidents = mysqli_fetch_assoc($result)['count'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Dashboard</title>
+    <title>Analytics - Campus Safety Monitoring</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,55 +35,142 @@ if (!isset($_SESSION['user_id'])) {
     <!-- FontAwesome Icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
+        body {
+            background: linear-gradient(135deg, #1E1E2E 0%, #2E2E4E 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphic Effects */
+        .glass-effect {
+            background: rgba(46, 46, 78, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(74, 30, 115, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        .trae-sidebar {
+            background: rgba(46, 46, 78, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(74, 30, 115, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        .trae-sidebar-item {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            background: rgba(46, 46, 78, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .trae-sidebar-item.active {
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
+            border: 1px solid rgba(215, 109, 119, 0.3);
+        }
+        
+        .trae-sidebar-item:hover {
+            background: rgba(215, 109, 119, 0.15);
+            border: 1px solid rgba(215, 109, 119, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
+        }
+
         .sidebar-hidden { transform: translateX(-100%); }
         .sidebar-visible { transform: translateX(0); }
         .toggle-moved { transform: translateX(16rem) translateY(-50%); }
         .toggle-default { transform: translateX(0) translateY(-50%); }
         .content-shifted { margin-left: 16rem; }
         .content-full { margin-left: 0; }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(46, 46, 78, 0.3);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.7), rgba(215, 109, 119, 0.7));
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.9), rgba(215, 109, 119, 0.9));
+        }
+
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.6; }
+        }
     </style>
 </head>
-<body class="bg-[#F9E9F0] text-[#333333]">
-    <div class="flex h-screen overflow-hidden">
+<body class="bg-[#1E1E2E] text-[#F0F0F0]">
+    <div class="flex h-screen overflow-hidden relative z-0">
+        <!-- Background gradient shapes -->
+        <div class="absolute -top-[300px] -right-[300px] w-[600px] h-[600px] bg-gradient-to-r from-[rgba(74,30,115,0.3)] to-[rgba(215,109,119,0.3)] rounded-full blur-3xl -z-10 animate-pulse-slow"></div>
+        <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed w-64 bg-[#D12E79] text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-hidden md:sidebar-visible">
+        <aside id="sidebar" class="trae-sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-hidden md:sidebar-visible">
             <div class="flex items-center justify-between mb-5">
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-shield-halved text-3xl"></i>
-                    <span class="text-lg font-bold"><?php 
-                    // Get user's name from session
-                    echo isset($_SESSION['first_name']) ? 'Welcome ' . htmlspecialchars($_SESSION['first_name']) : 'User Name'; 
-                    ?></span>
+                <div class="flex items-center space-x-4 w-full">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-[#4A1E73] to-[#D76D77] flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <?php
+                        require_once 'includes/profile_image_handler.php';
+                        $profileImage = null;
+                        if (isset($_SESSION['user_id'])) {
+                            $profileImage = getProfileImage($_SESSION['user_id']);
+                        }
+                        if ($profileImage) {
+                            echo '<img src="' . htmlspecialchars($profileImage) . '" class="w-full h-full object-cover profile-image" alt="Profile Picture">';
+                        } else {
+                            echo '<i class="fa-solid fa-user text-xl text-white"></i>';
+                        }
+                        ?>
+                    </div>
+                    <div class="flex-grow">
+                        <span class="text-lg font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php 
+                        if (!isset($_SESSION)) { session_start(); }
+                        $firstName = isset($_SESSION['first_name']) ? trim(htmlspecialchars($_SESSION['first_name'])) : '';
+                        $lastName = isset($_SESSION['last_name']) ? trim(htmlspecialchars($_SESSION['last_name'])) : '';
+                        echo !empty($firstName) || !empty($lastName) ? "$firstName $lastName" : 'User Name';
+                        ?></span>
+                    </div>
                 </div>
             </div>
             <nav>
                 <ul>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='dashboard.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='dashboard.php'">
                         <i class="fa-solid fa-house"></i> <span>Home</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='report.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='report.php'">
                         <i class="fa-solid fa-file"></i> <span>Reports</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='analytics.php'">
+                    <li class="trae-sidebar-item active p-3 rounded flex items-center space-x-2">
                         <i class="fa-solid fa-chart-bar"></i> <span>Analytics</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='map.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='map.php'">
                         <i class="fa-solid fa-map"></i> <span>Map</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='safespace.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='safespace.php'">
                         <i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='walkwithus.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='walkwithus.php'">
                         <i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="location.href='templates.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='templates.php'">
                         <i class="fa-solid fa-file-lines"></i> <span>Templates</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='settings.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='settings.php'">
                         <i class="fa-solid fa-gear"></i> <span>Settings</span>
                     </li>
-                    <li class="p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='auth/logout.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='auth/logout.php'">
                         <i class="fa-solid fa-sign-out-alt"></i> <span>Logout</span>
                     </li>
                 </ul>
@@ -80,208 +178,304 @@ if (!isset($_SESSION['user_id'])) {
         </aside>
         
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 bg-[#D12E79] text-white p-2 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-default md:toggle-moved">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-default md:toggle-moved hover:shadow-lg">
             <i class="fa-solid fa-bars"></i>
         </button>
 
         <!-- Main Content -->
-        <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-full md:content-shifted">
+        <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-full md:content-shifted overflow-y-auto h-screen">
             <div id="content">
-                <h1 class="text-3xl font-bold">Analytics Dashboard</h1>
+                <h1 class="text-3xl font-bold">Analytics</h1>
+                <p class="mt-2">View and analyze safety data and statistics.</p>
                 
-                <!-- Case Tracking Section -->
-<div class="mt-8 bg-white rounded-lg shadow p-6">
-    <h2 class="text-xl font-semibold mb-4">Case Tracking</h2>
-    
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Case ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complaint Type</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Reported</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Personnel</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+                <!-- Summary Section -->
+                <div class="mt-8 glass-effect rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Campus Safety Overview</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="glass-effect p-4 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
+                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Total Incidents</h3>
+                            <p class="text-3xl font-bold text-[#F0F0F0]"><?php echo $total_incidents; ?></p>
+                        </div>
+                        <div class="glass-effect p-4 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
+                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Resolution Rate</h3>
+                            <p class="text-3xl font-bold text-[#F0F0F0]"><?php echo $resolution_rate; ?>%</p>
+                        </div>
+                        <div class="glass-effect p-4 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
+                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Recent Incidents (7 days)</h3>
+                            <p class="text-3xl font-bold text-[#F0F0F0]"><?php echo $recent_incidents; ?></p>
+                        </div>
+                        <div class="glass-effect p-4 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
+                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Active Cases</h3>
+                            <p class="text-3xl font-bold text-[#F0F0F0]"><?php echo $total_incidents - $resolved_incidents; ?></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Content -->
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Resolution Status Chart -->
+                    <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
+                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Resolution Status</h2>
+                        <canvas id="resolutionChart"></canvas>
+                    </div>
+
+                    <!-- Average Response Time -->
+                    <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
+                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Average Response Time</h2>
+                        <canvas id="responseTimeChart"></canvas>
+                    </div>
+
+                    <!-- Safety Score by Area -->
+                    <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
+                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Safety Score by Area</h2>
+                        <canvas id="safetyScoreChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- PHP Code to Fetch Analytics Data -->
                 <?php
-                // Query to get cases based on user permissions
-                $user_id = $_SESSION['user_id'];
-                $user_role = $_SESSION['role'] ?? 'user';
-                
-                // Build query based on user role
-                $query = "SELECT 
-                            i.id AS case_id, 
-                            i.incident_type AS complaint_type, 
-                            i.date_time AS date_reported, 
-                            CONCAT(u.first_name, ' ', u.last_name) AS assigned_personnel, 
-                            i.status
-                          FROM incidents i
-                          LEFT JOIN users u ON i.user_id = u.id
-                          WHERE 1=1";
-                
-                // Filter based on user role
-                if ($user_role != 'admin') {
-                    $query .= " AND i.user_id = $user_id";
+                require_once 'includes/database.php';
+
+                // Get Resolution Status Distribution for the user
+                $status_query = "SELECT status, COUNT(*) as count FROM incidents WHERE user_id = ? GROUP BY status";
+                $stmt = $conn->prepare($status_query);
+                $stmt->bind_param('i', $user_id);
+                $stmt->execute();
+                $status_result = $stmt->get_result();
+                $status_data = array();
+                while ($row = mysqli_fetch_assoc($status_result)) {
+                    $status_data[$row['status']] = $row['count'];
                 }
-                
-                $query .= " ORDER BY i.date_time DESC";
-                
-                $result = $conn->query($query);
-                $rows = [];
-                if ($result) {
-                    while ($row = $result->fetch_assoc()) {
-                        $rows[] = $row;
-                    }
+
+                // Get Average Response Time for the user
+                $response_time_query = "SELECT DATE(created_at) as date, 
+                    AVG(TIMESTAMPDIFF(HOUR, created_at, NOW())) as avg_hours 
+                    FROM incidents 
+                    WHERE user_id = ?
+                    GROUP BY DATE(created_at) 
+                    ORDER BY date DESC LIMIT 7";
+                $stmt = $conn->prepare($response_time_query);
+                $stmt->bind_param('i', $user_id);
+                $stmt->execute();
+                $response_time_result = $stmt->get_result();
+                $response_time_data = array();
+                while ($row = mysqli_fetch_assoc($response_time_result)) {
+                    $response_time_data[$row['date']] = round($row['avg_hours'], 2);
                 }
-                
-                if (count($rows) > 0) {
-                    foreach($rows as $row) {
-                        echo '<tr>';
-                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . htmlspecialchars($row['case_id']) . '</td>';
-                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . htmlspecialchars($row['complaint_type']) . '</td>';
-                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . htmlspecialchars($row['date_reported']) . '</td>';
-                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . htmlspecialchars($row['assigned_personnel'] ?? 'Unassigned') . '</td>';
-                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . htmlspecialchars($row['status']) . '</td>';
-                        echo '</tr>';
-                    }
-                } else {
-                    echo '<tr><td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No cases found</td></tr>';
+
+                // Get Safety Score by Area for the user
+                $safety_score_query = "SELECT location, 
+                    COUNT(*) as incident_count,
+                    AVG(CASE incident_type 
+                        WHEN 'assault' THEN 3 
+                        WHEN 'harassment' THEN 2 
+                        WHEN 'suspicious_activity' THEN 1 
+                        ELSE 0 END) as severity_score
+                    FROM incidents 
+                    WHERE user_id = ?
+                    GROUP BY location";
+                $stmt = $conn->prepare($safety_score_query);
+                $stmt->bind_param('i', $user_id);
+                $stmt->execute();
+                $safety_score_result = $stmt->get_result();
+                $safety_score_data = array();
+                while ($row = mysqli_fetch_assoc($safety_score_result)) {
+                    $safety_score = 100 - (($row['incident_count'] * $row['severity_score']) / 3 * 10);
+                    $safety_score_data[$row['location']] = max(0, min(100, $safety_score));
                 }
-                $conn = null;
                 ?>
-            </tbody>
-        </table>
-    </div>
-</div>
 
-<!-- Analytics Charts Section -->
-<div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Case Status Distribution -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">Case Status Distribution</h2>
-        <canvas id="statusChart"></canvas>
-    </div>
+                <!-- JavaScript for Charts -->
+                <script>
+                    // Resolution Status Chart
+                    new Chart(document.getElementById('resolutionChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: <?php echo json_encode(array_keys($status_data)); ?>,
+                            datasets: [{
+                                data: <?php echo json_encode(array_values($status_data)); ?>,
+                                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
 
-    <!-- Incident Types Distribution -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">Incident Types Distribution</h2>
-        <canvas id="incidentTypeChart"></canvas>
-    </div>
-</div>
+                    // Response Time Chart
+                    new Chart(document.getElementById('responseTimeChart'), {
+                        type: 'line',
+                        data: {
+                            labels: <?php echo json_encode(array_keys($response_time_data)); ?>,
+                            datasets: [{
+                                label: 'Average Response Time (Hours)',
+                                data: <?php echo json_encode(array_values($response_time_data)); ?>,
+                                borderColor: '#36A2EB',
+                                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `Response Time: ${context.raw.toFixed(1)} hours`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Hours',
+                                        font: { weight: 'bold' }
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Date',
+                                        font: { weight: 'bold' }
+                                    }
+                                }
+                            }
+                        }
+                    });
 
-<!-- Chart.js Library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    // Fetch data for charts
-    <?php
-    // Reconnect to database since it was closed earlier
-    $conn = get_mysqli_connection();
-    
-    // Query for case status distribution
-    $statusQuery = "SELECT status, COUNT(*) as count FROM incidents ";
-    if ($user_role != 'admin') {
-        $statusQuery .= "WHERE user_id = $user_id OR assigned_to = $user_id ";
-    }
-    $statusQuery .= "GROUP BY status";
-    $statusResult = $conn->query($statusQuery);
-
-    $statusLabels = [];
-    $statusData = [];
-    if ($statusResult) {
-        while($row = $statusResult->fetch_assoc()) {
-            $statusLabels[] = $row['status'];
-            $statusData[] = $row['count'];
-        }
-    }
-
-    // Query for incident types distribution
-    $typeQuery = "SELECT incident_type, COUNT(*) as count FROM incidents ";
-    if ($user_role != 'admin') {
-        $typeQuery .= "WHERE user_id = $user_id OR assigned_to = $user_id ";
-    }
-    $typeQuery .= "GROUP BY incident_type";
-    $typeResult = $conn->query($typeQuery);
-
-    $typeLabels = [];
-    $typeData = [];
-    if ($typeResult) {
-        while($row = $typeResult->fetch_assoc()) {
-            $typeLabels[] = $row['incident_type'];
-            $typeData[] = $row['count'];
-        }
-    }
-    $conn = null;
-    ?>
-
-    // Case Status Chart
-    const statusCtx = document.getElementById('statusChart').getContext('2d');
-    new Chart(statusCtx, {
-        type: 'pie',
-        data: {
-            labels: <?php echo json_encode($statusLabels); ?>,
-            datasets: [{
-                data: <?php echo json_encode($statusData); ?>,
-                backgroundColor: [
-                    '#FF6384',
-                    '#36A2EB',
-                    '#FFCE56',
-                    '#4BC0C0',
-                    '#9966FF'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    // Incident Types Chart
-    const typeCtx = document.getElementById('incidentTypeChart').getContext('2d');
-    new Chart(typeCtx, {
-        type: 'bar',
-        data: {
-            labels: <?php echo json_encode($typeLabels); ?>,
-            datasets: [{
-                label: 'Number of Cases',
-                data: <?php echo json_encode($typeData); ?>,
-                backgroundColor: '#D12E79',
-                borderColor: '#AB1E5C',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-</script>
-                
+                    // Safety Score Chart
+                    new Chart(document.getElementById('safetyScoreChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: <?php echo json_encode(array_keys($safety_score_data)); ?>,
+                            datasets: [{
+                                label: 'Safety Score',
+                                data: <?php echo json_encode(array_values($safety_score_data)); ?>,
+                                backgroundColor: function(context) {
+                                    const value = context.dataset.data[context.dataIndex];
+                                    if (value >= 80) return 'rgba(76, 175, 80, 0.8)'; // Safe - Green
+                                    if (value >= 60) return 'rgba(255, 193, 7, 0.8)'; // Warning - Yellow
+                                    if (value >= 40) return 'rgba(255, 152, 0, 0.8)'; // Caution - Orange
+                                    return 'rgba(244, 67, 54, 0.8)'; // Danger - Red
+                                },
+                                borderWidth: 2,
+                                borderColor: '#333'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const value = context.parsed.y;
+                                            let status = '';
+                                            if (value >= 80) status = '✓ Safe Area';
+                                            else if (value >= 60) status = '⚠ Exercise Caution';
+                                            else if (value >= 40) status = '⚠ High Alert Area';
+                                            else status = '⛔ Danger Zone';
+                                            return [`Safety Score: ${value}%`, `Status: ${status}`];
+                                        }
+                                    }
+                                },
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Safety Score (%)',
+                                        font: { weight: 'bold' }
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Location',
+                                        font: { weight: 'bold' }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                </script>
             </div>
         </main>
     </div>
 
-    <!-- Sidebar Script -->
-    <script src="sidebar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleButton = document.getElementById('sidebarToggle');
+            const mainContent = document.getElementById('mainContent');
 
+            function setInitialState() {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('sidebar-hidden');
+                    sidebar.classList.remove('sidebar-visible');
+                    toggleButton.classList.add('toggle-default');
+                    toggleButton.classList.remove('toggle-moved');
+                    mainContent.classList.add('content-full');
+                    mainContent.classList.remove('content-shifted');
+                } else {
+                    sidebar.classList.remove('sidebar-hidden');
+                    sidebar.classList.add('sidebar-visible');
+                    toggleButton.classList.remove('toggle-default');
+                    toggleButton.classList.add('toggle-moved');
+                    mainContent.classList.remove('content-full');
+                    mainContent.classList.add('content-shifted');
+                }
+            }
+            
+            setInitialState();
+            window.addEventListener('resize', setInitialState);
+
+            toggleButton.addEventListener('click', function() {
+                if (sidebar.classList.contains('sidebar-hidden')) {
+                    sidebar.classList.remove('sidebar-hidden');
+                    sidebar.classList.add('sidebar-visible');
+                    toggleButton.classList.remove('toggle-default');
+                    toggleButton.classList.add('toggle-moved');
+                    mainContent.classList.remove('content-full');
+                    mainContent.classList.add('content-shifted');
+                } else {
+                    sidebar.classList.add('sidebar-hidden');
+                    sidebar.classList.remove('sidebar-visible');
+                    toggleButton.classList.add('toggle-default');
+                    toggleButton.classList.remove('toggle-moved');
+                    mainContent.classList.add('content-full');
+                    mainContent.classList.remove('content-shifted');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -67,7 +67,7 @@ try {
         description TEXT NOT NULL,
         location VARCHAR(255) NOT NULL,
         date_time DATETIME NOT NULL,
-        status ENUM('pending', 'in_progress', 'resolved', 'closed') DEFAULT 'pending',
+        status VARCHAR(20) DEFAULT 'pending',
         emergency_contact_name VARCHAR(100),
         emergency_contact_phone VARCHAR(20),
         evidence_file VARCHAR(255),

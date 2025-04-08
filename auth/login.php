@@ -24,11 +24,20 @@ if(!empty($data->email) && !empty($data->password)) {
     // Verify user credentials
     if($user->authenticate($data->password)) {
         // Set session variables
+        // Include profile image handler
+        require_once dirname(__DIR__) . '/includes/profile_image_handler.php';
+        
+        // Set session variables
         Session::set('logged_in', true);
         Session::set('user_id', $user->id);
         Session::set('email', $user->email);
         Session::set('first_name', $user->first_name);
+        Session::set('last_name', $user->last_name);
         Session::set('is_admin', $user->is_admin ?? false);
+        
+        // Load and set profile image
+        $profileImage = getProfileImage($user->id);
+        Session::set('profile_image', $profileImage);
         
         $response["status"] = "success";
         $response["message"] = "Login successful";
@@ -36,7 +45,9 @@ if(!empty($data->email) && !empty($data->password)) {
             "id" => $user->id,
             "email" => $user->email,
             "first_name" => $user->first_name,
-            "is_admin" => $user->is_admin ?? false
+            "last_name" => $user->last_name,
+            "is_admin" => $user->is_admin ?? false,
+            "profile_image" => $profileImage
         );
         http_response_code(200);
     } else {

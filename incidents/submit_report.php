@@ -33,7 +33,7 @@ try {
     
     // Validate required fields
     if (empty($data->incident_type) || empty($data->description) || empty($data->location)) {
-        throw new Exception("Missing required fields: incident_type, description, and location are required");
+        throw new Exception("Missing required fields: type, description, and location are required");
     }
 
     // Initialize database connection
@@ -49,7 +49,7 @@ try {
     
     // Prepare SQL statement with optional personal information fields
     $query = "INSERT INTO incidents 
-            (incident_type, description, location, date_time, user_id, status";
+            (type, description, location, incident_date, user_id, status";
     
     // Add personal info fields if provided
     if (!empty($data->first_name)) {
@@ -57,7 +57,7 @@ try {
     }
     
     $query .= ") VALUES 
-            (:incident_type, :description, :location, :date_time, :user_id, 'pending'";
+            (:type, :description, :location, :incident_date, :user_id, 'pending'";
     
     // Add personal info placeholders if provided
     if (!empty($data->first_name)) {
@@ -71,15 +71,15 @@ try {
         throw new Exception("Failed to prepare statement: " . implode(", ", $db->errorInfo()));
     }
     
-    // Format date_time
-    $date_time = !empty($data->date_time) ? date('Y-m-d H:i:s', strtotime($data->date_time)) : date('Y-m-d H:i:s');
+    // Format incident_date
+    $incident_date = !empty($data->date_time) ? date('Y-m-d H:i:s', strtotime($data->date_time)) : date('Y-m-d H:i:s');
     
     // Bind required values
     $params = array(
-        ":incident_type" => htmlspecialchars(strip_tags($data->incident_type)),
+        ":type" => htmlspecialchars(strip_tags($data->incident_type)),
         ":description" => htmlspecialchars(strip_tags($data->description)),
         ":location" => htmlspecialchars(strip_tags($data->location)),
-        ":date_time" => $date_time,
+        ":incident_date" => $incident_date,
         ":user_id" => $user_id
     );
     

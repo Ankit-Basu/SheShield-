@@ -91,16 +91,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentShape = null;
 
-    // Hide both instruction messages
+    // Hide only the default message while keeping the form visible
     function hideInstructions() {
-        const messages = document.querySelectorAll('.text-sm.text-gray-600.mb-4');
-        messages.forEach(msg => msg.style.display = 'none');
+        const defaultMessage = document.getElementById('defaultMessage');
+        if (defaultMessage) {
+            defaultMessage.style.display = 'none';
+        }
     }
 
-    // Show both instruction messages
+    // Show only the default message
     function showInstructions() {
-        const messages = document.querySelectorAll('.text-sm.text-gray-600.mb-4');
-        messages.forEach(msg => msg.style.display = 'block');
+        document.getElementById('defaultMessage').style.display = 'block';
     }
 
     map.on(L.Draw.Event.CREATED, function (e) {

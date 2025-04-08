@@ -8,7 +8,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $longitude = filter_input(INPUT_POST, 'longitude', FILTER_VALIDATE_FLOAT);
     $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_STRING);
     $timeActive = filter_input(INPUT_POST, 'timeActive', FILTER_VALIDATE_INT);
-    $user_id = 1; // Replace with actual user ID from session
+    session_start();
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'message' => 'User not logged in']);
+    exit;
+}
+$user_id = $_SESSION['user_id'];
 
     if ($latitude && $longitude && $description && $timeActive) {
         $sql = "INSERT INTO safe_spaces (user_id, latitude, longitude, description, time_active) VALUES (?, ?, ?, ?, ?)";

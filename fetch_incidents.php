@@ -2,8 +2,16 @@
 header('Content-Type: application/json');
 require_once 'mysqli_db.php';
 
-$sql = "SELECT * FROM incidents WHERE status='pending' ORDER BY created_at DESC";
-$result = $conn->query($sql);
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    die('User not logged in');
+}
+$sql = "SELECT i.*, u.first_name, u.last_name FROM incidents i 
+LEFT JOIN users u ON i.user_id = u.id 
+WHERE i.status='pending' ORDER BY i.created_at DESC";
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+$result = $stmt->get_result();
 
 $incidents = [];
 if ($result->num_rows > 0) {

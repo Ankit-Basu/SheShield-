@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS incidents (
     incident_date DATETIME NOT NULL,
     is_anonymous BOOLEAN DEFAULT FALSE,
     evidence_files TEXT,
-    status ENUM('pending', 'in_progress', 'resolved', 'closed') DEFAULT 'pending',
+    status VARCHAR(20) DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
@@ -41,10 +41,23 @@ CREATE TABLE IF NOT EXISTS admins (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Profile images table
+CREATE TABLE IF NOT EXISTS profile_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    image_path VARCHAR(255) NOT NULL,
+    upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('active', 'deleted') DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Create indexes for performance
 CREATE INDEX idx_incident_user ON incidents(user_id);
 CREATE INDEX idx_incident_status ON incidents(status);
 CREATE INDEX idx_incident_date ON incidents(incident_date);
+CREATE INDEX idx_profile_image_user ON profile_images(user_id);
 
 -- Insert default admin user
 INSERT IGNORE INTO users (first_name, last_name, email, phone, password) 
