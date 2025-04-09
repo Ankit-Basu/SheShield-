@@ -129,3 +129,17 @@ CREATE TABLE IF NOT EXISTS shared_locations (
     INDEX idx_status (status),
     INDEX idx_coordinates (latitude, longitude)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Incidents table for storing safety incidents
+CREATE TABLE IF NOT EXISTS incidents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    incident_type VARCHAR(50) NOT NULL,
+    description TEXT,
+    location VARCHAR(255),
+    date_time DATETIME,
+    status ENUM('pending', 'investigating', 'resolved', 'closed') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

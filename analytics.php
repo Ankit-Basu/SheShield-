@@ -367,7 +367,9 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                         }
                     });
 
-                    // Safety Score Chart
+
+
+           // Safety Score Chart
                     new Chart(document.getElementById('safetyScoreChart'), {
                         type: 'bar',
                         data: {
@@ -389,6 +391,9 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                         options: {
                             responsive: true,
                             plugins: {
+                                legend: {
+                                    display: false
+                                },
                                 tooltip: {
                                     callbacks: {
                                         label: function(context) {
@@ -401,9 +406,6 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                                             return [`Safety Score: ${value}%`, `Status: ${status}`];
                                         }
                                     }
-                                },
-                                legend: {
-                                    display: false
                                 }
                             },
                             scales: {
@@ -427,6 +429,113 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                         }
                     });
                 </script>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Fetch data for charts
+    <?php
+    // Reconnect to database since it was closed earlier
+    $conn = get_mysqli_connection();
+    
+    // Query for case status distribution
+    $statusQuery = "SELECT status, COUNT(*) as count FROM incidents ";
+    if ($user_role != 'admin') {
+        $statusQuery .= "WHERE user_id = $user_id ";
+    }
+    $statusQuery .= "GROUP BY status";
+    $statusResult = $conn->query($statusQuery);
+
+    $statusLabels = [];
+    $statusData = [];
+    if ($statusResult) {
+        while($row = $statusResult->fetch_assoc()) {
+            $statusLabels[] = $row['status'];
+            $statusData[] = $row['count'];
+        }
+    }
+
+    // Query for incident types distribution
+    $typeQuery = "SELECT incident_type, COUNT(*) as count FROM incidents ";
+    if ($user_role != 'admin') {
+        $typeQuery .= "WHERE user_id = $user_id ";
+    }
+    $typeQuery .= "GROUP BY incident_type";
+    $typeResult = $conn->query($typeQuery);
+
+    $typeLabels = [];
+    $typeData = [];
+    if ($typeResult) {
+        while($row = $typeResult->fetch_assoc()) {
+            $typeLabels[] = $row['incident_type'];
+            $typeData[] = $row['count'];
+        }
+    }
+    $conn = null;
+    ?>
+
+    // Case Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: <?php echo json_encode($statusLabels); ?>,
+            datasets: [{
+                data: <?php echo json_encode($statusData); ?>,
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Incident Types Chart
+    const typeCtx = document.getElementById('incidentTypeChart').getContext('2d');
+    new Chart(typeCtx, {
+        type: 'bar',
+        data: {
+            labels: <?php echo json_encode($typeLabels); ?>,
+            datasets: [{
+                label: 'Number of Cases',
+                data: <?php echo json_encode($typeData); ?>,
+                backgroundColor: '#D12E79',
+                borderColor: '#AB1E5C',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+                
+
             </div>
         </main>
     </div>

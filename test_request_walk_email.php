@@ -78,20 +78,23 @@ echo "</ul>";
 
 // Send test email
 try {
+    // Include email configuration
+    require_once 'config/email_config.php';
+    
     $mail = new PHPMailer(true);
     
     // Server settings with debug output
     $mail->SMTPDebug = 2; // Enable verbose debug output
     $mail->isSMTP();
-    $mail->Host = 'smtp.gmail.com';
+    $mail->Host = SMTP_HOST;
     $mail->SMTPAuth = true;
-    $mail->Username = 'arshchouhan004@gmail.com';
-    $mail->Password = 'qvgs zzeh aiiy iplc';
-    $mail->SMTPSecure = 'ssl';
-    $mail->Port = 465;
+    $mail->Username = SMTP_USERNAME;
+    $mail->Password = SMTP_PASSWORD;
+    $mail->SMTPSecure = SMTP_ENCRYPTION === 'tls' ? 'tls' : 'ssl';
+    $mail->Port = SMTP_PORT;
     
     // Recipients
-    $mail->setFrom('arshchouhan004@gmail.com', 'SheShield');
+    $mail->setFrom(DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME);
     $mail->addAddress($escort['email'], $escort['name']);
     
     // Content
@@ -138,10 +141,10 @@ try {
     // Troubleshooting information
     echo "<h3>Troubleshooting Information:</h3>";
     echo "<pre>";
-    echo "SMTP Host: smtp.gmail.com\n";
-    echo "SMTP Port: 465\n";
-    echo "SMTP Security: SSL\n";
-    echo "SMTP Username: arshchouhan004@gmail.com\n";
+    echo "SMTP Host: " . SMTP_HOST . "\n";
+    echo "SMTP Port: " . SMTP_PORT . "\n";
+    echo "SMTP Security: " . SMTP_ENCRYPTION . "\n";
+    echo "SMTP Username: " . SMTP_USERNAME . "\n";
     echo "Recipient: {$escort['email']}\n";
     echo "</pre>";
     

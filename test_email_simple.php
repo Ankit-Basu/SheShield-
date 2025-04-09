@@ -63,18 +63,21 @@ if (isset($_GET['escort_id']) || isset($_GET['email'])) {
     try {
         $mail = new PHPMailer(true);
         
-        // Server settings - with detailed debugging
+        // Include email configuration
+        require_once 'config/email_config.php';
+        
+        // Server settings
         $mail->SMTPDebug = 2; // Enable verbose debug output
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
-        $mail->Username = 'arshchouhan004@gmail.com'; // Your Gmail address
-        $mail->Password = 'qvgs zzeh aiiy iplc'; // Your app password
-        $mail->SMTPSecure = 'ssl';
-        $mail->Port = 465;
+        $mail->Username = SMTP_USERNAME; // Your Gmail address
+        $mail->Password = SMTP_PASSWORD; // Your Gmail password or App Password
+        $mail->SMTPSecure = SMTP_ENCRYPTION === 'tls' ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = SMTP_PORT;
         
         // Recipients
-        $mail->setFrom('arshchouhan004@gmail.com', 'SheShield');
+        $mail->setFrom(DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME);
         $mail->addAddress($escortEmail, $escortName);
         
         // Content
@@ -110,10 +113,10 @@ if (isset($_GET['escort_id']) || isset($_GET['email'])) {
         // Troubleshooting information
         echo "<h2>Troubleshooting Information:</h2>";
         echo "<pre>";
-        echo "SMTP Host: smtp.gmail.com\n";
-        echo "SMTP Port: 465\n";
-        echo "SMTP Security: SSL\n";
-        echo "SMTP Username: arshchouhan004@gmail.com\n";
+        echo "SMTP Host: " . SMTP_HOST . "\n";
+        echo "SMTP Port: " . SMTP_PORT . "\n";
+        echo "SMTP Security: " . SMTP_ENCRYPTION . "\n";
+        echo "SMTP Username: " . SMTP_USERNAME . "\n";
         echo "Recipient: {$escortEmail}\n";
         echo "</pre>";
         

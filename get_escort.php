@@ -50,15 +50,19 @@ try {
             // Server settings
             $mail->SMTPDebug = 0; // Disable debug output
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
+            
+            // Include email configuration
+            require_once 'config/email_config.php';
+            
+            $mail->Host = SMTP_HOST;
             $mail->SMTPAuth = true;
-            $mail->Username = 'arshchouhan004@gmail.com';
-            $mail->Password = 'qvgs zzeh aiiy iplc';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $mail->Port = 465;
+            $mail->Username = SMTP_USERNAME;
+            $mail->Password = SMTP_PASSWORD;
+            $mail->SMTPSecure = SMTP_ENCRYPTION === 'tls' ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port = SMTP_PORT;
             
             // Recipients
-            $mail->setFrom('arshchouhan004@gmail.com', 'SheShield');
+            $mail->setFrom(DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME);
             $mail->addAddress($escort['email'], $escort['name']);
             
             // Content
