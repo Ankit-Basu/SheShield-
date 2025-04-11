@@ -19,7 +19,7 @@ if ($result && $row = $result->fetch_assoc()) {
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <link href="/src/trae-theme.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
 
@@ -208,7 +208,7 @@ if ($result && $row = $result->fetch_assoc()) {
                         ?>
                     </div>
                     <div class="flex-grow">
-                        <span class="text-lg font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php 
+                        <span class="text-lg font-bold text-gradient"><?php 
                         if (!isset($_SESSION)) { session_start(); }
                         $firstName = isset($_SESSION['first_name']) ? htmlspecialchars($_SESSION['first_name']) : '';
                         $lastName = isset($_SESSION['last_name']) ? htmlspecialchars($_SESSION['last_name']) : '';
@@ -260,16 +260,16 @@ if ($result && $row = $result->fetch_assoc()) {
             <!-- Dashboard Tiles -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 animate-fade-in">
                 <div class="trae-card p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold text-[#F0F0F0]">Total Safe Spaces</h3>
-                    <p class="text-2xl font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php echo $totalSafeSpaces; ?></p>
+                    <h3 class="text-lg font-semibold text-[#D76D77]">Total Safe Spaces</h3>
+                    <p class="text-2xl font-bold text-[#F0F0F0] bg-clip-text"><?php echo $totalSafeSpaces; ?></p>
                 </div>
                 <div class="trae-card p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold text-[#F0F0F0]">Total Incidents</h3>
-                    <p class="text-2xl font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">0</p>
+                    <h3 class="text-lg font-semibold text-[#D76D77]">Total Incidents</h3>
+                    <p class="text-2xl font-bold text-[#F0F0F0] bg-clip-text">0</p>
                 </div>
                 <div class="trae-card p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold text-[#F0F0F0]">Active Users Today</h3>
-                    <p class="text-2xl font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">0</p>
+                    <h3 class="text-lg font-semibold text-[#D76D77]">Active Users Today</h3>
+                    <p class="text-2xl font-bold text-[#F0F0F0] bg-clip-text">0</p>
                 </div>
             </div>
 
@@ -289,7 +289,7 @@ if ($result && $row = $result->fetch_assoc()) {
 
                 <!-- Form Section (30%) -->
                 <div class="w-full md:w-[30%] trae-card rounded-lg p-4">
-                    <h2 class="text-xl font-bold mb-4 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Mark Safe Space</h2>
+                    <h2 class="text-xl font-bold mb-4 text-[#D76D77] bg-clip-text">Mark Safe Space</h2>
                     <form id="safeSpaceForm" class="space-y-4">
                         <input type="hidden" id="coordinates" name="coordinates">
                         <p class="text-sm text-[#F0F0F0] opacity-80 mb-4">Draw a polygon or circle on the map to mark a safe zone</p>

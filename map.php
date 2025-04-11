@@ -21,7 +21,7 @@ $user_id = $_SESSION['user_id'];
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
 
     <!-- Trae AI Theme -->
-    <link href="/src/trae-theme.css" rel="stylesheet">
+    <link href="src/trae-theme.css" rel="stylesheet">
 
     <style>
         body {
@@ -35,7 +35,7 @@ $user_id = $_SESSION['user_id'];
             background: rgba(46, 46, 78, 0.2);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(74, 30, 115, 0.2);
+            border: 1px solid rgba(215, 109, 119, 0.3);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
         
@@ -137,7 +137,7 @@ $user_id = $_SESSION['user_id'];
     <!-- Load locations data -->
     <script src="locations.js"></script>
 </head>
-<body class="text-white overflow-x-hidden">
+<body class="text-white overflow-x-hidden bg-[#1E1E2E]">
     <div class="flex h-screen relative z-0">
         <!-- Background gradient shapes -->
         <div class="absolute -top-[200px] -right-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(74,30,115,0.2)] to-[rgba(215,109,119,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
@@ -162,7 +162,7 @@ $user_id = $_SESSION['user_id'];
                         ?>
                     </div>
                     <div class="flex-grow">
-                        <span class="text-lg font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php 
+                        <span class="text-lg font-bold text-gradient"><?php 
                         if (!isset($_SESSION)) { session_start(); }
                         $firstName = isset($_SESSION['first_name']) ? htmlspecialchars($_SESSION['first_name']) : '';
                         $lastName = isset($_SESSION['last_name']) ? htmlspecialchars($_SESSION['last_name']) : '';
@@ -210,14 +210,14 @@ $user_id = $_SESSION['user_id'];
         <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out">
             <div id="content" class="flex flex-col md:flex-row gap-6 w-full max-w-screen-xl mx-auto px-4">
                 <!-- Map Section -->
-                <div class="w-full md:w-[70%] h-[calc(100vh-10rem)] rounded-lg shadow-lg bg-white">
+                <div class="w-full md:w-[70%] h-[calc(100vh-10rem)] rounded-lg shadow-lg glass-effect">
                     <div id="map" class="w-full h-full rounded-lg"></div>
                 </div>
 
                 <!-- Dashboard Tiles -->
                 <div class="w-full md:w-[40%] space-y-6 overflow-y-auto max-h-[calc(100vh-10rem)]">
                     <!-- Active Incidents Tile -->
-                    <div class="bg-white p-4 rounded-lg shadow-lg mb-6" style="height: 300px; overflow-y: auto;">
+                    <div class="glass-effect p-4 rounded-lg shadow-lg mb-6" style="height: 300px; overflow-y: auto;">
                         <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
                             <i class="fa-solid fa-bell text-red-500"></i>
                             <span>Active Incidents</span>
@@ -231,105 +231,42 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-        echo '<div class="p-3 rounded-lg border">';
+        echo '<div class="p-3 rounded-lg glass-effect mb-3">';
         echo '<div class="flex justify-between items-center">';
-        echo '<span class="font-medium">' . htmlspecialchars($row['incident_type'] ?? 'Unknown') . '</span>';
-        echo '<span class="text-sm text-gray-500">' . date('g:i A', strtotime($row['created_at'])) . '</span>';
+        echo '<span class="font-medium text-white">' . htmlspecialchars($row['incident_type'] ?? 'Unknown') . '</span>';
+        echo '<span class="text-sm text-gray-300">' . date('g:i A', strtotime($row['created_at'])) . '</span>';
         echo '</div>';
-        echo '<p class="text-sm text-gray-600 mt-1">' . htmlspecialchars($row['location']) . '</p>';
+        echo '<p class="text-sm text-gray-300 mt-1">' . htmlspecialchars($row['location']) . '</p>';
         echo '<div class="mt-2 flex justify-between items-center">';
         echo '<span class="px-2 py-1 text-xs rounded-full ' . getSeverityClass($row['severity'] ?? 'low') . '">' . ucfirst($row['severity'] ?? 'low') . '</span>';
-        echo '<button class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-600 hover:bg-green-200" onclick="markResolved(' . $row['id'] . ')">Mark Resolved</button>';
+        echo '<button class="px-3 py-1 text-sm rounded-full bg-gradient-to-r from-[rgba(74,30,115,0.7)] to-[rgba(215,109,119,0.7)] text-white hover:from-[rgba(74,30,115,0.9)] hover:to-[rgba(215,109,119,0.9)]" onclick="markResolved(' . $row['id'] . ')">Mark Resolved</button>';
         echo '</div>';
         echo '</div>';
     }
 } else {
-    echo '<div class="text-center text-gray-500">No active incidents</div>';
+    echo '<div class="text-center text-gray-300">No active incidents</div>';
 }
 
 
 
 function getSeverityClass($severity) {
     switch ($severity) {
-        case 'high': return 'bg-red-100 text-red-600';
-        case 'medium': return 'bg-yellow-100 text-yellow-600';
-        default: return 'bg-green-100 text-green-600';
+        case 'high': return 'bg-gradient-to-r from-[rgba(220,38,38,0.7)] to-[rgba(248,113,113,0.7)] text-white';
+        case 'medium': return 'bg-gradient-to-r from-[rgba(217,119,6,0.7)] to-[rgba(251,191,36,0.7)] text-white';
+        default: return 'bg-gradient-to-r from-[rgba(5,150,105,0.7)] to-[rgba(16,185,129,0.7)] text-white';
     }
 }
 ?>
                         </div>
                     </div>
 
-                    <!-- Heat Map Insights Tile -->
-                    <div class="trae-card p-6 rounded-xl overflow-hidden group mb-6 animate-fade-in">
-                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
-                        <div class="p-4 relative overflow-hidden z-10">
-                            <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
-                                <i class="fa-solid fa-fire text-orange-500"></i>
-                                <span>Heat Map Insights</span>
-                            </h2>
-                        <div class="space-y-2">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-4 h-4 bg-red-500 rounded-full"></div>
-                                <span>High Risk Area</span>
-                                <span class="ml-auto text-gray-500">3</span>
-                            </div>
-                            <button class="w-full mt-3 px-4 py-2 text-sm rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200">View Full Heat Map</button>
-                        </div>
-                    </div>
 
-                    <!-- Recent Reports Tile -->
-                    <div class="trae-card p-6 rounded-xl overflow-hidden group mb-6 animate-fade-in">
-                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
-                        <div class="p-4 relative overflow-hidden z-10">
-                            <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
-                                <i class="fa-solid fa-chart-line text-purple-500"></i>
-                                <span>Recent Reports</span>
-                            </h2>
-                        <div class="space-y-2">
-                            <div class="flex justify-between">
-                                <span>Today</span>
-                                <span class="font-medium">3</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>This Week</span>
-                                <span class="font-medium">10</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Frequent Incidents Tile -->
-                    <div class="bg-white p-4 rounded-lg shadow-lg mb-6" style="overflow-y: auto;">
-                        <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
-                            <i class="fa-solid fa-exclamation-triangle text-yellow-500"></i>
-                            <span>Frequent Incidents</span>
-                        </h2>
-                        <div class="space-y-2">
-                            <div class="flex items-center space-x-2">
-                                <span class="w-20">Harassment</span>
-                                <div class="flex-1 h-2 bg-gray-200 rounded-full">
-                                    <div class="h-2 bg-red-500 rounded-full" style="width: 50%"></div>
-                                </div>
-                                <span class="text-sm text-gray-500">50%</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Location Risk Tile -->
-                    <div class="trae-card p-6 rounded-xl overflow-hidden group mb-6 animate-fade-in">
-                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
-                        <div class="p-4 relative overflow-hidden z-10">
-                            <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
-                                <i class="fa-solid fa-location-dot text-blue-500"></i>
-                                <span>Location Risk</span>
-                            </h2>
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center">
-                                <span>Hostel Area</span>
-                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-600">High</span>
-                            </div>
-                        </div>
-                    </div>
+
+
+
+
                 </div>
             </div>
         </main>

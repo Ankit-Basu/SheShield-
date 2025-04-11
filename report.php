@@ -260,7 +260,7 @@ $stmt->close();
                         ?>
                     </div>
                     <div class="flex-grow">
-                        <span class="text-lg font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php 
+                        <span class="text-lg font-bold text-gradient"><?php 
                         if (!isset($_SESSION)) { session_start(); }
                         $firstName = isset($_SESSION['first_name']) ? trim(htmlspecialchars($_SESSION['first_name'])) : '';
                         $lastName = isset($_SESSION['last_name']) ? trim(htmlspecialchars($_SESSION['last_name'])) : '';
@@ -309,7 +309,7 @@ $stmt->close();
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 animate-fade-in">
                 <!-- Report Form Tile -->
                 <div class="glass-card p-8 rounded-xl shadow-lg form-container">
-                    <h1 class="text-2xl font-bold mb-6 text-[#FF9B9B] text-center">Report a Safety Incident</h1>
+                    <h1 class="text-2xl font-bold mb-6 text-gradient text-center">Report a Safety Incident</h1>
                     <form action="" method="POST" class="space-y-6">
                         <!-- Form fields remain unchanged -->
                         <form action="" method="POST" class="space-y-6">
@@ -678,7 +678,7 @@ $stmt->close();
                 showNotification('error', 'Please enable location access to share your location.');
             });
         }      function startLiveStream() {
-            const streamWindow = window.open('live_stream.php', 'SheShield Live Stream', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
+            const streamWindow = window.open('SheShield-\live_stream.php', 'SheShield Live Stream', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
             if (streamWindow) {
                 streamWindow.focus();
             } else {

@@ -167,7 +167,7 @@ session_start();
                         ?>
                     </div>
                     <div class="flex-grow">
-                        <span class="text-lg font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php 
+                        <span class="text-lg font-bold text-gradient"><?php 
                         if (!isset($_SESSION)) { session_start(); }
                         $firstName = isset($_SESSION['first_name']) ? trim(htmlspecialchars($_SESSION['first_name'])) : '';
                         $lastName = isset($_SESSION['last_name']) ? trim(htmlspecialchars($_SESSION['last_name'])) : '';

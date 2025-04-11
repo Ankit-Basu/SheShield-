@@ -34,7 +34,7 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
 
     <!-- FontAwesome Icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
-
+    <link href="/src/trae-theme.css" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -135,7 +135,7 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                         ?>
                     </div>
                     <div class="flex-grow">
-                        <span class="text-lg font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php 
+                        <span class="text-lg font-bold text-gradient"><?php 
                         if (!isset($_SESSION)) { session_start(); }
                         $firstName = isset($_SESSION['first_name']) ? trim(htmlspecialchars($_SESSION['first_name'])) : '';
                         $lastName = isset($_SESSION['last_name']) ? trim(htmlspecialchars($_SESSION['last_name'])) : '';
@@ -185,27 +185,27 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
         <!-- Main Content -->
         <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-full md:content-shifted overflow-y-auto h-screen">
             <div id="content">
-                <h1 class="text-3xl font-bold">Analytics</h1>
+                <h1 class="text-gradient text-3xl font-bold">Analytics</h1>
                 <p class="mt-2">View and analyze safety data and statistics.</p>
                 
                 <!-- Summary Section -->
                 <div class="mt-8 glass-effect rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Campus Safety Overview</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-[#F0F0F0]  bg-clip-text">Campus Safety Overview</h2>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="glass-effect p-4 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
-                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Total Incidents</h3>
+                            <h3 class="text-lg font-semibold text-[#D76D77] bg-clip-text">Total Incidents</h3>
                             <p class="text-3xl font-bold text-[#F0F0F0]"><?php echo $total_incidents; ?></p>
                         </div>
                         <div class="glass-effect p-4 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
-                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Resolution Rate</h3>
+                            <h3 class="text-lg font-semibold text-[#D76D77] bg-clip-text">Resolution Rate</h3>
                             <p class="text-3xl font-bold text-[#F0F0F0]"><?php echo $resolution_rate; ?>%</p>
                         </div>
                         <div class="glass-effect p-4 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
-                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Recent Incidents (7 days)</h3>
+                            <h3 class="text-lg font-semibold text-[#D76D77] bg-clip-text">Recent Incidents (7 days)</h3>
                             <p class="text-3xl font-bold text-[#F0F0F0]"><?php echo $recent_incidents; ?></p>
                         </div>
                         <div class="glass-effect p-4 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
-                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Active Cases</h3>
+                            <h3 class="text-lg font-semibold text-[#D76D77] bg-clip-text">Active Cases</h3>
                             <p class="text-3xl font-bold text-[#F0F0F0]"><?php echo $total_incidents - $resolved_incidents; ?></p>
                         </div>
                     </div>
@@ -215,19 +215,19 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                 <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Resolution Status Chart -->
                     <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
-                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Resolution Status</h2>
+                        <h2 class="text-xl font-semibold mb-4 text-[#F0F0F0] bg-clip-text">Resolution Status</h2>
                         <canvas id="resolutionChart"></canvas>
                     </div>
 
                     <!-- Average Response Time -->
                     <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
-                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Average Response Time</h2>
+                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r text-[#F0F0F0]  bg-clip-text">Average Response Time</h2>
                         <canvas id="responseTimeChart"></canvas>
                     </div>
 
                     <!-- Safety Score by Area -->
                     <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
-                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text">Safety Score by Area</h2>
+                        <h2 class="text-xl font-semibold mb-4 text-[#F0F0F0]  bg-clip-text">Safety Score by Area</h2>
                         <canvas id="safetyScoreChart"></canvas>
                     </div>
                 </div>

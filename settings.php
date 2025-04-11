@@ -10,7 +10,7 @@ session_start();
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <link href="/src/trae-theme.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
@@ -108,7 +108,7 @@ session_start();
                         ?>
                     </div>
                     <div class="flex-grow">
-                        <span class="text-lg font-bold bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-transparent bg-clip-text"><?php 
+                        <span class="text-lg font-bold text-gradient"><?php 
                         if (!isset($_SESSION)) { session_start(); }
                         $firstName = isset($_SESSION['first_name']) ? htmlspecialchars($_SESSION['first_name']) : '';
                         $lastName = isset($_SESSION['last_name']) ? htmlspecialchars($_SESSION['last_name']) : '';
@@ -160,7 +160,7 @@ session_start();
         <!-- Main Content -->
         <main id="mainContent" class="flex-1 p-8 transition-all duration-300 ease-in-out content-shifted overflow-y-auto h-screen">
             <div id="content" class="min-h-full">
-                <h1 class="text-4xl font-bold bg-gradient-to-r from-[#D12E79] to-[#AB1E5C] bg-clip-text text-transparent mb-8">Settings</h1>
+                <h1 class="text-4xl font-bold text-gradient mb-8">Settings</h1>
                 
                 <!-- Settings Sections -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">

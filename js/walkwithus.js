@@ -93,7 +93,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: data.emailSent ? 'success' : 'warning',
                     background: 'rgba(26, 26, 46, 0.95)',
                     color: '#fff',
-                    confirmButtonColor: '#D12E79',
+                    customClass: {
+                        confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#3A1859] hover:to-[#C55C66]'
+                    },
                     timer: 3000,
                     timerProgressBar: true,
                     toast: true,
@@ -107,7 +109,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: 'info',
                     background: 'rgba(26, 26, 46, 0.95)',
                     color: '#fff',
-                    confirmButtonColor: '#D12E79'
+                    customClass: {
+                        confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#3A1859] hover:to-[#C55C66]'
+                    }
                 });
             }
         } catch (error) {
@@ -121,7 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'error',
                 background: 'rgba(26, 26, 46, 0.95)',
                 color: '#fff',
-                confirmButtonColor: '#D12E79'
+                customClass: {
+                    confirmButton: 'bg-gradient-to-r from-purple-700 to-pink-500 hover:from-purple-800 hover:to-pink-600'
+                }
             });
         }
     });
@@ -195,7 +201,9 @@ document.addEventListener('DOMContentLoaded', function() {
             `,
             icon: 'info',
             showCancelButton: true,
-            confirmButtonColor: '#D12E79',
+            customClass: {
+                confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:shadow-lg transform hover:scale-[1.02]'
+            },
             cancelButtonColor: '#4A5568',
             confirmButtonText: 'Start Walk',
             background: 'rgba(26, 26, 46, 0.95)',
@@ -223,7 +231,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: 'success',
                     background: 'rgba(26, 26, 46, 0.95)',
                     color: '#fff',
-                    confirmButtonColor: '#D12E79'
+                    customClass: {
+                        confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:shadow-lg transform hover:scale-[1.02]'
+                    }
                 });
             }
         });
@@ -236,7 +246,9 @@ document.addEventListener('DOMContentLoaded', function() {
             text: 'Are you sure you want to end this walk?',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#D12E79',
+            customClass: {
+                confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:shadow-lg transform hover:scale-[1.02]'
+            },
             cancelButtonColor: '#4A5568',
             confirmButtonText: 'Yes, end walk',
             background: 'rgba(26, 26, 46, 0.95)',
@@ -271,7 +283,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     `,
                     background: 'rgba(26, 26, 46, 0.95)',
                     color: '#fff',
-                    confirmButtonColor: '#D12E79',
+                    customClass: {
+                        confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:shadow-lg transform hover:scale-[1.02]'
+                    },
                     confirmButtonText: 'Submit Rating'
                 });
 
@@ -293,7 +307,9 @@ document.addEventListener('DOMContentLoaded', function() {
             `,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#DC2626',
+            customClass: {
+                confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:shadow-lg transform hover:scale-[1.02]'
+            },
             cancelButtonColor: '#4A5568',
             confirmButtonText: 'Send Alert',
             background: 'rgba(26, 26, 46, 0.95)',
@@ -306,7 +322,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: 'success',
                     background: 'rgba(26, 26, 46, 0.95)',
                     color: '#fff',
-                    confirmButtonColor: '#D12E79'
+                    customClass: {
+                        confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:shadow-lg transform hover:scale-[1.02]'
+                    }
                 });
             }
         });
@@ -319,7 +337,9 @@ document.addEventListener('DOMContentLoaded', function() {
             text: 'Are you sure you want to cancel this walk request?',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#D12E79',
+            customClass: {
+                confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:shadow-lg transform hover:scale-[1.02]'
+            },
             cancelButtonColor: '#4A5568',
             confirmButtonText: 'Yes, cancel',
             background: 'rgba(26, 26, 46, 0.95)',
@@ -393,7 +413,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: 'success',
                     background: 'rgba(26, 26, 46, 0.95)',
                     color: '#fff',
-                    confirmButtonColor: '#D12E79'
+                    customClass: {
+                        confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:shadow-lg transform hover:scale-[1.02]'
+                    }
                 });
                 
                 volunteerForm.reset();
@@ -409,7 +431,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'error',
                 background: 'rgba(26, 26, 46, 0.95)',
                 color: '#fff',
-                confirmButtonColor: '#D12E79'
+                customClass: {
+                    confirmButton: 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:shadow-lg transform hover:scale-[1.02]'
+                }
             });
         }
     });
