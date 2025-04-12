@@ -16,7 +16,7 @@ echo "<h1>Email Test</h1>";
 
 // Get escort email from database
 $escortId = isset($_GET['escort_id']) ? $_GET['escort_id'] : 'ESC-2024-001';
-$escortEmail = isset($_GET['email']) ? $_GET['email'] : 'arshchouhan004@gmail.com';
+$escortEmail = isset($_GET['email']) ? $_GET['email'] : 'ankitbasu960@gmail.com';
 $escortName = 'Test Escort';
 
 // Try to get escort from database if ID is provided
