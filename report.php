@@ -66,6 +66,35 @@ $stmt->close();
             overflow-x: hidden;
         }
         
+        /* Main Content Container */
+        #mainContent {
+            max-width: 100%;
+            overflow-x: hidden !important;
+            padding: 2.5rem;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .grid {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .glass-card {
+            background: rgba(46, 46, 78, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(74, 30, 115, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .form-container {
+            max-height: none;
+            overflow-y: hidden;
+        }
+        
         /* Glassmorphic Effects */
         .glass-effect {
             background: rgba(46, 46, 78, 0.2);
@@ -75,12 +104,16 @@ $stmt->close();
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
         
-        .trae-sidebar {
+        .sidebar {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
             background: rgba(46, 46, 78, 0.3);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-right: 1px solid rgba(74, 30, 115, 0.3);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            height: 100vh;
+            overflow-y: auto;
         }
         
         .glass-card {
@@ -146,7 +179,7 @@ $stmt->close();
         
         .main-container {
             height: 100vh;
-            overflow-y: auto;
+            overflow-y: hidden;
         }
         
         .form-container {
@@ -192,24 +225,34 @@ $stmt->close();
             background: linear-gradient(135deg, rgba(74, 30, 115, 0.9), rgba(215, 109, 119, 0.9));
         }
         
-        /* Original sidebar behavior */
+        /* Responsive sidebar behavior */
         .sidebar-hidden { 
             transform: translateX(-100%);
+            opacity: 0;
         }
         .sidebar-visible { 
             transform: translateX(0);
+            opacity: 1;
         }
-        .toggle-moved { 
+        .toggle-moved {
             transform: translateX(16rem) translateY(-50%);
+            transition: transform 0.3s ease-in-out;
         }
-        .toggle-default { 
+        .toggle-default {
             transform: translateX(0) translateY(-50%);
+            transition: transform 0.3s ease-in-out;
         }
-        .content-shifted { 
+        .content-shifted {
             margin-left: 16rem;
+            transition: margin-left 0.3s ease-in-out;
         }
-        .content-full { 
+        .content-full {
             margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        #sidebarToggle {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
         }
         @keyframes pulse-ring {
             0% { transform: scale(0.33); }
@@ -235,14 +278,14 @@ $stmt->close();
         }
     </style>
 </head>
-<body class="text-[#F0F0F0]">
+<body class="text-[#F0F0F0] fixed inset-0 overflow-hidden">
     <!-- Background gradient shapes -->
     <div class="absolute -top-[300px] -right-[300px] w-[600px] h-[600px] bg-gradient-to-r from-[rgba(74,30,115,0.3)] to-[rgba(215,109,119,0.3)] rounded-full blur-3xl -z-10 animate-pulse-slow"></div>
     <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
     <!-- Main container -->
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside id="sidebar" class="trae-sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-visible">
+        <aside id="sidebar" class="sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 sidebar-visible">
             <div class="flex items-center justify-between mb-5">
                 <div class="flex items-center space-x-4 w-full">
                     <div class="w-12 h-12 rounded-full bg-gradient-to-r from-[#4A1E73] to-[#D76D77] flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -300,12 +343,12 @@ $stmt->close();
         </aside>
 
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-moved hover:shadow-lg">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 toggle-moved hover:shadow-lg">
             <i class="fa-solid fa-bars"></i>
         </button>
 
         <!-- Main Content -->
-        <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-shifted overflow-y-auto">
+        <main id="mainContent" class="flex-1 p-10  content-shifted overflow-y-auto h-screen">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 animate-fade-in">
                 <!-- Report Form Tile -->
                 <div class="glass-card p-8 rounded-xl shadow-lg form-container">
@@ -556,7 +599,7 @@ $stmt->close();
                 toggleButton.classList.add('toggle-default');
             }
         });
-    </script>
+    
     function sendEmergencyAlert(team, number) {
     if ("geolocation" in navigator) {
         showNotification('info', `Alerting ${team}...`);
@@ -678,7 +721,7 @@ $stmt->close();
                 showNotification('error', 'Please enable location access to share your location.');
             });
         }      function startLiveStream() {
-            const streamWindow = window.open('SheShield-\live_stream.php', 'SheShield Live Stream', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
+            const streamWindow = window.open('live_stream.php', 'SheShield Live Stream', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
             if (streamWindow) {
                 streamWindow.focus();
             } else {
@@ -720,6 +763,27 @@ $stmt->close();
     setTimeout(() => notification.remove(), 3000);
 }
     </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        let isSidebarVisible = true;
+    
+        sidebarToggle.addEventListener('click', function() {
+            isSidebarVisible = !isSidebarVisible;
+            sidebar.classList.toggle('sidebar-hidden');
+            sidebar.classList.toggle('sidebar-visible');
+            mainContent.classList.toggle('content-shifted');
+            mainContent.classList.toggle('content-full');
+            sidebarToggle.classList.toggle('toggle-moved');
+            sidebarToggle.classList.toggle('toggle-default');
+        });
+    });
+    </script>
+    </body>
+    </html>
 
     <script src="sidebar.js"></script>
     <script src="location.js"></script>

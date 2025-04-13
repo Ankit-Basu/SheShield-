@@ -33,13 +33,13 @@ session_start();
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
         
-        .trae-sidebar {
+        /* .trae-sidebar {
             background: rgba(46, 46, 78, 0.3);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-right: 1px solid rgba(74, 30, 115, 0.3);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
+        } */
         
         .trae-card {
             background: rgba(46, 46, 78, 0.2);
@@ -50,11 +50,11 @@ session_start();
             transition: all 0.3s ease;
         }
         
-        .trae-card:hover {
+         .trae-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(215, 109, 119, 0.3);
-        }
+        } 
         
         .trae-sidebar-item {
             transition: all 0.3s ease;
@@ -62,6 +62,7 @@ session_start();
             background: rgba(46, 46, 78, 0.2);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
+            color: #F0F0F0;
         }
 
         .trae-sidebar-item.active {
@@ -75,6 +76,7 @@ session_start();
             transform: translateX(5px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
+            color: #F0F0F0;
         }
         
         /* Custom scrollbar */
@@ -117,7 +119,33 @@ session_start();
         .animate-fade-in > a:nth-child(2) { animation-delay: 0.2s; }
         .animate-fade-in > a:nth-child(3) { animation-delay: 0.3s; }
         
-        /* Original sidebar behavior */
+        /* Responsive sidebar behavior */
+        
+            /* #sidebar {
+                transform: translateX(0);
+                opacity: 1;
+            } */
+            /* .sidebar{
+                transition: transform 0.3s ease-in-out;
+                background: linear-gradient(180deg, #4A1E73 0%, #D76D77 100%);
+            } */
+            /* #mainContent {
+                margin-left: 16rem;
+            } */
+            /* #sidebarToggle {
+            transition: transform 0.3s ease-in-out;
+            } */
+        .sidebar {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
+            background: rgba(46, 46, 78, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(74, 30, 115, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            height: 100vh;
+            overflow-y: auto;
+        }
         .sidebar-hidden { 
             transform: translateX(-100%);
             opacity: 0;
@@ -126,20 +154,27 @@ session_start();
             transform: translateX(0);
             opacity: 1;
         }
-        .toggle-moved { 
+        .toggle-moved {
             transform: translateX(16rem) translateY(-50%);
+            transition: transform 0.3s ease-in-out;
         }
-        .toggle-default { 
+        .toggle-default {
             transform: translateX(0) translateY(-50%);
+            transition: transform 0.3s ease-in-out;
         }
-        .content-shifted { 
+        .content-shifted {
             margin-left: 16rem;
-            transition: all 0.3s ease-in-out;
+            transition: margin-left 0.3s ease-in-out;
         }
-        .content-full { 
+        .content-full {
             margin-left: 0;
-            transition: all 0.3s ease-in-out;
+            transition: margin-left 0.3s ease-in-out;
         }
+        #sidebarToggle {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }        
+        
     </style>
 </head>
 <body class="bg-[#1E1E2E] text-[#F0F0F0]">
@@ -148,7 +183,7 @@ session_start();
         <div class="absolute -top-[300px] -right-[300px] w-[600px] h-[600px] bg-gradient-to-r from-[rgba(74,30,115,0.3)] to-[rgba(215,109,119,0.3)] rounded-full blur-3xl -z-10 animate-pulse-slow"></div>
         <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
         <!-- Sidebar -->
-        <aside id="sidebar" class="trae-sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-hidden md:sidebar-visible">
+        <aside id="sidebar" class="sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40  sidebar-visible">
 
         <div class="flex items-center justify-between mb-5">
                 <div class="flex items-center space-x-4 w-full">
@@ -184,8 +219,10 @@ session_start();
                     <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='report.php'">
                         <i class="fa-solid fa-file"></i> <span>Reports</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='analytics.php'">
+                    <li>
+                        <a href="analytics.php" class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
                         <i class="fa-solid fa-chart-bar"></i> <span>Analytics</span>
+                        </a>
                     </li>
                     <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='map.php'">
                         <i class="fa-solid fa-map"></i> <span>Map</span>
@@ -202,7 +239,7 @@ session_start();
                     <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='settings.php'">
                         <i class="fa-solid fa-gear"></i> <span>Settings</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='auth/logout.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='auth/logout.php'">
                         <i class="fa-solid fa-sign-out-alt"></i> <span>Logout</span>
                     </li>
                 </ul>
@@ -210,30 +247,30 @@ session_start();
         </aside>
         
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-default md:toggle-moved hover:shadow-lg">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 toggle-moved">
             <i class="fa-solid fa-bars"></i>
         </button>
 
         <!-- Main Content -->
-        <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-full md:content-shifted">
+        <main id="mainContent" class="flex-1 p-10  content-shifted">
             <div id="content">
                 <h1 class="text-3xl font-bold text-gradient">Dashboard Overview</h1>
                 
                 <!-- Dashboard Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 animate-fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 ">
                     <!-- Analytics Card -->
                     <a href="analytics.php" class="block">
                         <div class="trae-card rounded-xl overflow-hidden group">
-                            <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
+                            <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 "></div>
                             <div class="p-6 relative overflow-hidden z-10">
                                 <div class="flex items-center justify-between mb-3">
                                     <h2 class="text-xl font-semibold text-white">Analytics Dashboard</h2>
-                                    <div class="glass-effect p-3 rounded-full transform transition-all duration-300 group-hover:scale-110">
+                                    <div class="glass-effect p-3 rounded-full group-hover:scale-110">
                                         <i class="fa-solid fa-chart-bar text-[#D76D77] text-xl"></i>
                                     </div>
                                 </div>
                                 <p class="text-[#A0A0B0] mt-4">View comprehensive analytics, case statistics, and data visualizations.</p>
-                                <div class="mt-6 flex items-center text-[#D76D77] relative z-10 transition-all duration-300 group-hover:translate-x-2">
+                                <div class="mt-6 flex items-center text-[#D76D77] relative z-10  group-hover:translate-x-2">
                                     <span>Explore Analytics</span>
                                     <i class="fa-solid fa-arrow-right ml-2"></i>
                                 </div>
@@ -244,16 +281,16 @@ session_start();
                     <!-- Reports Card -->
                     <a href="report.php" class="block">
                         <div class="trae-card rounded-xl overflow-hidden group">
-                            <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
+                            <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 "></div>
                             <div class="p-6 relative overflow-hidden z-10">
                                 <div class="flex items-center justify-between mb-3">
                                     <h2 class="text-xl font-semibold text-white">Reports</h2>
-                                    <div class="glass-effect p-3 rounded-full transform transition-all duration-300 group-hover:scale-110">
+                                    <div class="glass-effect p-3 rounded-full  group-hover:scale-110">
                                         <i class="fa-solid fa-file text-[#D76D77] text-xl"></i>
                                     </div>
                                 </div>
                                 <p class="text-[#A0A0B0] mt-4">Access and manage incident reports and case documentation.</p>
-                                <div class="mt-6 flex items-center text-[#D76D77] relative z-10 transition-all duration-300 group-hover:translate-x-2">
+                                <div class="mt-6 flex items-center text-[#D76D77] relative z-10  group-hover:translate-x-2">
                                     <span>View Reports</span>
                                     <i class="fa-solid fa-arrow-right ml-2"></i>
                                 </div>
@@ -264,16 +301,16 @@ session_start();
                     <!-- Map Card -->
                     <a href="map.php" class="block">
                         <div class="trae-card rounded-xl overflow-hidden group">
-                            <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
+                            <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 "></div>
                             <div class="p-6 relative overflow-hidden z-10">
                                 <div class="flex items-center justify-between mb-3">
                                     <h2 class="text-xl font-semibold text-white">Safety Map</h2>
-                                    <div class="glass-effect p-3 rounded-full transform transition-all duration-300 group-hover:scale-110">
+                                    <div class="glass-effect p-3 rounded-full group-hover:scale-110">
                                         <i class="fa-solid fa-map text-[#D76D77] text-xl"></i>
                                     </div>
                                 </div>
                                 <p class="text-[#A0A0B0] mt-4">View incident locations and safety information on an interactive map.</p>
-                                <div class="mt-6 flex items-center text-[#D76D77] relative z-10 transition-all duration-300 group-hover:translate-x-2">
+                                <div class="mt-6 flex items-center text-[#D76D77] relative z-10  group-hover:translate-x-2">
                                     <span>Open Map</span>
                                     <i class="fa-solid fa-arrow-right ml-2"></i>
                                 </div>
@@ -286,49 +323,32 @@ session_start();
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.getElementById('sidebar');
-            const toggleButton = document.getElementById('sidebarToggle');
-            const mainContent = document.getElementById('mainContent');
-
-            function setInitialState() {
-                if (window.innerWidth < 768) {
-                    sidebar.classList.add('sidebar-hidden');
-                    sidebar.classList.remove('sidebar-visible');
-                    toggleButton.classList.add('toggle-default');
-                    toggleButton.classList.remove('toggle-moved');
-                    mainContent.classList.add('content-full');
-                    mainContent.classList.remove('content-shifted');
-                } else {
-                    sidebar.classList.remove('sidebar-hidden');
-                    sidebar.classList.add('sidebar-visible');
-                    toggleButton.classList.remove('toggle-default');
-                    toggleButton.classList.add('toggle-moved');
-                    mainContent.classList.remove('content-full');
-                    mainContent.classList.add('content-shifted');
-                }
+        class Sidebar {
+            constructor() {
+                this.sidebar = document.getElementById('sidebar');
+                this.sidebarToggle = document.getElementById('sidebarToggle');
+                this.mainContent = document.getElementById('mainContent');
+                this.initializeSidebar();
             }
-            
-            setInitialState();
-            window.addEventListener('resize', setInitialState);
 
-            toggleButton.addEventListener('click', function() {
-                if (sidebar.classList.contains('sidebar-hidden')) {
-                    sidebar.classList.remove('sidebar-hidden');
-                    sidebar.classList.add('sidebar-visible');
-                    toggleButton.classList.remove('toggle-default');
-                    toggleButton.classList.add('toggle-moved');
-                    mainContent.classList.remove('content-full');
-                    mainContent.classList.add('content-shifted');
-                } else {
-                    sidebar.classList.add('sidebar-hidden');
-                    sidebar.classList.remove('sidebar-visible');
-                    toggleButton.classList.add('toggle-default');
-                    toggleButton.classList.remove('toggle-moved');
-                    mainContent.classList.add('content-full');
-                    mainContent.classList.remove('content-shifted');
-                }
-            });
+            initializeSidebar() {
+                this.sidebarToggle.addEventListener('click', () => {
+                    this.toggleSidebar();
+                });
+            }
+
+            toggleSidebar() {
+                this.sidebar.classList.toggle('sidebar-hidden');
+                this.sidebar.classList.toggle('sidebar-visible');
+                this.mainContent.classList.toggle('content-shifted');
+                this.mainContent.classList.toggle('content-full');
+                this.sidebarToggle.classList.toggle('toggle-moved');
+                this.sidebarToggle.classList.toggle('toggle-default');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new Sidebar();
         });
     </script>
 </body>

@@ -43,12 +43,16 @@ if ($result && $row = $result->fetch_assoc()) {
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
         
-        .trae-sidebar {
+        .sidebar {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
             background: rgba(46, 46, 78, 0.3);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-right: 1px solid rgba(74, 30, 115, 0.3);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            height: 100vh;
+            overflow-y: auto;
         }
         
         .trae-card {
@@ -184,13 +188,13 @@ if ($result && $row = $result->fetch_assoc()) {
         }
     </style>
 </head>
-<body class="bg-[#1E1E2E] text-[#F0F0F0]">
+<body class="bg-[#1E1E2E] text-[#F0F0F0] opacity-0 transition-opacity duration-300">
     <div class="flex h-screen overflow-hidden relative z-0">
         <!-- Background gradient shapes -->
         <div class="absolute -top-[300px] -right-[300px] w-[600px] h-[600px] bg-gradient-to-r from-[rgba(74,30,115,0.3)] to-[rgba(215,109,119,0.3)] rounded-full blur-3xl -z-10 animate-pulse-slow"></div>
         <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
         <!-- Sidebar -->
-        <aside id="sidebar" class="trae-sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-hidden md:sidebar-visible">
+        <aside id="sidebar" class="sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 sidebar-visible">
             <div class="flex items-center justify-between mb-5">
                 <div class="flex items-center space-x-4 w-full">
                     <div class="w-12 h-12 rounded-full bg-gradient-to-r from-[#4A1E73] to-[#D76D77] flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -251,14 +255,14 @@ if ($result && $row = $result->fetch_assoc()) {
         </aside>
         
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-default md:toggle-moved hover:shadow-lg">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-moved hover:shadow-lg">
             <i class="fa-solid fa-bars"></i>
         </button>
 
         <!-- Main Content -->
-        <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-full md:content-shifted">
+        <main id="mainContent" class="flex-1 p-10 content-shifted">
             <!-- Dashboard Tiles -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 animate-fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 ">
                 <div class="trae-card p-4 rounded-lg">
                     <h3 class="text-lg font-semibold text-[#D76D77]">Total Safe Spaces</h3>
                     <p class="text-2xl font-bold text-[#F0F0F0] bg-clip-text"><?php echo $totalSafeSpaces; ?></p>
@@ -274,14 +278,14 @@ if ($result && $row = $result->fetch_assoc()) {
             </div>
 
             <!-- Map Controls -->
-            <div class="flex gap-2 mb-4 animate-fade-in">
+            <div class="flex gap-2 mb-4 ">
                 <button class="glass-effect text-white px-4 py-2 rounded bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] hover:shadow-lg transition-all duration-300" onclick="toggleMarkers('safe')">Show Safe Spaces</button>
                 <button class="glass-effect text-white px-4 py-2 rounded bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] hover:shadow-lg transition-all duration-300" onclick="toggleMarkers('incidents')">Show Incidents</button>
                 <button class="glass-effect text-white px-4 py-2 rounded bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] hover:shadow-lg transition-all duration-300" onclick="toggleMarkers('all')">Show All</button>
             </div>
 
             <!-- Main Content Area -->
-            <div class="flex flex-col md:flex-row gap-6 animate-fade-in">
+            <div class="flex flex-col md:flex-row gap-6 ">
                 <!-- Map Section (70%) -->
                 <div class="w-full md:w-[70%] trae-card rounded-lg p-4">
                     <div id="map"></div>
@@ -316,9 +320,17 @@ if ($result && $row = $result->fetch_assoc()) {
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const body = document.body;
             const sidebar = document.getElementById('sidebar');
             const toggleButton = document.getElementById('sidebarToggle');
             const mainContent = document.getElementById('mainContent');
+            
+            // Set initial state before showing content
+            setInitialState();
+            // Show content after initial state is set
+            setTimeout(() => {
+                body.style.opacity = '1';
+            }, 0);
 
             function setInitialState() {
                 if (window.innerWidth < 768) {
@@ -329,12 +341,12 @@ if ($result && $row = $result->fetch_assoc()) {
                     mainContent.classList.add('content-full');
                     mainContent.classList.remove('content-shifted');
                 } else {
-                    sidebar.classList.remove('sidebar-hidden');
                     sidebar.classList.add('sidebar-visible');
-                    toggleButton.classList.remove('toggle-default');
+                    sidebar.classList.remove('sidebar-hidden');
                     toggleButton.classList.add('toggle-moved');
-                    mainContent.classList.remove('content-full');
+                    toggleButton.classList.remove('toggle-default');
                     mainContent.classList.add('content-shifted');
+                    mainContent.classList.remove('content-full');
                 }
             }
 
@@ -344,8 +356,8 @@ if ($result && $row = $result->fetch_assoc()) {
             toggleButton.addEventListener('click', function() {
                 sidebar.classList.toggle('sidebar-hidden');
                 sidebar.classList.toggle('sidebar-visible');
-                toggleButton.classList.toggle('toggle-default');
                 toggleButton.classList.toggle('toggle-moved');
+                toggleButton.classList.toggle('toggle-default');
                 mainContent.classList.toggle('content-full');
                 mainContent.classList.toggle('content-shifted');
             });

@@ -9,6 +9,7 @@
     <!-- Tailwind CSS -->
     <link rel="icon" type="image/png" href="/images/logo.png">
     <link href="/src/output.css" rel="stylesheet">
+    <link href="/src/trae-theme.css" rel="stylesheet">
 </head>
 <body x-data="{ isMenuOpen: false }">
     <!-- Hero Section with Navigation -->
@@ -16,11 +17,11 @@
         <!-- Dark overlay with reduced opacity -->
         <div class="absolute inset-0 bg-black/40 z-10"></div>
         <!-- Hero image with zoom effect -->
-        <img src="/images/desktop-women4.png" alt="Hero" class="w-full h-full object-cover transform scale-100 hover:scale-105 transition-transform duration-3000">
-
+        <img src="/images/desktop-women4.png" alt="Hero" class="w-full h-full object-cover  z-0">
+        <link href="/src/trae-theme.css" rel="stylesheet">
         <!-- Navbar -->
-        <div class="absolute top-0 left-0 w-full z-20">
-            <nav class="bg-white shadow-lg">
+        <div class="absolute top-0 left-0 w-full z-50">
+            <nav class="bg-[#1E1E2E] shadow-lg z-70">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
                         <!-- Logo on the left -->
@@ -81,8 +82,8 @@
                            animate-[pulse_3s_ease-in-out_infinite]">
                     EMPOWER YOUR COMMUNITY,<br>ENSURE WOMEN'S SAFETY
                 </h1>
-                <a href="report.html" class="inline-block px-8 py-3 bg-pink-500 text-white font-semibold rounded-lg
-                                          hover:bg-pink-600 transform hover:scale-105 transition-all duration-300
+                <a href="report.html" class="inline-block px-8 py-3 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#5A2E83] hover:to-[#E77D87] text-white font-semibold rounded-lg z-30
+                                           transform hover:scale-105 transition-all duration-300
                                           shadow-lg hover:shadow-xl">
                     Report an Incident
                 </a>
@@ -99,7 +100,7 @@
         <div class="w-full sm:w-1/2 text-left sm:text-left mt-6 sm:mt-0 sm:pl-12">
             <div class="relative">
                 <h2 class="text-3xl sm:text-4xl font-semibold mt-6 sm:mt-28 p-4 sm:p-10
-                          bg-clip-text text-transparent bg-gradient-to-r from-pink-600 to-purple-600
+                          bg-clip-text text-gradient
                           transform hover:scale-105 transition-transform duration-300">
                     RESPECT, PROTECT, EMPOWER WITH SHESHIELD
                 </h2>
