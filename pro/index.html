@@ -212,23 +212,11 @@
         isOpen: false,
         userInput: '',
         selectedLanguage: 'en',
-        messages: [
-            {
-                id: 1,
-                type: 'bot',
-                text: 'Hello! I\'m your SheShield AI assistant. How can I help you today?',
-                options: [
-                    'I need immediate help',
-                    'Legal information',
-                    'Emotional support',
-                    'Report an incident'
-                ]
-            }
-        ]
+        messages: []
     }" 
     class="fixed bottom-4 right-4 z-50 flex flex-col items-end">
         <!-- Chat Button -->
-        <button @click="isOpen = !isOpen" 
+        <button @click="isOpen = !isOpen; if(isOpen && messages.length === 0) { setTimeout(initializeChat, 100); }" 
                 class="bg-pink-600 text-white rounded-full p-4 shadow-lg hover:bg-pink-700 transition-all duration-300 mb-2">
             <svg x-show="!isOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
@@ -278,8 +266,8 @@
                             <template x-if="message.type === 'bot' && message.options">
                                 <div class="mt-2 space-y-2">
                                     <template x-for="option in message.options" :key="option">
-                                        <button @click="userInput = option; $nextTick(() => { messages.push({ id: Date.now(), type: 'user', text: option }); messages.push({ id: Date.now() + 1, type: 'bot', text: 'How can I assist you further?', options: ['Emergency help', 'Legal support', 'Emotional support', 'Report incident'] }); })"
-                                                class="block w-full text-left text-sm text-pink-600 hover:bg-pink-50 rounded px-2 py-1 transition-colors">
+                                        <button @click="handleQuickAction(option)"
+                                                class="block w-full text-left text-sm text-pink-600 hover:bg-pink-50 rounded px-2 py-1 transition-colors hover:bg-pink-100">
                                             <span x-text="option"></span>
                                         </button>
                                     </template>
@@ -292,19 +280,19 @@
 
             <!-- Chat Input -->
             <div class="border-t p-4">
-                <div class="flex space-x-2">
+                <form id="chat-form" @submit.prevent="handleUserInput($event)" class="flex space-x-2">
                     <input type="text" 
                            x-model="userInput" 
-                           @keydown.enter="messages.push({ id: Date.now(), type: 'user', text: userInput }); messages.push({ id: Date.now() + 1, type: 'bot', text: 'How can I assist you further?', options: ['Emergency help', 'Legal support', 'Emotional support', 'Report incident'] }); userInput = ''"
                            placeholder="Type your message..."
-                           class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500">
-                    <button @click="messages.push({ id: Date.now(), type: 'user', text: userInput }); messages.push({ id: Date.now() + 1, type: 'bot', text: 'How can I assist you further?', options: ['Emergency help', 'Legal support', 'Emotional support', 'Report incident'] }); userInput = ''"
-                            class="bg-pink-600 text-white rounded-lg px-4 py-2 hover:bg-pink-700 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                           id="user-input">
+                    <button type="submit"
+                            class="bg-gradient-to-r from-pink-500 to-pink-800 text-white rounded-lg p-3 hover:from-pink-600 hover:to-pink-900 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                         </svg>
                     </button>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -351,12 +339,12 @@
                         <a href="#" class="text-gray-400 hover:text-pink-500 transition-colors">
                             <span class="sr-only">Instagram</span>
                             <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"/>
+                                <path d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.398.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"/>
                             </svg>
                         </a>
                         <a href="#" class="text-gray-400 hover:text-pink-500 transition-colors">
                             <span class="sr-only">Twitter</span>
-                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"/>
                             </svg>
                         </a>
@@ -370,66 +358,275 @@
     <script>
         const chatbot = {
             greetings: [
-                "Hello! I'm SheShield's AI assistant. I'm here to help you stay safe and informed. How can I assist you today?",
-                "Welcome to SheShield! I'm your personal safety assistant. What would you like to know?",
-                "Hi there! I'm here to provide support and information about personal safety. How may I help you?"
+                "Hi there! I'm SheShield's AI assistant. I'm here to provide support and information about personal safety. How can I help you today?",
+                "Welcome to SheShield! I'm your personal safety assistant. What information or resources are you looking for?",
+                "Hello! I'm here to help you stay safe and informed. How may I assist you with women's safety resources?"
             ],
 
             responses: {
+                "hi": {
+                    keywords: ["hi", "hello", "hey", "greetings"],
+                    reply: "Hello! How can I assist you today with women's safety resources and support?"
+                },
+                "security_basics": {
+                    keywords: ["security basics", "women security", "basic safety", "safety basics", "women safety", "basics about"],
+                    reply: `WOMEN'S SECURITY BASICS
+
+1. PERSONAL SAFETY FUNDAMENTALS:
+   • Be aware of your surroundings at all times
+   • Trust your instincts - if something feels wrong, it probably is
+   • Keep your phone charged and accessible
+   • Share your location with trusted contacts when traveling
+   • Avoid isolated areas, especially at night
+
+2. DIGITAL SAFETY:
+   • Use strong, unique passwords for all accounts
+   • Enable two-factor authentication where possible
+   • Be cautious about sharing personal information online
+   • Review privacy settings on social media regularly
+   • Be aware of phishing attempts and suspicious messages
+
+3. HOME SECURITY:
+   • Ensure all doors and windows have secure locks
+   • Consider a security system or camera
+   • Don't hide spare keys outside
+   • Keep emergency contacts easily accessible
+   • Have an emergency exit plan
+
+4. TRAVEL SAFETY:
+   • Research destinations before traveling
+   • Use well-lit, populated routes
+   • Consider using buddy systems when possible
+   • Share your itinerary with someone you trust
+   • Use official transportation services
+
+5. SELF-DEFENSE:
+   • Consider taking a self-defense class
+   • Carry legal personal safety devices where permitted
+   • Learn basic escape techniques
+   • Practice situational awareness
+   • Know how to call for help effectively
+
+Would you like more specific information about any of these areas?`
+                },
+                "workplace_safety": {
+                    keywords: ["workplace", "office", "work", "job", "harassment", "professional"],
+                    reply: `WORKPLACE SAFETY FOR WOMEN
+
+1. UNDERSTANDING WORKPLACE HARASSMENT:
+   • Recognize different forms of harassment (verbal, physical, digital)
+   • Know your company's harassment policies and reporting procedures
+   • Document all incidents with dates, times, and details
+   • Identify trusted colleagues or mentors for support
+   • Understand your legal rights in the workplace
+
+2. PREVENTIVE MEASURES:
+   • Maintain professional boundaries with colleagues
+   • Be aware of office layout and avoid isolated areas
+   • Keep emergency contacts accessible
+   • Trust your instincts about uncomfortable situations
+   • Consider using buddy systems for late work hours
+
+3. COMMUTING SAFETY:
+   • Vary your routes and schedules when possible
+   • Use well-lit, populated paths to and from work
+   • Share your location with trusted contacts
+   • Consider rideshare or carpooling options
+   • Keep your phone charged and accessible
+
+4. DIGITAL WORKPLACE SAFETY:
+   • Use strong passwords for work accounts
+   • Be cautious about sharing personal information with colleagues
+   • Understand privacy settings on work communication platforms
+   • Be aware of phishing attempts targeting employees
+   • Know your company's data protection policies
+
+5. REPORTING INCIDENTS:
+   • Know the proper channels for reporting harassment
+   • Understand your rights to a safe workplace
+   • Consider speaking with HR or management
+   • Document all communication about incidents
+   • Know external resources if internal reporting fails
+
+Would you like more specific information about workplace safety?`
+                },
+                "public_transportation": {
+                    keywords: ["public transport", "bus", "train", "subway", "metro", "commute", "transportation"],
+                    reply: `PUBLIC TRANSPORTATION SAFETY FOR WOMEN
+
+1. BEFORE YOUR JOURNEY:
+   • Plan your route in advance
+   • Check schedules to minimize waiting time
+   • Share your travel plans with someone trusted
+   • Keep your phone charged and accessible
+   • Consider downloading safety apps with location sharing
+
+2. AT STATIONS AND STOPS:
+   • Wait in well-lit, populated areas
+   • Stand near security cameras or staff when possible
+   • Be aware of emergency help points
+   • Avoid isolated areas, especially at night
+   • Stay alert and minimize distractions (headphones, phone)
+
+3. DURING YOUR JOURNEY:
+   • Sit near the driver or in women-only sections if available
+   • Be aware of who boards and exits around you
+   • Keep valuables secure and out of sight
+   • Trust your instincts if something feels wrong
+   • Know the emergency features (alarms, intercoms)
+
+4. NIGHTTIME TRAVEL:
+   • Consider alternative transport options when possible
+   • Request stops closer to your destination when allowed
+   • Arrange for someone to meet you at your stop
+   • Stay in well-lit areas when exiting
+   • Be extra vigilant about your surroundings
+
+5. IF YOU FEEL UNSAFE:
+   • Move to a more populated area of the vehicle
+   • Alert the driver or transit staff
+   • Call emergency services if necessary
+   • Use emergency alarms if available
+   • Consider exiting at a busy stop if safe to do so
+
+Would you like more specific information about public transportation safety?`
+                },
+                "online_safety": {
+                    keywords: ["online", "internet", "digital", "social media", "cyber", "cyberbullying", "stalking"],
+                    reply: `ONLINE SAFETY FOR WOMEN
+
+1. SOCIAL MEDIA PROTECTION:
+   • Review and strengthen privacy settings regularly
+   • Be selective about what personal information you share
+   • Consider using a nickname or pseudonym
+   • Be cautious about location sharing and check-ins
+   • Regularly audit your friends/followers lists
+
+2. PREVENTING CYBERSTALKING:
+   • Use different passwords across platforms
+   • Enable two-factor authentication
+   • Be cautious about accepting friend requests from strangers
+   • Regularly search your name online to monitor your digital footprint
+   • Consider using a VPN for additional privacy
+
+3. DEALING WITH ONLINE HARASSMENT:
+   • Document all harassing messages (screenshots with dates)
+   • Block and report abusive accounts
+   • Don't engage with harassers
+   • Know reporting procedures for each platform
+   • Understand when online harassment becomes a legal issue
+
+4. DATING APP SAFETY:
+   • Use reputable apps with safety features
+   • Limit personal information in your profile
+   • Video chat before meeting in person
+   • Meet in public places for first dates
+   • Share your date details with a trusted friend
+
+5. PROTECTING PERSONAL DATA:
+   • Use strong, unique passwords
+   • Be cautious about public WiFi networks
+   • Regularly update your devices and apps
+   • Be aware of phishing attempts
+   • Consider using password managers
+
+Would you like more specific information about online safety?`
+                },
+                "campus_safety": {
+                    keywords: ["campus", "college", "university", "school", "student", "education"],
+                    reply: `CAMPUS SAFETY FOR WOMEN
+
+1. NAVIGATING CAMPUS:
+   • Familiarize yourself with campus layout and emergency locations
+   • Use well-lit, populated paths, especially at night
+   • Know the locations of emergency phones and help points
+   • Consider using campus escort services when available
+   • Download your campus safety app if available
+
+2. DORM AND HOUSING SAFETY:
+   • Always lock your door, even for short absences
+   • Be cautious about who you let into your building
+   • Know your roommates' schedules
+   • Have emergency contacts readily available
+   • Report maintenance issues that affect security promptly
+
+3. SOCIAL SAFETY:
+   • Be cautious at parties and social gatherings
+   • Watch your drinks and don't accept drinks from strangers
+   • Use a buddy system when going out
+   • Trust your instincts in uncomfortable situations
+   • Know how to contact campus security quickly
+
+4. ACADEMIC SPACES:
+   • Be aware of building hours and when areas become less populated
+   • Let someone know your study schedule if working late
+   • Consider studying in groups in isolated areas
+   • Know alternative exits from buildings
+   • Keep valuables secure in libraries and study spaces
+
+5. REPORTING INCIDENTS:
+   • Know your campus Title IX office and procedures
+   • Understand confidential vs. mandatory reporting resources
+   • Save campus security and health services numbers in your phone
+   • Know your rights as a student
+   • Familiarize yourself with support services available
+
+Would you like more specific information about campus safety?`
+                },
                 "help": {
                     keywords: ["help", "assistance", "support"],
-                    reply: `I understand you need help. Let me guide you through our support options:
+                    reply: `I understand you need help. Here are some resources and options:
 
 1. Emergency Assistance:
    • Immediate Danger: Call 112 (All-India Emergency)
-   • Police: 100
    • Women's Helpline: 1091
+   • Domestic Violence Helpline: 181
+   • Police: 100
    • Ambulance: 102
-   • Fire: 101
 
 2. Support Services:
-   • 24/7 Women's Helpline: 1091
-   • Domestic Violence Helpline: 181
    • NCW WhatsApp Help: 7217735372
+   • Mental Health Helpline: 1800-599-0019
+   • One Stop Crisis Centers: Available in most districts
 
-3. How would you like me to help you?
-   • Need immediate emergency assistance
-   • Want to report an incident
-   • Looking for safety tips
-   • Need legal information
-   • Need emotional support
+3. How can I assist you?
+   • Connect you with emergency services
+   • Provide safety resources and tips
+   • Guide you through reporting an incident
+   • Offer legal information and rights
+   • Connect you with support groups
 
-Please select one of these options or tell me more about your situation.`
+Please let me know what specific help you need, and I'll guide you through the next steps.`
                 },
                 "emergency": {
                     keywords: ["emergency", "danger", "urgent", "immediate"],
-                    reply: ` EMERGENCY PROTOCOL ACTIVATED 
+                    reply: `⚠️ EMERGENCY ASSISTANCE ⚠️
 
 1. IMMEDIATE ACTIONS:
    • If in immediate danger, call 112 NOW
-   • Police: 100
    • Women's Helpline: 1091
+   • Police: 100
    • Ambulance: 102
 
 2. SAFETY STEPS:
-   • Get to a safe location if possible
+   • Move to a safe location if possible
    • Stay on the line with emergency services
-   • Make noise to attract attention if needed
-   • Use SheShield's SOS feature if available
+   • Share your location with trusted contacts
+   • Use SheShield's SOS feature to alert emergency contacts
 
 3. WHILE WAITING FOR HELP:
+   • Keep your phone charged and with you
    • Stay on the phone with emergency services
-   • Keep your location services on
    • Document any evidence if safe to do so
-   • Contact trusted friends/family
+   • If possible, get to a public place with other people
 
-Do you need me to:
+I can help you:
 • Guide you through contacting emergency services
 • Help you use SheShield's SOS feature
 • Connect you with local support services
 • Provide specific safety instructions
 
-Please let me know what you need right now.`
+What do you need assistance with right now?`
                 },
                 "report": {
                     keywords: ["report", "incident", "complaint", "file"],
@@ -590,71 +787,94 @@ How can I best support you right now?`
                 }
             },
 
-            findResponse(input) {
-                input = input.toLowerCase();
+            async findResponse(input) {
+                const lowerInput = input.toLowerCase();
                 
-                // Check for exact matches first
-                for (const category in this.responses) {
-                    const keywords = this.responses[category].keywords;
-                    if (keywords.some(keyword => input.includes(keyword))) {
-                        return this.responses[category].reply;
+                if (lowerInput === 'hi' || lowerInput === 'hello' || lowerInput === 'hey') {
+                    return chatbot.responses.hi.reply;
+                }
+                
+                if (lowerInput.includes('security basics') || 
+                    lowerInput.includes('women security') || 
+                    lowerInput.includes('basic safety') || 
+                    lowerInput.includes('women safety') || 
+                    lowerInput.includes('basics about') ||
+                    (lowerInput.includes('tell') && lowerInput.includes('basics'))) {
+                    return chatbot.responses.security_basics.reply;
+                }
+                
+                if (lowerInput.includes('work') || lowerInput.includes('office') || 
+                    lowerInput.includes('job') || lowerInput.includes('harassment') || 
+                    lowerInput.includes('professional')) {
+                    return chatbot.responses.workplace_safety.reply;
+                }
+                
+                if (lowerInput.includes('public transport') || lowerInput.includes('bus') || 
+                    lowerInput.includes('train') || lowerInput.includes('subway') || 
+                    lowerInput.includes('metro') || lowerInput.includes('commute')) {
+                    return chatbot.responses.public_transportation.reply;
+                }
+                
+                if (lowerInput.includes('online') || lowerInput.includes('internet') || 
+                    lowerInput.includes('digital') || lowerInput.includes('social media') || 
+                    lowerInput.includes('cyber') || lowerInput.includes('cyberbullying')) {
+                    return chatbot.responses.online_safety.reply;
+                }
+                
+                if (lowerInput.includes('campus') || lowerInput.includes('college') || 
+                    lowerInput.includes('university') || lowerInput.includes('school') || 
+                    lowerInput.includes('student')) {
+                    return chatbot.responses.campus_safety.reply;
+                }
+                
+                for (const category in chatbot.responses) {
+                    const response = chatbot.responses[category];
+                    for (const keyword of response.keywords) {
+                        if (lowerInput.includes(keyword)) {
+                            return response.reply;
+                        }
                     }
                 }
-
-                // If no exact match, provide a helpful default response
-                return `I'm here to help you. Please let me know what you need:
-
-1. EMERGENCY ASSISTANCE:
-   • If you're in immediate danger
-   • Need urgent help
-   • Medical emergency
-   • Police assistance
-
-2. INCIDENT REPORTING:
-   • File a complaint
-   • Document an incident
-   • Track a report
-   • Update existing report
-
-3. SAFETY INFORMATION:
-   • Personal safety tips
-   • Digital security
-   • Travel safety
-   • Home security
-
-4. SUPPORT SERVICES:
-   • Legal assistance
-   • Emotional support
-   • Counseling services
-   • Support groups
-
-5. RESOURCES:
-   • Helpline numbers
-   • Support organizations
-   • Legal aid
-   • Medical services
-
-Please tell me what type of help you need, or click one of the quick action buttons below.`;
+                
+                if ((lowerInput.includes('women') || lowerInput.includes('woman') || lowerInput.includes('female')) && 
+                    (lowerInput.includes('safety') || lowerInput.includes('security') || lowerInput.includes('protection'))) {
+                    return chatbot.responses.security_basics.reply;
+                }
+                
+                return "I'm here to help with women's safety resources. You can ask about emergency help, safety tips, reporting incidents, or legal information.";
             }
         };
 
-        function handleQuickAction(action) {
-            const actionMessages = {
-                'emergency': 'I need emergency help',
-                'report': 'How do I report an incident?',
-                'safety': 'Can you provide safety tips?',
-                'rights': 'What are my legal rights?'
-            };
-            
-            const message = actionMessages[action];
-            appendMessage('user', message);
-            showTypingIndicator();
-            
-            setTimeout(() => {
-                removeTypingIndicator();
-                const response = chatbot.findResponse(message);
-                appendMessage('bot', response);
-            }, 1000);
+        async function handleQuickAction(action) {
+            if (action === 'I need immediate help') {
+                appendMessage('user', 'I need immediate help');
+                showTypingIndicator();
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    appendMessage('bot', chatbot.responses.emergency.reply);
+                }, 800);
+            } else if (action === 'Legal information & rights') {
+                appendMessage('user', 'Legal information & rights');
+                showTypingIndicator();
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    appendMessage('bot', chatbot.responses.legal.reply);
+                }, 800);
+            } else if (action === 'Safety tips & resources') {
+                appendMessage('user', 'Safety tips & resources');
+                showTypingIndicator();
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    appendMessage('bot', chatbot.responses.safety.reply);
+                }, 800);
+            } else if (action === 'Report an incident') {
+                appendMessage('user', 'Report an incident');
+                showTypingIndicator();
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    appendMessage('bot', chatbot.responses.report.reply);
+                }, 800);
+            }
         }
 
         function showTypingIndicator() {
@@ -691,21 +911,19 @@ Please tell me what type of help you need, or click one of the quick action butt
             
             const messageBubble = document.createElement('div');
             messageBubble.className = sender === 'bot' ? 
-                'bg-gray-200 rounded-lg py-2 px-4 max-w-[80%]' : 
-                'bg-pink-500 text-white rounded-lg py-2 px-4 max-w-[80%]';
+                'bg-gray-100 text-gray-800 rounded-lg py-2 px-4 max-w-[80%]' : 
+                'bg-pink-600 text-white rounded-lg py-2 px-4 max-w-[80%]';
             
-            // Format message with proper styling
             const formattedMessage = message.split('\n').map(line => {
                 const trimmedLine = line.trim();
-                if (trimmedLine.match(/^\d+\./)) {
-                    // Section headers
-                    return `<div class="font-bold text-lg mt-2 mb-1">${trimmedLine}</div>`;
-                } else if (trimmedLine.startsWith('•')) {
-                    // Bullet points
-                    return `<div class="ml-4 my-1">${trimmedLine}</div>`;
-                } else if (trimmedLine.match(/^[A-Z\s]+:/)) {
-                    // Category headers
-                    return `<div class="font-bold mt-3 mb-1">${trimmedLine}</div>`;
+                if (sender === 'bot') {
+                    if (trimmedLine.match(/^\d+\./)) {
+                        return `<div class="font-bold text-lg mt-2 mb-1">${trimmedLine}</div>`;
+                    } else if (trimmedLine.startsWith('•')) {
+                        return `<div class="ml-4 my-1">${trimmedLine}</div>`;
+                    } else if (trimmedLine.match(/^[A-Z\s]+:/)) {
+                        return `<div class="font-bold mt-3 mb-1">${trimmedLine}</div>`;
+                    }
                 }
                 return `<div>${trimmedLine}</div>`;
             }).join('');
@@ -713,33 +931,83 @@ Please tell me what type of help you need, or click one of the quick action butt
             messageBubble.innerHTML = formattedMessage;
             messageDiv.appendChild(messageBubble);
             chatMessages.appendChild(messageDiv);
+            
+            // Add predefined options after every bot message
+            if (sender === 'bot') {
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'flex mb-3';
+                
+                const optionsBubble = document.createElement('div');
+                optionsBubble.className = 'bg-gray-100 rounded-lg py-2 px-4 max-w-[80%]';
+                
+                const optionsContent = `
+                    <div class="mt-2 space-y-2">
+                        <button onclick="handleQuickAction('I need immediate help')" 
+                                class="block w-full text-left text-sm text-pink-600 hover:bg-pink-50 rounded px-2 py-1 transition-colors hover:bg-pink-100">
+                            I need immediate help
+                        </button>
+                        <button onclick="handleQuickAction('Legal information & rights')" 
+                                class="block w-full text-left text-sm text-pink-600 hover:bg-pink-50 rounded px-2 py-1 transition-colors hover:bg-pink-100">
+                            Legal information & rights
+                        </button>
+                        <button onclick="handleQuickAction('Safety tips & resources')" 
+                                class="block w-full text-left text-sm text-pink-600 hover:bg-pink-50 rounded px-2 py-1 transition-colors hover:bg-pink-100">
+                            Safety tips & resources
+                        </button>
+                        <button onclick="handleQuickAction('Report an incident')" 
+                                class="block w-full text-left text-sm text-pink-600 hover:bg-pink-50 rounded px-2 py-1 transition-colors hover:bg-pink-100">
+                            Report an incident
+                        </button>
+                    </div>
+                `;
+                
+                optionsBubble.innerHTML = optionsContent;
+                optionsDiv.appendChild(optionsBubble);
+                chatMessages.appendChild(optionsDiv);
+            }
+            
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        function handleUserInput(event) {
+        async function handleUserInput(event) {
             event.preventDefault();
             const input = document.getElementById('user-input');
             const message = input.value.trim();
             
             if (message) {
                 appendMessage('user', message);
+                
                 showTypingIndicator();
                 
-                setTimeout(() => {
-                    removeTypingIndicator();
-                    const response = chatbot.findResponse(message);
-                    appendMessage('bot', response);
-                }, 1000 + Math.random() * 1000);
+                try {
+                    const response = await chatbot.findResponse(message);
+                    setTimeout(() => {
+                        removeTypingIndicator();
+                        appendMessage('bot', response);
+                    }, 800);
+                } catch (error) {
+                    console.error("Error getting response:", error);
+                    setTimeout(() => {
+                        removeTypingIndicator();
+                        appendMessage('bot', "I'm sorry, I couldn't process your request. Please try again.");
+                    }, 800);
+                }
                 
                 input.value = '';
             }
         }
 
-        // Initialize chatbot when page loads
-        window.addEventListener('load', () => {
-            const greeting = chatbot.greetings[Math.floor(Math.random() * chatbot.greetings.length)];
-            appendMessage('bot', greeting);
-        });
+        function initializeChat() {
+            // Only add greeting if there are no messages yet
+            const chatMessages = document.getElementById('chat-messages');
+            if (chatMessages && chatMessages.childElementCount === 0) {
+                const greeting = "Hello! I'm here to help support you. I understand you might be looking for information or resources related to women's safety. How can I assist you today?";
+                appendMessage('bot', greeting);
+            }
+        }
+        
+        // Add event listener for the user input form
+        document.getElementById('chat-form').addEventListener('submit', handleUserInput);
     </script>
 </body>
 </html>
