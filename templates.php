@@ -30,12 +30,16 @@ session_start();
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
         
-        .trae-sidebar {
+        .sidebar {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
             background: rgba(46, 46, 78, 0.3);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-right: 1px solid rgba(74, 30, 115, 0.3);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            height: 100vh;
+            overflow-y: auto;
         }
         
         .trae-sidebar-item {
@@ -52,11 +56,10 @@ session_start();
         }
         
         .trae-sidebar-item:hover {
-            background: rgba(215, 109, 119, 0.15);
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
             border: 1px solid rgba(215, 109, 119, 0.2);
             transform: translateX(5px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
         }
 
         .sidebar-hidden { transform: translateX(-100%); }
@@ -68,17 +71,30 @@ session_start();
 
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: rgba(46, 46, 78, 0.3);
+            background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, rgba(74, 30, 115, 0.7), rgba(215, 109, 119, 0.7));
-            border-radius: 4px;
+            background: rgba(215, 109, 119, 0.5);
+            border-radius: 3px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, rgba(74, 30, 115, 0.9), rgba(215, 109, 119, 0.9));
+            background: rgba(215, 109, 119, 0.7);
+        }
+
+        #mainContent {
+            height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 2rem;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
         }
     </style>
 </head>
@@ -86,9 +102,9 @@ session_start();
     <div class="flex h-screen overflow-hidden relative z-0">
         <!-- Background gradient shapes -->
         <div class="absolute -top-[300px] -right-[300px] w-[600px] h-[600px] bg-gradient-to-r from-[rgba(74,30,115,0.3)] to-[rgba(215,109,119,0.3)] rounded-full blur-3xl -z-10 animate-pulse-slow"></div>
-        <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
+        <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 "></div>
         <!-- Sidebar -->
-        <aside id="sidebar" class="trae-sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-hidden md:sidebar-visible">
+        <aside id="sidebar" class="sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 sidebar-visible">
             <div class="flex items-center justify-between mb-5">
                 <div class="flex items-center space-x-4 w-full">
                     <div class="w-12 h-12 rounded-full bg-gradient-to-r from-[#4A1E73] to-[#D76D77] flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -145,12 +161,12 @@ session_start();
         </aside>
 
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-default md:toggle-moved hover:shadow-lg">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-moved hover:shadow-lg">
             <i class="fa-solid fa-bars"></i>
         </button>
 
         <!-- Main Content -->
-        <main id="mainContent" class="flex-1 p-8 transition-all duration-300 ease-in-out content-full md:content-shifted overflow-y-auto h-screen">
+        <main id="mainContent" class="flex-1 p-8 transition-all duration-300 ease-in-out content-shifted overflow-y-auto h-screen">
             <div id="content" class="min-h-full">
                 <h1 class="text-4xl font-bold text-gradient">Templates</h1>
                 <div class="absolute top-8 right-8 z-10 w-72">
@@ -166,7 +182,7 @@ session_start();
                     </div>
                 </div>
                 <p class="mt-2">Manage your templates here.</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10 p-4">
+                <div class="template-grid mt-10">
                     <!-- Template Cards with enhanced styling -->
                     <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#D76D77] focus:ring-offset-2 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl flex flex-col h-[280px]" data-category="Harassment">
                         <div class="flex-grow">
@@ -669,63 +685,4 @@ session_start();
         }
     </style>
 </html>
-.trae-card {
-    background: rgba(46, 46, 78, 0.2);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(74, 30, 115, 0.25);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    transition: all 0.3s ease;
-    margin-bottom: 1.5rem;
-}
 
-.trae-card:hover {
-    transform: translateY(-5px);
-    border: 1px solid rgba(215, 109, 119, 0.4);
-    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
-}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10 p-4">
-                    <!-- Template Cards with enhanced styling -->
-    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#D76D77] focus:ring-offset-2 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Harassment">
-        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Inadequate Response to Safety Concerns by University Staff</h2>
-        <p class="text-[#F0F0F0] mb-4">Formal complaint template for reporting inadequate responses to safety concerns by university authorities.</p>
-        <div class="h-12 flex items-center">
-            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D76D77] focus:ring-offset-2 template-button">Use Template</button>
-        </div>
-    </div>
-    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Assault">
-        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Blackmail and Threat</h2>
-        <p class="text-gray-300 mb-4">Template for reporting blackmail and and threat on campus.</p>
-        <div class="h-12 flex items-center">
-            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D76D77] focus:ring-offset-2 template-button">Use Template</button>
-        </div>
-    </div>
-    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Assault">
-        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Sexual Harassment Incident</h2>
-        <p class="text-gray-300 mb-4">Formal template for documenting and reporting sexual harassment incidents with evidentiary support.</p>
-        <div class="h-12 flex items-center">
-            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D76D77] focus:ring-offset-2 template-button">Use Template</button>
-        </div>
-    </div>
-    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] mt-6 md:mt-0 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Stalking">
-        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Stalking Incident</h2>
-        <p class="text-gray-300 mb-4">Template for reporting persistent stalking behavior with timeline documentation.</p>
-        <div class="h-12 flex items-center">
-            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D76D77] focus:ring-offset-2 template-button">Use Template</button>
-        </div>
-    </div>
-    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] mt-6 md:mt-0 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Stalking">
-        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Eve-Teasing</h2>
-        <p class="text-gray-300 mb-4">Template for reporting instances of eve-teasing and street harassment.</p>
-        <div class="h-12 flex items-center">
-            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D76D77] focus:ring-offset-2 template-button">Use Template</button>
-        </div>
-    </div>
-    <div class="trae-card p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] mt-6 md:mt-0 border-2 border-[rgba(215,109,119,0.3)] backdrop-blur-lg shadow-xl" data-category="Stalking">
-        <h2 class="text-xl font-semibold mb-3 text-white">Complaint Regarding Offensive Comments or Remarks</h2>
-        <p class="text-gray-300 mb-4">Template for documenting and reporting offensive verbal comments or derogatory remarks.</p>
-        <div class="h-12 flex items-center">
-            <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-6 py-3 rounded-lg hover:from-[#3A1863] hover:to-[#C65D67] transition-all duration-300 focus:ring-2 focus:ring-[#D76D77] focus:ring-offset-2 template-button">Use Template</button>
-        </div>
-    </div>
-</div>

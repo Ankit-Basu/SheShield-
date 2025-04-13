@@ -34,7 +34,7 @@ html {
   background: linear-gradient(135deg, var(--trae-bg-primary) 0%, var(--trae-bg-secondary) 100%);
   min-height: 100%;
   color-scheme: dark;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 body {
@@ -47,13 +47,13 @@ body {
   margin: 0;
   padding: 0;
   transition: none !important;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* Prevent white flash during page transitions */
-* {
+/* * {
   transition: background-color 0s, background 0s !important;
-}
+} */
 
 /* Remove all animations during page load */
 @media (prefers-reduced-motion: reduce) {
@@ -138,7 +138,7 @@ label {
 }
 
 /* Sidebar */
-.trae-sidebar {
+/* .trae-sidebar {
   background-color: var(--trae-bg-secondary);
   border-right: 1px solid var(--trae-border);
 }
@@ -154,7 +154,7 @@ label {
 
 .trae-sidebar-item.active {
   background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
-}
+} */
 
 /* Gradient text */
 .text-gradient {

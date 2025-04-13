@@ -33,206 +33,10 @@ function getEscortProfile($escortId) {
 
     <!-- Custom JS -->
     <script src="js/walkwithus.js"></script>
-<script>
-// Handle sidebar toggle functionality
-const sidebar = document.getElementById('sidebar');
-const toggleButton = document.getElementById('sidebarToggle');
+<!-- <script>
+Handle sidebar toggle functionality
 
-function toggleSidebar() {
-    sidebar.classList.toggle('sidebar-hidden');
-    sidebar.classList.toggle('sidebar-visible');
-    toggleButton.classList.toggle('toggle-default');
-    toggleButton.classList.toggle('toggle-moved');
-}
-
-// Initialize sidebar state based on screen size
-function initializeSidebar() {
-    if (window.innerWidth < 768) {
-        sidebar.classList.add('sidebar-hidden');
-        sidebar.classList.remove('sidebar-visible');
-        toggleButton.classList.add('toggle-default');
-        toggleButton.classList.remove('toggle-moved');
-    } else {
-        sidebar.classList.remove('sidebar-hidden');
-        sidebar.classList.add('sidebar-visible');
-        toggleButton.classList.remove('toggle-default');
-        toggleButton.classList.add('toggle-moved');
-    }
-}
-
-// Add event listeners
-document.addEventListener('DOMContentLoaded', initializeSidebar);
-window.addEventListener('resize', initializeSidebar);
-toggleButton.addEventListener('click', toggleSidebar);
-
-function requestWalk(escortId) {
-    const pickupLocation = document.getElementById('pickupLocation').value;
-    const destination = document.getElementById('destination').value;
-
-    if (!pickupLocation || !destination) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Missing Information',
-            text: 'Please provide both pickup location and destination.'
-        });
-        return;
-    }
-
-    // Show loading animation
-    document.getElementById('loadingAnimation').classList.remove('hidden');
-
-    // Prepare request data
-    const requestData = {
-        escortId: escortId,
-        userId: '<?php echo isset($_SESSION["user_id"]) ? $_SESSION["user_id"] : ""; ?>',
-        pickupLocation: pickupLocation,
-        destination: destination,
-        requestTime: new Date().toISOString()
-    };
-
-    // Send request to backend
-    fetch('api/walks/request_walk.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Hide loading animation
-        document.getElementById('loadingAnimation').classList.add('hidden');
-
-        if (data.success) {
-            // Show the active walk card immediately
-            showActiveWalkCard({
-                walkId: data.walkId,
-                escortId: escortId,
-                pickupLocation: pickupLocation,
-                destination: destination,
-                status: 'pending'
-            });
-            
-            // Determine message based on email status
-            let message = 'Your walk request has been submitted successfully.';
-            let icon = 'success';
-            
-            // Check if email was sent
-            if (data.hasOwnProperty('emailSent')) {
-                if (data.emailSent === true) {
-                    message += ' The escort has been notified via email.';
-                } else {
-                    message += ' However, the email notification to the escort failed. They will still see your request when they log in.';
-                    icon = 'warning';
-                }
-            }
-            
-            Swal.fire({
-                icon: icon,
-                title: 'Walk Requested!',
-                text: message,
-                showConfirmButton: true
-            });
-
-            // Clear form
-            document.getElementById('pickupLocation').value = '';
-            document.getElementById('destination').value = '';
-        } else {
-            throw new Error(data.message || 'Failed to submit walk request');
-        }
-    })
-    .catch(error => {
-        // Hide loading animation
-        document.getElementById('loadingAnimation').classList.add('hidden');
-
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'Failed to submit walk request. Please try again.'
-        });
-    });
-}
-
-// Function to display the active walk card
-function showActiveWalkCard(walkData) {
-    // Get the active walk card and request section elements
-    const activeWalkCard = document.getElementById('activeWalk');
-    const requestSection = document.getElementById('requestSection');
-    
-    if (!activeWalkCard) return;
-    
-    // Save walk data to localStorage for persistence
-    localStorage.setItem('activeWalk', JSON.stringify(walkData));
-    
-    // Update the active walk card with walk details
-    document.getElementById('walkId').textContent = walkData.walkId || 'N/A';
-    document.getElementById('walkStatus').textContent = walkData.status || 'pending';
-    document.getElementById('walkPickup').textContent = walkData.pickupLocation || 'N/A';
-    document.getElementById('walkDestination').textContent = walkData.destination || 'N/A';
-    
-    // Set current time as start time
-    const startTimeElement = document.getElementById('activeStartTime');
-    if (startTimeElement) {
-        const now = new Date();
-        startTimeElement.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    }
-    
-    // Hide request section and show active walk card
-    if (requestSection) requestSection.classList.add('hidden');
-    activeWalkCard.classList.remove('hidden');
-    
-    // Scroll to the active walk card
-    activeWalkCard.scrollIntoView({ behavior: 'smooth' });
-}
-
-// Check for active walk on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const activeWalkData = localStorage.getItem('activeWalk');
-    if (activeWalkData) {
-        try {
-            const walkData = JSON.parse(activeWalkData);
-            showActiveWalkCard(walkData);
-        } catch (e) {
-            console.error('Error parsing active walk data:', e);
-            localStorage.removeItem('activeWalk');
-        }
-    }
-});
-
-function showEscortProfile(escortId) {
-    fetch('get_escort.php?escort_id=' + escortId)
-        .then(response => response.json())
-        .then(data => {
-            const profileCard = document.createElement('div');
-            profileCard.className = 'glass-card p-6 mb-4';
-            profileCard.innerHTML = `
-                <div class="flex items-center mb-4">
-                    <div class="w-16 h-16 rounded-full bg-gray-700 mr-4"></div>
-                    <div>
-                        <h3 class="text-xl font-bold">${data.escort.name}</h3>
-                        <p class="text-gray-400">ID: ${data.escort.id}</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-gray-400">Rating:</p>
-                        <p>${data.escort.rating}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-400">Completed Walks:</p>
-                        <p>${data.escort.completedWalks}</p>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <button class="glass-button px-4 py-2 w-full" onclick="requestWalk('${data.escort.id}')">
-                        Request Walk
-                    </button>
-                </div>
-            `;
-            document.getElementById('profile-container').appendChild(profileCard);
-        });
-}
-</script>
+</script> -->
 
     <style>
         body {
@@ -250,12 +54,16 @@ function showEscortProfile(escortId) {
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
         
-        .trae-sidebar {
+        .sidebar {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
             background: rgba(46, 46, 78, 0.3);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-right: 1px solid rgba(74, 30, 115, 0.3);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            height: 100vh;
+            overflow-y: auto;
         }
         
         .trae-sidebar-item {
@@ -476,6 +284,12 @@ function showEscortProfile(escortId) {
             display: block;
             visibility: visible;
         }
+        .sidebar-hidden { transform: translateX(-100%); }
+        .sidebar-visible { transform: translateX(0); }
+        .toggle-moved { transform: translateX(16rem) translateY(-50%); }
+        .toggle-default { transform: translateX(0) translateY(-50%); }
+        .content-shifted { margin-left: 16rem; }
+        .content-full { margin-left: 0; }
     </style>
 </head>
 <body class="bg-[#1E1E2E] text-[#F0F0F0] overflow-hidden">
@@ -485,11 +299,11 @@ function showEscortProfile(escortId) {
         <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
     <div class="flex h-screen">
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-default md:toggle-moved hover:shadow-lg">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-moved hover:shadow-lg">
             <i class="fas fa-bars"></i>
         </button>
         <!-- Sidebar -->
-        <aside id="sidebar" class="trae-sidebar w-64 text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-hidden md:sidebar-visible md:fixed">
+        <aside id="sidebar" class="trae-sidebar w-64 text-white p-5 flex flex-col h-full z-40 sidebar-visible fixed">
             <div class="flex items-center justify-between mb-5">
                 <div class="flex items-center space-x-4 w-full">
                     <div class="w-12 h-12 rounded-full bg-gradient-to-r from-[#4A1E73] to-[#D76D77] flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -550,7 +364,7 @@ function showEscortProfile(escortId) {
         </aside>
         
         <!-- Main Content -->
-        <main id="mainContent" class="flex-1 p-8 md:ml-64 transition-all duration-300 overflow-y-auto content-full">
+        <main id="mainContent" class="flex-1 p-8 md:ml-64 transition-all duration-300 ease-in-out overflow-y-auto content-shifted">
             <div class="max-w-7xl mx-auto">
                 <h1 class="text-4xl font-bold mb-8 text-gradient">
                     Walk With Us
@@ -766,44 +580,247 @@ function showEscortProfile(escortId) {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
-            const toggleButton = document.getElementById('sidebarToggle');
-            const toggleIcon = toggleButton.querySelector('i');
             const mainContent = document.getElementById('mainContent');
+            const toggleButton = document.getElementById('sidebarToggle');
 
-            function setInitialState() {
-                // Always start with sidebar closed
-                sidebar.style.transform = 'translateX(-100%)';
-                toggleButton.style.transform = 'translate(0, -50%)';
-                toggleIcon.style.transform = 'rotate(0deg)';
+            function toggleSidebar() {
+                const isMobile = window.innerWidth < 768;
+                if (isMobile) {
+                    if (sidebar.classList.contains('sidebar-visible')) {
+                        sidebar.classList.remove('sidebar-visible');
+                        sidebar.classList.add('sidebar-hidden');
+                        toggleButton.classList.remove('toggle-moved');
+                        mainContent.classList.remove('content-shifted');
+                        mainContent.classList.add('content-full');
+                    } else {
+                        sidebar.classList.remove('sidebar-hidden');
+                        sidebar.classList.add('sidebar-visible');
+                        toggleButton.classList.add('toggle-moved');
+                        mainContent.classList.remove('content-full');
+                        mainContent.classList.add('content-shifted');
+                    }
+                }
+            }
+
+            toggleButton.addEventListener('click', toggleSidebar);
+
+            // Set initial state
+            if (window.innerWidth >= 768) {
+                mainContent.classList.add('content-shifted');
+                mainContent.classList.remove('content-full');
+            } else {
                 mainContent.classList.add('content-full');
                 mainContent.classList.remove('content-shifted');
             }
-
-            // Set initial state
-            setInitialState();
-
-            // Handle sidebar toggle
-            toggleButton.addEventListener('click', function() {
-                const isHidden = sidebar.style.transform === 'translateX(-100%)';
-                
-                // Animate sidebar
-                sidebar.style.transform = isHidden ? 'translateX(0)' : 'translateX(-100%)';
-                
-                // Animate toggle button
-                toggleButton.style.transform = isHidden 
-                    ? 'translate(16rem, -50%)' 
-                    : 'translate(0, -50%)';
-                
-                // Rotate toggle icon
-                toggleIcon.style.transform = isHidden 
-                    ? 'rotate(180deg)' 
-                    : 'rotate(0deg)';
-                
-                // Adjust main content
-                mainContent.classList.toggle('content-shifted');
-                mainContent.classList.toggle('content-full');
-            });
         });
+
+    if (!pickupLocation || !destination) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Missing Information',
+            text: 'Please provide both pickup location and destination.'
+        });
+        return;
+    }
+
+    // Show loading animation
+    document.getElementById('loadingAnimation').classList.remove('hidden');
+
+    // Prepare request data
+    const requestData = {
+        escortId: escortId,
+        userId: '<?php echo isset($_SESSION["user_id"]) ? $_SESSION["user_id"] : ""; ?>',
+        pickupLocation: pickupLocation,
+        destination: destination,
+        requestTime: new Date().toISOString()
+    };
+
+    // Send request to backend
+    fetch('api/walks/request_walk.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Hide loading animation
+        document.getElementById('loadingAnimation').classList.add('hidden');
+
+        if (data.success) {
+            // Show the active walk card immediately
+            showActiveWalkCard({
+                walkId: data.walkId,
+                escortId: escortId,
+                pickupLocation: pickupLocation,
+                destination: destination,
+                status: 'pending'
+            });
+            
+            // Determine message based on email status
+            let message = 'Your walk request has been submitted successfully.';
+            let icon = 'success';
+            
+            // Check if email was sent
+            if (data.hasOwnProperty('emailSent')) {
+                if (data.emailSent === true) {
+                    message += ' The escort has been notified via email.';
+                } else {
+                    message += ' However, the email notification to the escort failed. They will still see your request when they log in.';
+                    icon = 'warning';
+                }
+            }
+            
+            Swal.fire({
+                icon: icon,
+                title: 'Walk Requested!',
+                text: message,
+                showConfirmButton: true
+            });
+
+            // Clear form
+            document.getElementById('pickupLocation').value = '';
+            document.getElementById('destination').value = '';
+        } else {
+            throw new Error(data.message || 'Failed to submit walk request');
+        }
+    })
+    .catch(error => {
+        // Hide loading animation
+        document.getElementById('loadingAnimation').classList.add('hidden');
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Failed to submit walk request. Please try again.'
+        });
+    });
+
+
+// Function to display the active walk card
+function showActiveWalkCard(walkData) {
+    // Get the active walk card and request section elements
+    const activeWalkCard = document.getElementById('activeWalk');
+    const requestSection = document.getElementById('requestSection');
+    
+    if (!activeWalkCard) return;
+    
+    // Save walk data to localStorage for persistence
+    localStorage.setItem('activeWalk', JSON.stringify(walkData));
+    
+    // Update the active walk card with walk details
+    document.getElementById('walkId').textContent = walkData.walkId || 'N/A';
+    document.getElementById('walkStatus').textContent = walkData.status || 'pending';
+    document.getElementById('walkPickup').textContent = walkData.pickupLocation || 'N/A';
+    document.getElementById('walkDestination').textContent = walkData.destination || 'N/A';
+    
+    // Set current time as start time
+    const startTimeElement = document.getElementById('activeStartTime');
+    if (startTimeElement) {
+        const now = new Date();
+        startTimeElement.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+    
+    // Hide request section and show active walk card
+    if (requestSection) requestSection.classList.add('hidden');
+    activeWalkCard.classList.remove('hidden');
+    
+    // Scroll to the active walk card
+    activeWalkCard.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Check for active walk on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const activeWalkData = localStorage.getItem('activeWalk');
+    if (activeWalkData) {
+        try {
+            const walkData = JSON.parse(activeWalkData);
+            showActiveWalkCard(walkData);
+        } catch (e) {
+            console.error('Error parsing active walk data:', e);
+            localStorage.removeItem('activeWalk');
+        }
+    }
+});
+
+function showEscortProfile(escortId) {
+    fetch('get_escort.php?escort_id=' + escortId)
+        .then(response => response.json())
+        .then(data => {
+            const profileCard = document.createElement('div');
+            profileCard.className = 'glass-card p-6 mb-4';
+            profileCard.innerHTML = `
+                <div class="flex items-center mb-4">
+                    <div class="w-16 h-16 rounded-full bg-gray-700 mr-4"></div>
+                    <div>
+                        <h3 class="text-xl font-bold">${data.escort.name}</h3>
+                        <p class="text-gray-400">ID: ${data.escort.id}</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-gray-400">Rating:</p>
+                        <p>${data.escort.rating}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Completed Walks:</p>
+                        <p>${data.escort.completedWalks}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button class="glass-button px-4 py-2 w-full" onclick="requestWalk('${data.escort.id}')">
+                        Request Walk
+                    </button>
+                </div>
+            `;
+            document.getElementById('profile-container').appendChild(profileCard);
+        });
+}
+// document.addEventListener('DOMContentLoaded', function() {
+//         const sidebar = document.getElementById('sidebar');
+//         const toggleButton = document.getElementById('sidebarToggle');
+//         const mainContent = document.getElementById('mainContent');
+
+//         function setInitialState() {
+//             if (window.innerWidth < 768) {
+//                 sidebar.classList.add('sidebar-hidden');
+//                 sidebar.classList.remove('sidebar-visible');
+//                 toggleButton.classList.add('toggle-default');
+//                 toggleButton.classList.remove('toggle-moved');
+//                 mainContent.classList.add('content-full');
+//                 mainContent.classList.remove('content-shifted');
+//             } else {
+//                 sidebar.classList.remove('sidebar-hidden');
+//                 sidebar.classList.add('sidebar-visible');
+//                 toggleButton.classList.remove('toggle-default');
+//                 toggleButton.classList.add('toggle-moved');
+//                 mainContent.classList.remove('content-full');
+//                 mainContent.classList.add('content-shifted');
+//             }
+//         }
+        
+//         setInitialState();
+//         window.addEventListener('resize', setInitialState);
+
+//         toggleButton.addEventListener('click', function() {
+//             if (sidebar.classList.contains('sidebar-hidden')) {
+//                 sidebar.classList.remove('sidebar-hidden');
+//                 sidebar.classList.add('sidebar-visible');
+//                 toggleButton.classList.remove('toggle-default');
+//                 toggleButton.classList.add('toggle-moved');
+//                 mainContent.classList.remove('content-full');
+//                 mainContent.classList.add('content-shifted');
+//             } else {
+//                 sidebar.classList.add('sidebar-hidden');
+//                 sidebar.classList.remove('sidebar-visible');
+//                 toggleButton.classList.add('toggle-default');
+//                 toggleButton.classList.remove('toggle-moved');
+//                 mainContent.classList.add('content-full');
+//                 mainContent.classList.remove('content-shifted');
+//             }
+//         });
+//     });
     </script>
 
     <script src="locations.js"></script>
