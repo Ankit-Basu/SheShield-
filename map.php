@@ -28,6 +28,7 @@ $user_id = $_SESSION['user_id'];
             background: linear-gradient(135deg, #1E1E2E 0%, #2E2E4E 100%);
             min-height: 100vh;
             overflow-x: hidden;
+            overflow-y: hidden;
         }
         
         /* Glassmorphic Effects */
@@ -209,16 +210,28 @@ $user_id = $_SESSION['user_id'];
 
         <!-- Main Content -->
         <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out">
-            <div id="content" class="flex flex-col md:flex-row gap-6 w-full max-w-screen-xl mx-auto px-4">
-                <!-- Map Section -->
-                <div class="w-full md:w-[70%] h-[calc(100vh-10rem)] rounded-lg shadow-lg glass-effect">
+            <div id="content" class="flex flex-col gap-6 w-full max-w-screen-xl mx-auto px-4">
+                <!-- Heat Map Description -->
+                <div class="glass-effect p-6 rounded-lg shadow-lg mb-2">
+                    <h2 class="text-2xl font-bold mb-3 text-gradient flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        Campus Safety Heat Map
+                    </h2>
+                    <p class="text-gray-300 leading-relaxed">
+                        This interactive heat map visualizes safety incident density across campus areas. Red zones indicate higher incident concentration, while green areas show lower activity. Use this map to identify safe routes and stay informed about campus safety patterns.
+                    </p>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Map Section -->
+                    <div class="w-full md:w-[70%] h-[calc(100vh-15rem)] rounded-lg shadow-lg glass-effect">
                     <div id="map" class="w-full h-full rounded-lg"></div>
                 </div>
 
                 <!-- Dashboard Tiles -->
-                <div class="w-full md:w-[40%] space-y-6 overflow-y-auto max-h-[calc(100vh-10rem)]">
+                <div class="w-full md:w-[40%] space-y-6 overflow-y-hidden max-h-[calc(100vh-10rem)]">
                     <!-- Active Incidents Tile -->
-                    <div class="glass-effect p-4 rounded-lg shadow-lg mb-6" style="height: 300px; overflow-y: auto;">
+                    <div class="glass-effect p-4 rounded-lg shadow-lg mb-6" style="height: 450px; overflow-y: auto;">
                         <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
                             <i class="fa-solid fa-bell text-red-500"></i>
                             <span>Active Incidents</span>

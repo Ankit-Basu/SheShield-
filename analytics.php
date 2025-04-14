@@ -255,11 +255,13 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                         <canvas id="responseTimeChart"></canvas>
                     </div>
 
-                    <!-- Safety Score by Area -->
-                    <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
-                        <h2 class="text-xl font-semibold mb-4 text-[#F0F0F0]  bg-clip-text">Safety Score by Area</h2>
+
+                
+                   <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
+                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r text-[#F0F0F0]  bg-clip-text">Safety Score Trend</h2>
                         <canvas id="safetyScoreChart"></canvas>
                     </div>
+
                 </div>
 
                 <!-- PHP Code to Fetch Analytics Data -->
@@ -293,26 +295,31 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                     $response_time_data[$row['date']] = round($row['avg_hours'], 2);
                 }
 
-                // Get Safety Score by Area for the user
-                $safety_score_query = "SELECT location, 
-                    COUNT(*) as incident_count,
-                    AVG(CASE incident_type 
-                        WHEN 'assault' THEN 3 
-                        WHEN 'harassment' THEN 2 
-                        WHEN 'suspicious_activity' THEN 1 
-                        ELSE 0 END) as severity_score
+                // Calculate Safety Score based on resolution status and time
+                $safety_score_query = "SELECT 
+                    DATE(created_at) as date,
+                    AVG(
+                        CASE 
+                            WHEN status = 'resolved' THEN 90
+                            WHEN status = 'pending' THEN 70
+                            ELSE 60
+                        END -
+                        LEAST(TIMESTAMPDIFF(HOUR, created_at, NOW())/24 * 5, 20)
+                    ) as safety_score
                     FROM incidents 
                     WHERE user_id = ?
-                    GROUP BY location";
+                    GROUP BY DATE(created_at)
+                    ORDER BY date DESC LIMIT 7";
                 $stmt = $conn->prepare($safety_score_query);
                 $stmt->bind_param('i', $user_id);
                 $stmt->execute();
                 $safety_score_result = $stmt->get_result();
                 $safety_score_data = array();
                 while ($row = mysqli_fetch_assoc($safety_score_result)) {
-                    $safety_score = 100 - (($row['incident_count'] * $row['severity_score']) / 3 * 10);
-                    $safety_score_data[$row['location']] = max(0, min(100, $safety_score));
+                    $safety_score_data[$row['date']] = round($row['safety_score'], 1);
                 }
+
+
                 ?>
 
                 <!-- JavaScript for Charts -->
@@ -397,43 +404,31 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                         }
                     });
 
-
-
-           // Safety Score Chart
+                    // Safety Score Chart
                     new Chart(document.getElementById('safetyScoreChart'), {
-                        type: 'bar',
+                        type: 'line',
                         data: {
                             labels: <?php echo json_encode(array_keys($safety_score_data)); ?>,
                             datasets: [{
                                 label: 'Safety Score',
                                 data: <?php echo json_encode(array_values($safety_score_data)); ?>,
-                                backgroundColor: function(context) {
-                                    const value = context.dataset.data[context.dataIndex];
-                                    if (value >= 80) return 'rgba(76, 175, 80, 0.8)'; // Safe - Green
-                                    if (value >= 60) return 'rgba(255, 193, 7, 0.8)'; // Warning - Yellow
-                                    if (value >= 40) return 'rgba(255, 152, 0, 0.8)'; // Caution - Orange
-                                    return 'rgba(244, 67, 54, 0.8)'; // Danger - Red
-                                },
+                                borderColor: '#4BC0C0',
+                                backgroundColor: 'rgba(75, 192, 192, 0.1)',
                                 borderWidth: 2,
-                                borderColor: '#333'
+                                fill: true,
+                                tension: 0.4
                             }]
                         },
                         options: {
                             responsive: true,
                             plugins: {
                                 legend: {
-                                    display: false
+                                    position: 'bottom'
                                 },
                                 tooltip: {
                                     callbacks: {
                                         label: function(context) {
-                                            const value = context.parsed.y;
-                                            let status = '';
-                                            if (value >= 80) status = '✓ Safe Area';
-                                            else if (value >= 60) status = '⚠ Exercise Caution';
-                                            else if (value >= 40) status = '⚠ High Alert Area';
-                                            else status = '⛔ Danger Zone';
-                                            return [`Safety Score: ${value}%`, `Status: ${status}`];
+                                            return `Safety Score: ${context.raw}`;
                                         }
                                     }
                                 }
@@ -444,14 +439,14 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                                     max: 100,
                                     title: {
                                         display: true,
-                                        text: 'Safety Score (%)',
+                                        text: 'Score',
                                         font: { weight: 'bold' }
                                     }
                                 },
                                 x: {
                                     title: {
                                         display: true,
-                                        text: 'Location',
+                                        text: 'Date',
                                         font: { weight: 'bold' }
                                     }
                                 }
@@ -460,110 +455,9 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                     });
                 </script>
 
-<!-- Chart.js Library -->
+<!-- Chart.js Library -->`
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-    // Fetch data for charts
-    <?php
-    // Reconnect to database since it was closed earlier
-    $conn = get_mysqli_connection();
-    
-    // Query for case status distribution
-    $statusQuery = "SELECT status, COUNT(*) as count FROM incidents ";
-    if ($user_role != 'admin') {
-        $statusQuery .= "WHERE user_id = $user_id ";
-    }
-    $statusQuery .= "GROUP BY status";
-    $statusResult = $conn->query($statusQuery);
-
-    $statusLabels = [];
-    $statusData = [];
-    if ($statusResult) {
-        while($row = $statusResult->fetch_assoc()) {
-            $statusLabels[] = $row['status'];
-            $statusData[] = $row['count'];
-        }
-    }
-
-    // Query for incident types distribution
-    $typeQuery = "SELECT incident_type, COUNT(*) as count FROM incidents ";
-    if ($user_role != 'admin') {
-        $typeQuery .= "WHERE user_id = $user_id ";
-    }
-    $typeQuery .= "GROUP BY incident_type";
-    $typeResult = $conn->query($typeQuery);
-
-    $typeLabels = [];
-    $typeData = [];
-    if ($typeResult) {
-        while($row = $typeResult->fetch_assoc()) {
-            $typeLabels[] = $row['incident_type'];
-            $typeData[] = $row['count'];
-        }
-    }
-    $conn = null;
-    ?>
-
-    // Case Status Chart
-    const statusCtx = document.getElementById('statusChart').getContext('2d');
-    new Chart(statusCtx, {
-        type: 'pie',
-        data: {
-            labels: <?php echo json_encode($statusLabels); ?>,
-            datasets: [{
-                data: <?php echo json_encode($statusData); ?>,
-                backgroundColor: [
-                    '#FF6384',
-                    '#36A2EB',
-                    '#FFCE56',
-                    '#4BC0C0',
-                    '#9966FF'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    // Incident Types Chart
-    const typeCtx = document.getElementById('incidentTypeChart').getContext('2d');
-    new Chart(typeCtx, {
-        type: 'bar',
-        data: {
-            labels: <?php echo json_encode($typeLabels); ?>,
-            datasets: [{
-                label: 'Number of Cases',
-                data: <?php echo json_encode($typeData); ?>,
-                backgroundColor: '#D12E79',
-                borderColor: '#AB1E5C',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-</script>
                 
 
             </div>

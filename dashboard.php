@@ -18,10 +18,11 @@ session_start();
     <link href="/src/trae-theme.css" rel="stylesheet">
 
     <style>
-        body {
+        body{
             background: linear-gradient(135deg, #1E1E2E 0%, #2E2E4E 100%);
             min-height: 100vh;
             overflow-x: hidden;
+            overflow-y:auto;
         }
         
         /* Glassmorphic Effects */
@@ -178,7 +179,7 @@ session_start();
     </style>
 </head>
 <body class="bg-[#1E1E2E] text-[#F0F0F0]">
-    <div class="flex h-screen relative z-0">
+    <div class="flex min-h-screen relative z-0">
         <!-- Background gradient shapes -->
         <div class="absolute -top-[300px] -right-[300px] w-[600px] h-[600px] bg-gradient-to-r from-[rgba(74,30,115,0.3)] to-[rgba(215,109,119,0.3)] rounded-full blur-3xl -z-10 animate-pulse-slow"></div>
         <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
@@ -252,12 +253,12 @@ session_start();
         </button>
 
         <!-- Main Content -->
-        <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-full md:content-shifted">
+        <main id="mainContent" class="flex-1 p-10  content-shifted">
             <div id="content">
                 <h1 class="text-3xl font-bold text-gradient">Dashboard Overview</h1>
                 
                 <!-- Dashboard Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 ">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
                     <!-- Analytics Card -->
                     <a href="analytics.php" class="block">
                         <div class="trae-card rounded-xl overflow-hidden group">
@@ -310,201 +311,64 @@ session_start();
                                     </div>
                                 </div>
                                 <p class="text-[#A0A0B0] mt-4">View incident locations and safety information on an interactive map.</p>
-                                <div class="mt-6 flex items-center text-[#D76D77] relative z-10  group-hover:translate-x-2">
+                                <div class="mt-6 flex items-center text-[#D76D77] relative z-10 group-hover:translate-x-2">
                                     <span>Open Map</span>
                                     <i class="fa-solid fa-arrow-right ml-2"></i>
                                 </div>
                             </div>
                         </div>
                     </a>
-                </div>
-                
-                <!-- Dynamic Data Cards - Second Row -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 animate-fade-in">
-                    <!-- Pending Reports Card -->
-                    <div class="trae-card rounded-xl overflow-hidden group">
-                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
+                    <!-- Latest Incident Report Tile -->
+                    <?php
+                    require_once 'mysqli_db.php';
+                    $sql = "SELECT incident_type, description, date_time, status FROM incidents WHERE user_id = ? ORDER BY date_time DESC LIMIT 1";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("i", $_SESSION['user_id']);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $latest_incident = $result->fetch_assoc();
+                    ?>
+                    <div class="trae-card h-[500px] w-[120%] -ml-[10%] p-6 rounded-xl overflow-hidden group">
+                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3"></div>
                         <div class="p-6 relative overflow-hidden z-10">
                             <div class="flex items-center justify-between mb-3">
-                                <h2 class="text-xl font-semibold text-white">Pending Reports</h2>
-                                <div class="glass-effect p-3 rounded-full transform transition-all duration-300 group-hover:scale-110">
-                                    <i class="fa-solid fa-clipboard-list text-[#D76D77] text-xl"></i>
+                                <h2 class="text-xl font-semibold text-white">Latest Incident Report</h2>
+                                <div class="glass-effect p-3 rounded-full group-hover:scale-110">
+                                    <i class="fa-solid fa-triangle-exclamation text-[#D76D77] text-xl"></i>
                                 </div>
                             </div>
-                            <?php
-                            // Get pending reports count
-                            require_once 'mysqli_db.php';
-                            $pending_sql = "SELECT COUNT(*) as count FROM incidents WHERE status='pending'";
-                            $pending_result = $conn->query($pending_sql);
-                            $pending_count = 0;
-                            if ($pending_result && $pending_result->num_rows > 0) {
-                                $pending_count = $pending_result->fetch_assoc()['count'];
-                            }
-                            ?>
-                            <div class="mt-4 flex items-center">
-                                <span class="text-4xl font-bold text-[#D76D77]"><?php echo $pending_count; ?></span>
-                                <span class="ml-2 text-[#A0A0B0]">pending reports</span>
-                            </div>
-                            <p class="text-[#A0A0B0] mt-4">Reports awaiting review and action.</p>
-                            <div class="mt-6 flex items-center text-[#D76D77] relative z-10 transition-all duration-300 group-hover:translate-x-2">
-                                <a href="report.php" class="flex items-center">
-                                    <span>View All Reports</span>
-                                    <i class="fa-solid fa-arrow-right ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Active Users Card -->
-                    <div class="trae-card rounded-xl overflow-hidden group">
-                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
-                        <div class="p-6 relative overflow-hidden z-10">
-                            <div class="flex items-center justify-between mb-3">
-                                <h2 class="text-xl font-semibold text-white">Active Users</h2>
-                                <div class="glass-effect p-3 rounded-full transform transition-all duration-300 group-hover:scale-110">
-                                    <i class="fa-solid fa-users text-[#D76D77] text-xl"></i>
-                                </div>
-                            </div>
-                            <?php
-                            // Get active users count (users who have logged in within the last 30 days)
-                            // Since we don't have a last_login field, we'll just count all users
-                            $users_sql = "SELECT COUNT(*) as count FROM users WHERE is_active = TRUE OR is_active = 1";
-                            $users_result = $conn->query($users_sql);
-                            $users_count = 0;
-                            if ($users_result && $users_result->num_rows > 0) {
-                                $users_count = $users_result->fetch_assoc()['count'];
-                            }
-                            // If the query fails (e.g., is_active column doesn't exist), count all users
-                            if ($users_count == 0) {
-                                $users_sql = "SELECT COUNT(*) as count FROM users";
-                                $users_result = $conn->query($users_sql);
-                                if ($users_result && $users_result->num_rows > 0) {
-                                    $users_count = $users_result->fetch_assoc()['count'];
-                                }
-                            }
-                            ?>
-                            <div class="mt-4 flex items-center">
-                                <span class="text-4xl font-bold text-[#D76D77]"><?php echo $users_count; ?></span>
-                                <span class="ml-2 text-[#A0A0B0]">active users</span>
-                            </div>
-                            <p class="text-[#A0A0B0] mt-4">Users actively using the platform.</p>
-                            <div class="mt-6 flex items-center text-[#D76D77] relative z-10 transition-all duration-300 group-hover:translate-x-2">
-                                <a href="analytics.php" class="flex items-center">
-                                    <span>View Analytics</span>
-                                    <i class="fa-solid fa-arrow-right ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Recent Incidents Card -->
-                    <div class="trae-card rounded-xl overflow-hidden group">
-                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
-                        <div class="p-6 relative overflow-hidden z-10">
-                            <div class="flex items-center justify-between mb-3">
-                                <h2 class="text-xl font-semibold text-white">Recent Incidents</h2>
-                                <div class="glass-effect p-3 rounded-full transform transition-all duration-300 group-hover:scale-110">
-                                    <i class="fa-solid fa-bell text-[#D76D77] text-xl"></i>
-                                </div>
-                            </div>
-                            <?php
-                            // Get recent incidents
-                            $recent_sql = "SELECT incident_type as type, location, created_at FROM incidents ORDER BY created_at DESC LIMIT 3";
-                            $recent_result = $conn->query($recent_sql);
-                            ?>
+                            <?php if ($latest_incident): ?>
                             <div class="mt-4 space-y-3">
-                                <?php if ($recent_result && $recent_result->num_rows > 0): ?>
-                                    <?php while($incident = $recent_result->fetch_assoc()): ?>
-                                        <div class="glass-effect p-3 rounded-lg">
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <span class="text-white font-medium capitalize"><?php echo htmlspecialchars($incident['type']); ?></span>
-                                                    <p class="text-sm text-[#A0A0B0] truncate max-w-[150px]"><?php echo htmlspecialchars($incident['location']); ?></p>
-                                                </div>
-                                                <span class="text-xs text-[#A0A0B0]"><?php echo date('M d', strtotime($incident['created_at'])); ?></span>
-                                            </div>
-                                        </div>
-                                    <?php endwhile; ?>
-                                <?php else: ?>
-                                    <p class="text-[#A0A0B0]">No recent incidents reported.</p>
-                                <?php endif; ?>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[#A0A0B0]">Type:</span>
+                                    <span class="text-white"><?php echo htmlspecialchars($latest_incident['incident_type']); ?></span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[#A0A0B0]">Status:</span>
+                                    <span class="px-2 py-1 rounded text-sm <?php echo $latest_incident['status'] === 'pending' ? 'bg-yellow-500/20 text-yellow-300' : 'bg-green-500/20 text-green-300'; ?>">
+                                        <?php echo ucfirst(htmlspecialchars($latest_incident['status'])); ?>
+                                    </span>
+                                </div>
+                                <div class="mt-4">
+                                    <p class="text-[#A0A0B0] line-clamp-3"><?php echo htmlspecialchars($latest_incident['description']); ?></p>
+                                </div>
+                                <div class="text-sm text-[#A0A0B0] mt-4">
+                                    Reported: <?php echo date('M j, Y g:i A', strtotime($latest_incident['date_time'])); ?>
+                                </div>
                             </div>
-                            <div class="mt-6 flex items-center text-[#D76D77] relative z-10 transition-all duration-300 group-hover:translate-x-2">
-                                <a href="map.php" class="flex items-center">
-                                    <span>View on Map</span>
-                                    <i class="fa-solid fa-arrow-right ml-2"></i>
-                                </a>
+                            <?php else: ?>
+                            <div class="mt-4 text-center text-[#A0A0B0]">
+                                <p>No incidents reported yet</p>
                             </div>
+                            <?php endif; ?>
+                            <a href="report.php" class="mt-6 flex items-center text-[#D76D77] relative z-10 group-hover:translate-x-2">
+                                <span>View All Reports</span>
+                                <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </a>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Emergency Contacts Row -->
-                <div class="grid grid-cols-1 gap-8 mt-8 animate-fade-in">
-                    <!-- Emergency Contacts Card -->
-                    <div class="trae-card rounded-xl overflow-hidden group">
-                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
-                        <div class="p-6 relative overflow-hidden z-10">
-                            <div class="flex items-center justify-between mb-3">
-                                <h2 class="text-xl font-semibold text-white">Emergency Contacts</h2>
-                                <div class="glass-effect p-3 rounded-full transform transition-all duration-300 group-hover:scale-110">
-                                    <i class="fa-solid fa-phone-volume text-[#D76D77] text-xl"></i>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <!-- Police -->
-                                <div class="glass-effect p-4 rounded-lg hover:border hover:border-[#D76D77] transition-all duration-300">
-                                    <div class="flex items-center mb-2">
-                                        <div class="w-10 h-10 rounded-full bg-[rgba(74,30,115,0.3)] flex items-center justify-center mr-3">
-                                            <i class="fa-solid fa-shield-alt text-[#D76D77]"></i>
-                                        </div>
-                                        <h3 class="text-white font-medium">Police</h3>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-xl font-bold text-[#D76D77] number-hover">100</span>
-                                        <button onclick="copyNumber('100')" class="text-[#D76D77] hover:text-[#AB1E5C] p-1">
-                                            <i class="fa-solid fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <!-- Women's Helpline -->
-                                <div class="glass-effect p-4 rounded-lg hover:border hover:border-[#D76D77] transition-all duration-300">
-                                    <div class="flex items-center mb-2">
-                                        <div class="w-10 h-10 rounded-full bg-[rgba(74,30,115,0.3)] flex items-center justify-center mr-3">
-                                            <i class="fa-solid fa-venus text-[#D76D77]"></i>
-                                        </div>
-                                        <h3 class="text-white font-medium">Women's Helpline</h3>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-xl font-bold text-[#D76D77] number-hover">1091</span>
-                                        <button onclick="copyNumber('1091')" class="text-[#D76D77] hover:text-[#AB1E5C] p-1">
-                                            <i class="fa-solid fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <!-- Ambulance -->
-                                <div class="glass-effect p-4 rounded-lg hover:border hover:border-[#D76D77] transition-all duration-300">
-                                    <div class="flex items-center mb-2">
-                                        <div class="w-10 h-10 rounded-full bg-[rgba(74,30,115,0.3)] flex items-center justify-center mr-3">
-                                            <i class="fa-solid fa-ambulance text-[#D76D77]"></i>
-                                        </div>
-                                        <h3 class="text-white font-medium">Ambulance</h3>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-xl font-bold text-[#D76D77] number-hover">102</span>
-                                        <button onclick="copyNumber('102')" class="text-[#D76D77] hover:text-[#AB1E5C] p-1">
-                                            <i class="fa-solid fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <p class="text-[#A0A0B0] mt-4">Click on the copy icon to copy the number to your clipboard.</p>
-                        </div>
-                    </div>
+                    <!-- Latest Episode Card -->
+                    <!-- Episode Analytics Card -->
                 </div>
             </div>
         </main>
@@ -538,38 +402,6 @@ session_start();
         document.addEventListener('DOMContentLoaded', () => {
             new Sidebar();
         });
-        
-        // Function to copy emergency numbers to clipboard
-        function copyNumber(number) {
-            navigator.clipboard.writeText(number).then(function() {
-                // Show a temporary notification
-                const notification = document.createElement('div');
-                notification.textContent = 'Number copied to clipboard!';
-                notification.className = 'fixed bottom-4 right-4 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-4 py-2 rounded-lg shadow-lg z-50';
-                notification.style.animation = 'fadeIn 0.3s ease-out forwards';
-                document.body.appendChild(notification);
-                
-                // Remove the notification after 2 seconds
-                setTimeout(function() {
-                    notification.style.animation = 'fadeOut 0.3s ease-in forwards';
-                    setTimeout(function() {
-                        document.body.removeChild(notification);
-                    }, 300);
-                }, 2000);
-            }).catch(function(err) {
-                console.error('Could not copy text: ', err);
-            });
-        }
-        
-        // Add fadeOut animation to the stylesheet
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeOut {
-                from { opacity: 1; transform: translateY(0); }
-                to { opacity: 0; transform: translateY(10px); }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
