@@ -177,6 +177,89 @@ session_start();
         }        
         
     </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mainContent = document.getElementById('mainContent');
+    
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('sidebar-hidden');
+            sidebar.classList.toggle('sidebar-visible');
+            sidebarToggle.classList.toggle('toggle-moved');
+            sidebarToggle.classList.toggle('toggle-default');
+            mainContent.classList.toggle('content-shifted');
+            mainContent.classList.toggle('content-full');
+        });
+    });
+    
+    function updateProgress(field) {
+        fetch('update_incident_progress.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'field=' + field
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Refresh to update progress
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function rateExperience(rating) {
+        // Update star display
+        const stars = document.querySelectorAll('#starRating .fa-star');
+        stars.forEach((star, index) => {
+            star.classList.remove('fas', 'far', 'text-[#D76D77]', 'text-gray-400');
+            if (index < rating) {
+                star.classList.add('fas', 'text-yellow-500');
+            } else {
+                star.classList.add('far', 'text-gray-400');
+            }
+        });
+
+        // Show feedback form for ratings less than 3
+        const feedbackForm = document.getElementById('feedbackForm');
+        if (rating < 3) {
+            feedbackForm.classList.remove('hidden');
+        } else {
+            feedbackForm.classList.add('hidden');
+            // For higher ratings, just save the rating
+            saveFeedback(rating, '');
+        }
+    }
+
+    function submitFeedback() {
+        const stars = document.querySelectorAll('#starRating .fa-star.text-[#D76D77]');
+        const rating = stars.length;
+        const feedback = document.getElementById('feedbackText').value;
+        saveFeedback(rating, feedback);
+    }
+
+    function saveFeedback(rating, feedback) {
+        fetch('update_incident_progress.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `rating=${rating}&feedback=${encodeURIComponent(feedback)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Hide feedback form after submission
+                document.getElementById('feedbackForm').classList.add('hidden');
+                // Show success message
+                alert('Thank you for your feedback!');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    </script>
 </head>
 <body class="bg-[#1E1E2E] text-[#F0F0F0]">
     <div class="flex min-h-screen relative z-0">
@@ -328,7 +411,7 @@ session_start();
                     $result = $stmt->get_result();
                     $latest_incident = $result->fetch_assoc();
                     ?>
-                    <div class="trae-card h-[500px] w-[120%] -ml-[10%] p-6 rounded-xl overflow-hidden group">
+                    <div class="trae-card h-[500px] w-[100%] -mr-[10%] p-6 rounded-xl overflow-hidden group">
                         <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3"></div>
                         <div class="p-6 relative overflow-hidden z-10">
                             <div class="flex items-center justify-between mb-3">
@@ -341,20 +424,36 @@ session_start();
                             <div class="mt-4 space-y-3">
                                 <div class="flex items-center justify-between">
                                     <span class="text-[#A0A0B0]">Type:</span>
-                                    <span class="text-white"><?php echo htmlspecialchars($latest_incident['incident_type']); ?></span>
+                                    <span class="text-white"><?php echo $latest_incident ? htmlspecialchars($latest_incident['incident_type']) : 'N/A'; ?></span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-[#A0A0B0]">Status:</span>
-                                    <span class="px-2 py-1 rounded text-sm <?php echo $latest_incident['status'] === 'pending' ? 'bg-yellow-500/20 text-yellow-300' : 'bg-green-500/20 text-green-300'; ?>">
-                                        <?php echo ucfirst(htmlspecialchars($latest_incident['status'])); ?>
-                                    </span>
+                                    <span class="text-white"><?php echo $latest_incident ? htmlspecialchars($latest_incident['status']) : 'N/A'; ?></span>
                                 </div>
-                                <div class="mt-4">
-                                    <p class="text-[#A0A0B0] line-clamp-3"><?php echo htmlspecialchars($latest_incident['description']); ?></p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[#A0A0B0]">Description:</span>
+                                    <span class="text-white"><?php echo $latest_incident ? htmlspecialchars($latest_incident['description']) : 'N/A'; ?></span>
                                 </div>
-                                <div class="text-sm text-[#A0A0B0] mt-4">
-                                    Reported: <?php echo date('M j, Y g:i A', strtotime($latest_incident['date_time'])); ?>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[#A0A0B0]">Reported:</span>
+                                    <span class="text-white"><?php echo $latest_incident ? date('M d, Y h:i A', strtotime($latest_incident['date_time'])) : 'N/A'; ?></span>
                                 </div>
+                                <!-- Star Rating System
+                                <div class="mt-6 border-t border-[rgba(74,30,115,0.3)] pt-4">
+                                    <h3 class="text-white text-lg mb-3">Rate Your Experience</h3>
+                                    <div class="flex items-center space-x-2" id="starRating">
+                                        <?php for($i = 1; $i <= 5; $i++): ?>
+                                            <button onclick="rateExperience(<?php echo $i; ?>)" class="text-2xl transition-colors duration-200 hover:text-[#D76D77]">
+                                                <i class="fa-star <?php echo isset($_SESSION['rating']) && $_SESSION['rating'] >= $i ? 'fas text-[#D76D77]' : 'far text-gray-400'; ?>"></i>
+                                            </button>
+                                        <?php endfor; ?>
+                                    </div>
+                                    Feedback Form (Initially Hidden) 
+                                    <div id="feedbackForm" class="mt-4 hidden">
+                                        <textarea id="feedbackText" class="w-full p-3 rounded-lg bg-[rgba(46,46,78,0.3)] border border-[rgba(74,30,115,0.3)] text-white placeholder-gray-400 focus:outline-none focus:border-[#D76D77] transition-colors duration-200" placeholder="Please share your feedback for improvement..."></textarea>
+                                        <button onclick="submitFeedback()" class="mt-2 px-4 py-2 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white rounded-lg hover:opacity-90 transition-opacity duration-200">Submit Feedback</button>
+                                    </div>
+                                 </div> -->
                             </div>
                             <?php else: ?>
                             <div class="mt-4 text-center text-[#A0A0B0]">
@@ -367,8 +466,123 @@ session_start();
                             </a>
                         </div>
                     </div>
-                    <!-- Latest Episode Card -->
-                    <!-- Episode Analytics Card -->
+                    <!-- Incident Progress Card -->
+                    <div class="trae-card h-[500px] w-[206%] -mr-[20%] rounded-xl overflow-hidden group">
+                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
+                        <div class="p-6 relative overflow-hidden z-10">
+                            <div class="flex items-center justify-between mb-3">
+                                <h2 class="text-xl font-semibold text-white">Incident Progress</h2>
+                                <div class="glass-effect p-3 rounded-full group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fa-solid fa-list-check text-[#D76D77] text-xl"></i>
+                                </div>
+                            </div>
+                            <?php if ($latest_incident): 
+                                $progress = 0;
+                                $security_confirmed = isset($_SESSION['security_confirmed']) ? $_SESSION['security_confirmed'] : false;
+                                $victim_safe = isset($_SESSION['victim_safe']) ? $_SESSION['victim_safe'] : false;
+                                $resolution_confirmed = isset($_SESSION['resolution_confirmed']) ? $_SESSION['resolution_confirmed'] : false;
+                                
+                                if ($security_confirmed) $progress += 33;
+                                if ($victim_safe) $progress += 33;
+                                if ($resolution_confirmed) $progress += 34;
+                            ?>
+                            <div class="mt-4 space-y-6">
+                                <!-- Progress Bar -->
+                                <div class="w-full bg-gray-700 rounded-full h-2.5 mb-4">
+                                    <div class="bg-green-700 h-2.5 rounded-full transition-all duration-500" style="width: <?php echo $progress; ?>%"></div>
+                                </div>
+                                
+                                <!-- Security Response -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[#A0A0B0]">Security Response</span>
+                                        <!-- <button onclick="updateProgress('security_response')" class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-4 py-2 rounded hover:opacity-90 transition-opacity">Confirm Arrival</button> -->
+                                        <button onclick="updateProgress('security_confirmed')" class="px-3 py-1 rounded text-sm <?php echo $security_confirmed ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'; ?>">
+                                            <?php echo $security_confirmed ? 'Confirmed' : 'Confirm Arrival'; ?>
+                                        </button>
+                                    </div>
+                                    <!-- <div class="flex items-center justify-between">
+                                        <span class="text-[#A0A0B0]">Victim Safety Status</span>
+                                        <button onclick="updateProgress('victim_safety')" class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-4 py-2 rounded hover:opacity-90 transition-opacity">Confirm Safety</button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[#A0A0B0]">Resolution Status</span>
+                                        <button onclick="updateProgress('resolution_status')" class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white px-4 py-2 rounded hover:opacity-90 transition-opacity">Confirm Resolution</button>
+                                    </div> -->
+                                    
+                             
+                                </div>
+
+                                <!-- Victim Safety Status -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[#A0A0B0]">Victim Safety Status</span>
+                                        <button onclick="updateProgress('victim_safe')" class="px-3 py-1 rounded text-sm <?php echo $victim_safe ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'; ?>">
+                                            <?php echo $victim_safe ? 'Safe' : 'Confirm Safety'; ?>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Resolution Status -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[#A0A0B0]">Resolution Status</span>
+                                        <button onclick="updateProgress('resolution_confirmed')" class="px-3 py-1 rounded text-sm <?php echo $resolution_confirmed ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'; ?>">
+                                            <?php echo $resolution_confirmed ? 'Resolved' : 'Confirm Resolution'; ?>
+                                        </button>
+                                    </div>
+                                </div>
+                                    
+                                </div>
+                                <!-- Star Rating System -->
+                                <div class="mt-6 border-t border-[rgba(74,30,115,0.3)] pt-4">
+                                    <h3 class="text-white text-lg mb-3">Rate Your Experience</h3>
+                                    <div class="flex items-center space-x-2" id="starRating">
+                                        <?php for($i = 1; $i <= 5; $i++): ?>
+                                            <button onclick="rateExperience(<?php echo $i; ?>)" class="text-2xl transition-colors duration-200 hover:text-yellow-600">
+                                                <i class="fa-star <?php echo isset($_SESSION['rating']) && $_SESSION['rating'] >= $i ? 'fas text-yellow-500' : 'far text-gray-400'; ?>"></i>
+                                            </button>
+                                        <?php endfor; ?>
+                                    </div>
+                                    <!-- Feedback Form (Initially Hidden) -->
+                                    <div id="feedbackForm" class="mt-4 hidden">
+                                        <textarea id="feedbackText" class="w-full p-1 cols-1 rounded-lg bg-[rgba(46,46,78,0.3)] border border-[rgba(74,30,115,0.3)] text-white placeholder-gray-400 focus:outline-none focus:border-[#D76D77] transition-colors duration-200" placeholder="Please share your feedback for improvement..."></textarea>
+                                        <button onclick="submitFeedback()" class="mt-0.5 px-2 py-1 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white rounded-lg hover:opacity-90 transition-opacity duration-200">Submit Feedback</button>
+                                    </div>
+                                      
+                                <!-- Resolution Status -->
+                                <!-- <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-[#A0A0B0]">Resolution Status</span>
+                                        <span class="text-[#D76D77]"><?php echo $latest_incident['status'] === 'resolved' ? '100%' : '50%'; ?></span>
+                                    </div>
+                                    <div class="h-2 bg-[rgba(74,30,115,0.2)] rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-[#4A1E73] to-[#D76D77] rounded-full" style="width: <?php echo $latest_incident['status'] === 'resolved' ? '100%' : '50%'; ?>"></div>
+                                    </div>
+                                </div> -->
+
+
+                                <!-- Status Indicators -->
+                                <!-- <div class="grid grid-cols-2 gap-4 mt-6">
+                                    <div class="glass-effect p-4 rounded-lg text-center">
+                                        <i class="fa-solid fa-shield-halved text-[#D76D77] text-xl mb-2"></i>
+                                        <p class="text-[#A0A0B0] text-sm">Security Reached</p>
+                                        <p class="text-white font-semibold mt-1"><?php echo $latest_incident['status'] === 'resolved' ? 'Yes' : 'En Route'; ?></p>
+                                    </div>
+                                    <div class="glass-effect p-4 rounded-lg text-center">
+                                        <i class="fa-solid fa-clipboard-check text-[#D76D77] text-xl mb-2"></i>
+                                        <p class="text-[#A0A0B0] text-sm">Case Resolution</p>
+                                        <p class="text-white font-semibold mt-1"><?php echo $latest_incident['status'] === 'resolved' ? 'Complete' : 'In Progress'; ?></p>
+                                    </div>
+                                </div> -->
+                            </div>
+                            <?php else: ?>
+                            <div class="mt-4 text-center text-[#A0A0B0]">
+                                <p>No active incidents to track</p>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
