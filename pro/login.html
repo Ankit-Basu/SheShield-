@@ -9,6 +9,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        primary: '#4A1E73',
+                        secondary: '#D76D77'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'pulse': 'pulse 2s infinite',
+                        'gradient-flow': 'gradientFlow 3s ease infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        pulse: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.1)' }
+                        },
+                        gradientFlow: {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                            '100%': { backgroundPosition: '0% 50%' }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="font-[Inter] bg-[#1E1E2E]">
@@ -156,42 +191,5 @@ window.location.href = '../dashboard.php';
             });
         });
     </script>
-</body>
-</html>
-
-tailwind.config = {
-    theme: {
-        extend: {
-            fontFamily: {
-                sans: ['Inter', 'sans-serif']
-            },
-            colors: {
-                primary: '#4A1E73',
-                secondary: '#D76D77'
-            },
-            animation: {
-                'fade-in': 'fadeIn 0.8s ease-out',
-                'pulse': 'pulse 2s infinite',
-                'gradient-flow': 'gradientFlow 3s ease infinite'
-            },
-            keyframes: {
-                fadeIn: {
-                    '0%': { opacity: '0', transform: 'translateY(20px)' },
-                    '100%': { opacity: '1', transform: 'translateY(0)' }
-                },
-                pulse: {
-                    '0%, 100%': { transform: 'scale(1)' },
-                    '50%': { transform: 'scale(1.1)' }
-                },
-                gradientFlow: {
-                    '0%': { backgroundPosition: '0% 50%' },
-                    '50%': { backgroundPosition: '100% 50%' },
-                    '100%': { backgroundPosition: '0% 50%' }
-                }
-            }
-        }
-    }
-};
-</script>
 </body>
 </html>
