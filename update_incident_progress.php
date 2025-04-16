@@ -3,6 +3,23 @@ session_start();
 
 header('Content-Type: application/json');
 
+// Handle feedback submission
+if (isset($_POST['rating'])) {
+    $rating = intval($_POST['rating']);
+    $feedback = isset($_POST['feedback']) ? $_POST['feedback'] : '';
+    
+    // Store in session for now (in a real app, you'd save to database)
+    $_SESSION['user_rating'] = $rating;
+    $_SESSION['user_feedback'] = $feedback;
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'Feedback submitted successfully'
+    ]);
+    exit;
+}
+
+// Handle progress updates
 if (!isset($_POST['field'])) {
     echo json_encode(['success' => false, 'message' => 'No field specified']);
     exit;

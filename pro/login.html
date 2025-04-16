@@ -5,56 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Login - SheShield</title>
-    <link href="/src/output.css" rel="stylesheet">
+    <!-- <link href="/src/output.css" rel="stylesheet"> -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-gray-50" x-data="{ isMenuOpen: false }">
-    <!-- Navigation -->
-    <nav class="bg-[#1E1E2E] shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center">
-                    <a href="index.html" class="text-2xl font-bold text-pink-600">SheShield</a>
-                </div>
-                
-                <!-- Desktop Navigation -->
-                <div class="hidden sm:ml-auto sm:flex sm:items-center sm:space-x-8">
-                    <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
-                    <a href="about.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
-                    <a href="report.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Report</a>
-                    <a href="login.html" class="border-pink-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Login</a>
-                </div>
-
-                <!-- Mobile menu button -->
-                <div class="sm:hidden flex items-center">
-                    <button @click="isMenuOpen = !isMenuOpen" class="text-gray-700 hover:text-pink-600 transition-colors duration-300">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                    </button>
-                </div>
+<body class="font-[Inter] bg-[#1E1E2E]">
+    <nav class="fixed w-full top-0 bg-[#1E1E2E] shadow-lg z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" class="flex-shrink-0">
+                    <circle cx="20" cy="20" r="18" stroke="#D76D77" stroke-width="4"/>
+                    <path d="M20 10L24 16H16L20 10Z" fill="#D76D77"/>
+                    <rect x="18" y="16" width="4" height="14" rx="2" fill="#D76D77"/>
+                </svg>
+                <span class="text-2xl font-bold text-[#D76D77]">SheShield</span>
             </div>
-        </div>
-
-        <!-- Mobile menu -->
-        <div x-show="isMenuOpen" class="sm:hidden bg-white border-t border-gray-200">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="index.html" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">Home</a>
-                <a href="about.html" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">About</a>
-                <a href="report.html" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">Report</a>
-                <a href="login.html" class="block px-3 py-2 text-pink-600 font-semibold">Login</a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-white hover:text-[#D76D77] transition-colors duration-300">Home</a>
+                <a href="index.html#about" class="text-white hover:text-[#D76D77] transition-colors duration-300">About Us</a>
+                <a href="index.html#features" class="text-white hover:text-[#D76D77] transition-colors duration-300">Safety Services</a>
+                <a href="index.html#how-it-works" class="text-white hover:text-[#D76D77] transition-colors duration-300">How It Works</a>
+                <a href="index.html#contact" class="text-white hover:text-[#D76D77] transition-colors duration-300">Emergency</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#5A2E83] hover:to-[#E77D87] text-white px-8 py-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] flex items-center space-x-2" onclick="window.location.href='login.html'">Log In</button>
+                <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#5A2E83] hover:to-[#E77D87] text-white px-8 py-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] flex items-center space-x-2" onclick="window.location.href='report.html'">Report Now</button>
             </div>
         </div>
     </nav>
 
     <!-- Login Form Section -->
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-white to-purple-100">
+    <div class="min-h-screen flex items-center justify-center bg-[#1E1E2E]">
         <div class="max-w-md w-full mx-4">
-            <div class="bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-2xl shadow-xl p-8 space-y-6">
+            <div class="bg-[#2E2E4E] bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-2xl shadow-xl p-8 space-y-6">
                 <div class="text-center space-y-2">
-                    <h2 class="text-3xl font-bold text-gray-900">Welcome Back</h2>
-                    <p class="text-gray-600">Sign in to your SheShield account</p>
+                    <h2 class="text-3xl font-bold text-white">Welcome Back</h2>
+                    <p class="text-[#D76D77]">Sign in to your SheShield account</p>
                 </div>
 
                 <!-- Error Alert -->
@@ -64,43 +52,43 @@
 
                 <form id="loginForm" class="mt-8 space-y-6">
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                        <label for="email" class="block text-sm font-medium text-[#D76D77]">Email address</label>
                         <input id="email" name="email" type="email" required 
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
+                               class="mt-1 bg-[#1E1E2E] block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
                     </div>
                 
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <label for="password" class="block text-sm font-medium text-[#D76D77]">Password</label>
                         <input id="password" name="password" type="password" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
+                               class="mt-1 bg-[#1E1E2E] block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500">
                     </div>
 
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
                             <input id="remember-me" name="remember-me" type="checkbox"
                                    class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded">
-                            <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
+                            <label for="remember-me" class="ml-2 block text-sm text-white">Remember me</label>
                         </div>
-                        <div class="text-sm">
+                        <!-- <div class="text-sm">
                             <a href="#" class="font-medium text-pink-600 hover:text-pink-500">
                                 Forgot password?
                             </a>
-                        </div>
+                        </div> -->
                     </div>
                     <div id="error-message" class="hidden text-red-600 text-sm"></div>
 
                     <div>
                         <button type="submit"
-                                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                                class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#5A2E83] hover:to-[#E77D87] flex justify-center text-white px-8 py-3 rounded-md w-full transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] flex items-center space-x-2">
                             Sign in
                         </button>
                     </div>
                 </form>
 
                 <div class="text-center">
-                    <p class="text-sm text-gray-600">
+                    <p class="text-sm text-white">
                         Don't have an account?
-                        <a href="signup.html" class="font-medium text-pink-600 hover:text-pink-500">Sign up</a>
+                        <a href="signup.php" class="font-medium text-blue-600 hover:text-[#D76D77]">Sign up</a>
                     </p>
                 </div>
             </div>
@@ -168,5 +156,42 @@ window.location.href = '../dashboard.php';
             });
         });
     </script>
+</body>
+</html>
+
+tailwind.config = {
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Inter', 'sans-serif']
+            },
+            colors: {
+                primary: '#4A1E73',
+                secondary: '#D76D77'
+            },
+            animation: {
+                'fade-in': 'fadeIn 0.8s ease-out',
+                'pulse': 'pulse 2s infinite',
+                'gradient-flow': 'gradientFlow 3s ease infinite'
+            },
+            keyframes: {
+                fadeIn: {
+                    '0%': { opacity: '0', transform: 'translateY(20px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' }
+                },
+                pulse: {
+                    '0%, 100%': { transform: 'scale(1)' },
+                    '50%': { transform: 'scale(1.1)' }
+                },
+                gradientFlow: {
+                    '0%': { backgroundPosition: '0% 50%' },
+                    '50%': { backgroundPosition: '100% 50%' },
+                    '100%': { backgroundPosition: '0% 50%' }
+                }
+            }
+        }
+    }
+};
+</script>
 </body>
 </html>

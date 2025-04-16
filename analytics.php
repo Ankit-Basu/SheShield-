@@ -174,16 +174,16 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
             </div>
             <nav>
                 <ul>
-                    <li> 
-                    <a href="dashboard.php" class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" ">
+                <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer active" onclick="window.location.href='dashboard.php'">
                         <i class="fa-solid fa-house"></i> <span>Home</span>
-                    </a>
                     </li>
                     <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='report.php'">
                         <i class="fa-solid fa-file"></i> <span>Reports</span>
                     </li>
-                    <li class="trae-sidebar-item active p-3 rounded flex items-center space-x-2">
+                    <li>
+                        <a href="analytics.php" class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
                         <i class="fa-solid fa-chart-bar"></i> <span>Analytics</span>
+                        </a>
                     </li>
                     <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='map.php'">
                         <i class="fa-solid fa-map"></i> <span>Map</span>
@@ -200,7 +200,7 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                     <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='settings.php'">
                         <i class="fa-solid fa-gear"></i> <span>Settings</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 hover:bg-[#AB1E5C] cursor-pointer" onclick="window.location.href='auth/logout.php'">
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='auth/logout.php'">
                         <i class="fa-solid fa-sign-out-alt"></i> <span>Logout</span>
                     </li>
                 </ul>
@@ -280,11 +280,12 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                 }
 
                 // Get Average Response Time for the user
-                $response_time_query = "SELECT DATE(created_at) as date, 
-                    AVG(TIMESTAMPDIFF(HOUR, created_at, NOW())) as avg_hours 
+                $response_time_query = "SELECT 
+                    DATE(date_time) as date,
+                    AVG(TIMESTAMPDIFF(HOUR, date_time, NOW())) as avg_hours
                     FROM incidents 
                     WHERE user_id = ?
-                    GROUP BY DATE(created_at) 
+                    GROUP BY DATE(date_time)
                     ORDER BY date DESC LIMIT 7";
                 $stmt = $conn->prepare($response_time_query);
                 $stmt->bind_param('i', $user_id);
@@ -297,18 +298,18 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
 
                 // Calculate Safety Score based on resolution status and time
                 $safety_score_query = "SELECT 
-                    DATE(created_at) as date,
+                    DATE(date_time) as date,
                     AVG(
                         CASE 
                             WHEN status = 'resolved' THEN 90
                             WHEN status = 'pending' THEN 70
                             ELSE 60
                         END -
-                        LEAST(TIMESTAMPDIFF(HOUR, created_at, NOW())/24 * 5, 20)
+                        LEAST(TIMESTAMPDIFF(HOUR, date_time, NOW())/24 * 5, 20)
                     ) as safety_score
                     FROM incidents 
                     WHERE user_id = ?
-                    GROUP BY DATE(created_at)
+                    GROUP BY DATE(date_time)
                     ORDER BY date DESC LIMIT 7";
                 $stmt = $conn->prepare($safety_score_query);
                 $stmt->bind_param('i', $user_id);

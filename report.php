@@ -144,6 +144,8 @@ $stmt->close();
             border: 1px solid rgba(215, 109, 119, 0.2);
             transform: translateX(5px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
+            color: #F0F0F0;
         }
         
         .form-input:focus {
@@ -315,29 +317,34 @@ $stmt->close();
             </div>
             <nav>
                 <ul>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="dashboard.php" class="w-full"><i class="fa-solid fa-house"></i> <span>Home</span></a>
+                <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer " onclick="window.location.href='dashboard.php'">
+                        <i class="fa-solid fa-house"></i> <span>Home</span>
                     </li>
-                    <li class="trae-sidebar-item active p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="report.php" class="w-full"><i class="fa-solid fa-file"></i> <span>Report</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer active" onclick="window.location.href='report.php'">
+                        <i class="fa-solid fa-file"></i> <span>Reports</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="analytics.php" class="w-full"><i class="fa-solid fa-chart-bar"></i> <span>Analytics</span></a>
+                    <li>
+                        <a href="analytics.php" class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <i class="fa-solid fa-chart-bar"></i> <span>Analytics</span>
+                        </a>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="map.php" class="w-full"><i class="fa-solid fa-map"></i> <span>Map</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='map.php'">
+                        <i class="fa-solid fa-map"></i> <span>Map</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="safespace.php" class="w-full"><i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='safespace.php'">
+                        <i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="walkwithus.php" class="w-full"><i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='walkwithus.php'">
+                        <i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="templates.php" class="w-full"><i class="fa-solid fa-file-lines"></i> <span>Templates</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='templates.php'">
+                        <i class="fa-solid fa-file-lines"></i> <span>Templates</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="settings.php" class="w-full"><i class="fa-solid fa-gear"></i> <span>Settings</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='settings.php'">
+                        <i class="fa-solid fa-gear"></i> <span>Settings</span>
+                    </li>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='auth/logout.php'">
+                        <i class="fa-solid fa-sign-out-alt"></i> <span>Logout</span>
                     </li>
                 </ul>
             </nav>
@@ -349,7 +356,7 @@ $stmt->close();
         </button>
 
         <!-- Main Content -->
-        <main id="mainContent" class="flex-1 p-10  content-shifted overflow-y-auto h-screen">
+        <main id="mainContent" class="flex-1 p-10  content-shifted overflow-y-hidden  h-screen">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 animate-fade-in">
                 <!-- Report Form Tile -->
                 <div class="glass-card p-8 rounded-xl shadow-lg form-container">

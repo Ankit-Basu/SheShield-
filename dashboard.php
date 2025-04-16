@@ -136,7 +136,7 @@ session_start();
             /* #sidebarToggle {
             transition: transform 0.3s ease-in-out;
             } */
-        .sidebar {
+            .sidebar {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             will-change: transform, opacity;
             background: rgba(46, 46, 78, 0.3);
@@ -147,6 +147,8 @@ session_start();
             height: 100vh;
             overflow-y: auto;
         }
+        
+        /* These classes are kept for backward compatibility */
         .sidebar-hidden { 
             transform: translateX(-100%);
             opacity: 0;
@@ -157,19 +159,17 @@ session_start();
         }
         .toggle-moved {
             transform: translateX(16rem) translateY(-50%);
-            transition: transform 0.3s ease-in-out;
         }
         .toggle-default {
             transform: translateX(0) translateY(-50%);
-            transition: transform 0.3s ease-in-out;
         }
         .content-shifted {
             margin-left: 16rem;
-            transition: margin-left 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out;
         }
         .content-full {
             margin-left: 0;
-            transition: margin-left 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out;
         }
         #sidebarToggle {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -182,14 +182,52 @@ session_start();
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const mainContent = document.getElementById('mainContent');
-    
+        
+        // Get initial state from localStorage or screen size
+        let isSidebarVisible = localStorage.getItem('sidebarVisible') !== null ?
+            localStorage.getItem('sidebarVisible') === 'true' :
+            window.innerWidth >= 768;
+
+        function updateSidebarState(visible, saveState = true) {
+            isSidebarVisible = visible;
+            
+            // Save state to localStorage
+            if (saveState) {
+                localStorage.setItem('sidebarVisible', visible);
+            }
+
+            // Update DOM with CSS classes
+            if (visible) {
+                sidebar.style.transform = 'translateX(0)';
+                sidebar.style.opacity = '1';
+                sidebarToggle.style.transform = 'translateX(16rem) translateY(-50%)';
+                mainContent.style.marginLeft = '16rem';
+            } else {
+                sidebar.style.transform = 'translateX(-100%)';
+                sidebar.style.opacity = '0';
+                sidebarToggle.style.transform = 'translateX(0) translateY(-50%)';
+                mainContent.style.marginLeft = '0';
+            }
+        }
+
+        // Set initial state without saving
+        updateSidebarState(isSidebarVisible, false);
+
+        // Handle window resize
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const shouldBeVisible = window.innerWidth >= 768;
+                if (shouldBeVisible !== isSidebarVisible) {
+                    updateSidebarState(shouldBeVisible);
+                }
+            }, 250);
+        });
+
+        // Handle toggle button click
         sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('sidebar-hidden');
-            sidebar.classList.toggle('sidebar-visible');
-            sidebarToggle.classList.toggle('toggle-moved');
-            sidebarToggle.classList.toggle('toggle-default');
-            mainContent.classList.toggle('content-shifted');
-            mainContent.classList.toggle('content-full');
+            updateSidebarState(!isSidebarVisible);
         });
     });
     
@@ -234,7 +272,7 @@ session_start();
     }
 
     function submitFeedback() {
-        const stars = document.querySelectorAll('#starRating .fa-star.text-[#D76D77]');
+        const stars = document.querySelectorAll('#starRating .fa-star.text-yellow-500');
         const rating = stars.length;
         const feedback = document.getElementById('feedbackText').value;
         saveFeedback(rating, feedback);
@@ -253,8 +291,28 @@ session_start();
             if (data.success) {
                 // Hide feedback form after submission
                 document.getElementById('feedbackForm').classList.add('hidden');
-                // Show success message
-                alert('Thank you for your feedback!');
+                // Show custom success message instead of alert
+                const messageContainer = document.createElement('div');
+                messageContainer.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 glass-effect p-6 rounded-xl text-center z-50';
+                messageContainer.innerHTML = `
+                    <div class="text-2xl text-gradient font-bold mb-3"><i class="fas fa-check-circle mr-2"></i>Thank You!</div>
+                    <p class="text-white mb-4">Your suggestion is our utmost priority.<br>Your suggestion has been noted.</p>
+                    <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] px-4 py-2 rounded-lg text-white hover:opacity-90 transition-opacity">Close</button>
+                `;
+                document.body.appendChild(messageContainer);
+                
+                // Add event listener to close button
+                const closeButton = messageContainer.querySelector('button');
+                closeButton.addEventListener('click', () => {
+                    document.body.removeChild(messageContainer);
+                });
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (document.body.contains(messageContainer)) {
+                        document.body.removeChild(messageContainer);
+                    }
+                }, 5000);
             }
         })
         .catch(error => console.error('Error:', error));
@@ -331,7 +389,7 @@ session_start();
         </aside>
         
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 toggle-moved">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 text-white p-3 rounded-r z-50 transition-all duration-300 ease-in-out toggle-moved hover:shadow-lg hover:translate-x-1 bg-gradient-to-r from-[rgba(74,30,115,0.8)] to-[rgba(215,109,119,0.8)] backdrop-blur-md border border-[rgba(215,109,119,0.3)]">
             <i class="fa-solid fa-bars"></i>
         </button>
 
@@ -404,7 +462,7 @@ session_start();
                     <!-- Latest Incident Report Tile -->
                     <?php
                     require_once 'mysqli_db.php';
-                    $sql = "SELECT incident_type, description, date_time, status FROM incidents WHERE user_id = ? ORDER BY date_time DESC LIMIT 1";
+                    $sql = "SELECT * FROM incidents WHERE user_id = ? ORDER BY date_time DESC LIMIT 1";
                     $stmt = $conn->prepare($sql);
                     $stmt->bind_param("i", $_SESSION['user_id']);
                     $stmt->execute();
@@ -412,8 +470,8 @@ session_start();
                     $latest_incident = $result->fetch_assoc();
                     ?>
                     <div class="trae-card h-[500px] w-[100%] -mr-[10%] p-6 rounded-xl overflow-hidden group">
-                        <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3"></div>
-                        <div class="p-6 relative overflow-hidden z-10">
+                    <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] h-2 group-hover:h-3 transition-all duration-300"></div>
+                    <div class="p-6 relative overflow-hidden z-10">
                             <div class="flex items-center justify-between mb-3">
                                 <h2 class="text-xl font-semibold text-white">Latest Incident Report</h2>
                                 <div class="glass-effect p-3 rounded-full group-hover:scale-110">
@@ -619,3 +677,4 @@ session_start();
     </script>
 </body>
 </html>
+ 

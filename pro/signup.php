@@ -4,53 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - SheShield</title>
-    <link href="/src/output.css" rel="stylesheet">
+    <!-- <link href="/src/output.css" rel="stylesheet"> -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-gray-50" x-data="{ isMenuOpen: false }">
+<body class="font-[Inter] bg-[#1E1E2E]" x-data="{ isMenuOpen: false }">
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
-                        <a href="index.html" class="text-2xl font-bold text-pink-600">SheShield</a>
-                    </div>
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
-                        <a href="about.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
-                        <a href="report.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Report</a>
-                        <a href="login.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Login</a>
-                    </div>
-                </div>
-                <div class="sm:hidden flex items-center">
-                    <button @click="isMenuOpen = !isMenuOpen" class="text-gray-700 hover:text-pink-600 transition-colors duration-300">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                    </button>
-                </div>
+    <nav class="fixed w-full top-0 bg-[#1E1E2E] shadow-lg z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" class="flex-shrink-0">
+                    <circle cx="20" cy="20" r="18" stroke="#D76D77" stroke-width="4"/>
+                    <path d="M20 10L24 16H16L20 10Z" fill="#D76D77"/>
+                    <rect x="18" y="16" width="4" height="14" rx="2" fill="#D76D77"/>
+                </svg>
+                <span class="text-2xl font-bold text-[#D76D77]">SheShield</span>
             </div>
-        </div>
-        <!-- Mobile menu -->
-        <div x-show="isMenuOpen" class="sm:hidden bg-white border-t border-gray-200">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="index.html" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">Home</a>
-                <a href="about.html" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">About</a>
-                <a href="report.html" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">Report</a>
-                <a href="login.html" class="block px-3 py-2 text-gray-700 hover:text-pink-600 transition-colors">Login</a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="landing.html" class="text-white hover:text-[#D76D77] transition-colors duration-300">Home</a>
+                <a href="landing.html#about" class="text-white hover:text-[#D76D77] transition-colors duration-300">About Us</a>
+                <a href="landing.html#features" class="text-white hover:text-[#D76D77] transition-colors duration-300">Safety Services</a>
+                <a href="landing.html#how-it-works" class="text-white hover:text-[#D76D77] transition-colors duration-300">How It Works</a>
+                <a href="landing.html#contact" class="text-white hover:text-[#D76D77] transition-colors duration-300">Emergency</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#5A2E83] hover:to-[#E77D87] text-white px-8 py-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] flex items-center space-x-2" onclick="window.location.href='login.html'">Log In</button>
+                <button class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#5A2E83] hover:to-[#E77D87] text-white px-8 py-3 rounded-full transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] flex items-center space-x-2" onclick="window.location.href='report.html'">Report Now</button>
             </div>
         </div>
     </nav>
 
     <!-- Sign Up Form -->
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-lg">
+    <div class="min-h-screen flex items-center mt-10 justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8 bg-[#2E2E4E] p-8 rounded-lg shadow-lg">
             <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Join SheShield</h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-white">Join SheShield</h2>
+                <p class="mt-2 text-center text-sm text-[#D76D77]">
                     Already have an account?
-                    <a href="login.html" class="font-medium text-pink-600 hover:text-pink-700 transition-colors duration-300">
+                    <a href="login.html" class="font-medium text-blue-600 hover:text-white transition-colors duration-300">
                         Sign in here
                     </a>
                 </p>
@@ -60,76 +52,76 @@
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                            <label for="first_name" class="block text-sm font-medium text-[#D76D77] mb-1">First Name</label>
                             <input id="first_name" name="first_name" type="text" required
-                                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                                class="appearance-none bg-[#1E1E2E] relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
                                 placeholder="Enter your first name">
                         </div>
                         <div>
-                            <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                            <label for="last_name" class="block text-sm font-medium text-[#D76D77] mb-1">Last Name</label>
                             <input id="last_name" name="last_name" type="text" required
-                                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                                class="appearance-none bg-[#1E1E2E] relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
                                 placeholder="Enter your last name">
                         </div>
                     </div>
 
                     <!-- Contact Information -->
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                        <label for="email" class="block text-sm font-medium text-[#D76D77] mb-1">Email address</label>
                         <input id="email" name="email" type="email" autocomplete="email" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                            class="appearance-none bg-[#1E1E2E] relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
                             placeholder="Enter your email">
                     </div>
                     <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        <label for="phone" class="block text-sm font-medium text-[#D76D77] mb-1">Phone Number</label>
                         <input id="phone" name="phone" type="tel" autocomplete="tel" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                            class="appearance-none bg-[#1E1E2E] relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
                             placeholder="Enter your phone number">
                     </div>
 
                     <!-- Password -->
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <label for="password" class="block text-sm font-medium text-[#D76D77] mb-1">Password</label>
                         <input id="password" name="password" type="password" autocomplete="new-password" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                            class="appearance-none bg-[#1E1E2E] relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
                             placeholder="Create a password">
                     </div>
                     <div>
-                        <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <label for="confirm_password" class="block text-sm font-medium text-[#D76D77] mb-1">Confirm Password</label>
                         <input id="confirm_password" name="confirm_password" type="password" required
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                            class="appearance-none bg-[#1E1E2E] relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
                             placeholder="Confirm your password">
                     </div>
                 </div>
 
                 <!-- Emergency Contact -->
                 <div class="space-y-4">
-                    <h3 class="text-lg font-medium text-gray-900">Emergency Contact</h3>
-                    <p class="text-sm text-gray-500">This information will be used only in emergency situations.</p>
+                    <h3 class="text-lg font-medium text-[#D76D77]">Emergency Contact</h3>
+                    <p class="text-sm text-white">This information will be used only in emergency situations.</p>
                     <div>
-                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Name</label>
+                        <label for="emergency_contact_name" class="block text-sm font-medium text-[#D76D77] mb-1">Emergency Contact Name</label>
                         <input id="emergency_contact_name" name="emergency_contact_name" type="text"
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                            class="appearance-none bg-[#1E1E2E] relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
                             placeholder="Enter emergency contact name">
                     </div>
                     <div>
-                        <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Phone</label>
+                        <label for="emergency_contact_phone" class="block text-sm font-medium text-[#D76D77] mb-1">Emergency Contact Phone</label>
                         <input id="emergency_contact_phone" name="emergency_contact_phone" type="tel"
-                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                            class="appearance-none bg-[#1E1E2E] relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-white rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
                             placeholder="Enter emergency contact phone">
                     </div>
                 </div>
 
                 <div class="flex items-center">
                     <input id="terms" name="terms" type="checkbox" required
-                        class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded">
-                    <label for="terms" class="ml-2 block text-sm text-gray-900">
+                        class="h-4 w-4 bg-[#1E1E2E] text-pink-600 focus:ring-pink-500 border-gray-300 rounded">
+                    <label for="terms" class="ml-2 block text-sm text-white">
                         I agree to the
-                        <a href="#" class="font-medium text-pink-600 hover:text-pink-700 transition-colors duration-300">
+                        <a href="#" class="font-medium text-[#D76D77] hover:text-[#D76D77] transition-colors duration-300">
                             Terms and Conditions
                         </a>
                         and
-                        <a href="#" class="font-medium text-pink-600 hover:text-pink-700 transition-colors duration-300">
+                        <a href="#" class="font-medium text-[#D76D77] hover:text-[#D76D77] transition-colors duration-300">
                             Privacy Policy
                         </a>
                     </label>
@@ -137,7 +129,7 @@
 
                 <div>
                     <button type="submit"
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors duration-300">
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#5A2E83] hover:to-[#E77D87] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
                         Create Account
                     </button>
                 </div>

@@ -1,5 +1,17 @@
 <?php
 session_start();
+
+// Ensure profile image is loaded
+if (!isset($_SESSION['profile_image']) || empty($_SESSION['profile_image'])) {
+    // Try to load profile image if user is logged in but image is missing
+    if (isset($_SESSION['user_id'])) {
+        require_once 'includes/profile_image_handler.php';
+        $profileImage = getProfileImage($_SESSION['user_id']);
+        if ($profileImage) {
+            $_SESSION['profile_image'] = $profileImage;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -335,13 +347,34 @@ session_start();
         // Handle profile image upload
         function handleImageUpload(input) {
             if (input.files && input.files[0]) {
+                // Show preview immediately after selection
+                const reader = new FileReader();
+                const statusElement = document.getElementById('upload-status');
+                
+                reader.onload = function(e) {
+                    // Update all profile image containers in the document with preview
+                    const allProfileContainers = document.querySelectorAll('.w-12.h-12.rounded-full, .w-20.h-20.rounded-full');
+                    allProfileContainers.forEach(container => {
+                        // Clear any existing content
+                        container.innerHTML = '';
+                        // Create and append the image element
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'w-full h-full object-cover';
+                        img.alt = 'Profile Picture';
+                        container.appendChild(img);
+                    });
+                    
+                    statusElement.textContent = 'Image selected. Uploading...';
+                    statusElement.className = 'text-sm text-blue-400';
+                }
+                reader.readAsDataURL(input.files[0]);
+                
+                // Prepare form data for upload
                 const formData = new FormData();
                 formData.append('profile_image', input.files[0]);
 
-                const statusElement = document.getElementById('upload-status');
-                statusElement.textContent = 'Uploading...';
-                statusElement.className = 'text-sm text-blue-400';
-
+                // Send the image to server
                 fetch('includes/handle_profile_update.php', {
                     method: 'POST',
                     body: formData
@@ -349,27 +382,14 @@ session_start();
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update the profile image display
-                        const imageContainer = input.closest('.flex').querySelector('.rounded-full');
-                        const reader = new FileReader();
-                        
-                        // Update profile images with the server-returned path
-                        const imagePath = data.image_path;
-                        imageContainer.innerHTML = `<img src="${imagePath}" class="w-full h-full object-cover" alt="Profile Picture">`;
-                        
                         statusElement.textContent = 'Profile picture updated successfully!';
                         statusElement.className = 'text-sm text-green-400';
                         
-                        // Update all profile images across the site
-                        const profileImages = document.querySelectorAll('.profile-image');
-                        profileImages.forEach(img => {
-                            img.src = imagePath;
-                        });
-                        
-                        // Refresh the page to ensure all profile images are updated
+                        // We don't need to update the images again as we've already shown the preview
+                        // Just keep a short timeout to show the success message
                         setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
+                            statusElement.textContent = '';
+                        }, 3000);
                     } else {
                         statusElement.textContent = data.message || 'Error updating profile picture';
                         statusElement.className = 'text-sm text-red-400';
