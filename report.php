@@ -1,4 +1,3 @@
-
 <?php
 require_once 'mysqli_db.php';
 
@@ -67,6 +66,35 @@ $stmt->close();
             overflow-x: hidden;
         }
         
+        /* Main Content Container */
+        #mainContent {
+            max-width: 100%;
+            overflow-x: hidden !important;
+            padding: 2.5rem;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .grid {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .glass-card {
+            background: rgba(46, 46, 78, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(74, 30, 115, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .form-container {
+            max-height: none;
+            overflow-y: hidden;
+        }
+        
         /* Glassmorphic Effects */
         .glass-effect {
             background: rgba(46, 46, 78, 0.2);
@@ -76,12 +104,16 @@ $stmt->close();
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
         
-        .trae-sidebar {
+        .sidebar {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
             background: rgba(46, 46, 78, 0.3);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-right: 1px solid rgba(74, 30, 115, 0.3);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            height: 100vh;
+            overflow-y: auto;
         }
         
         .glass-card {
@@ -149,7 +181,7 @@ $stmt->close();
         
         .main-container {
             height: 100vh;
-            overflow-y: auto;
+            overflow-y: hidden;
         }
         
         .form-container {
@@ -195,24 +227,34 @@ $stmt->close();
             background: linear-gradient(135deg, rgba(74, 30, 115, 0.9), rgba(215, 109, 119, 0.9));
         }
         
-        /* Original sidebar behavior */
+        /* Responsive sidebar behavior */
         .sidebar-hidden { 
             transform: translateX(-100%);
+            opacity: 0;
         }
         .sidebar-visible { 
             transform: translateX(0);
+            opacity: 1;
         }
-        .toggle-moved { 
+        .toggle-moved {
             transform: translateX(16rem) translateY(-50%);
+            transition: transform 0.3s ease-in-out;
         }
-        .toggle-default { 
+        .toggle-default {
             transform: translateX(0) translateY(-50%);
+            transition: transform 0.3s ease-in-out;
         }
-        .content-shifted { 
+        .content-shifted {
             margin-left: 16rem;
+            transition: margin-left 0.3s ease-in-out;
         }
-        .content-full { 
+        .content-full {
             margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        #sidebarToggle {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
         }
         @keyframes pulse-ring {
             0% { transform: scale(0.33); }
@@ -238,14 +280,14 @@ $stmt->close();
         }
     </style>
 </head>
-<body class="text-[#F0F0F0]">
+<body class="text-[#F0F0F0] fixed inset-0 overflow-hidden">
     <!-- Background gradient shapes -->
     <div class="absolute -top-[300px] -right-[300px] w-[600px] h-[600px] bg-gradient-to-r from-[rgba(74,30,115,0.3)] to-[rgba(215,109,119,0.3)] rounded-full blur-3xl -z-10 animate-pulse-slow"></div>
     <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
     <!-- Main container -->
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside id="sidebar" class="trae-sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 transition-transform duration-300 ease-in-out sidebar-visible">
+        <aside id="sidebar" class="sidebar fixed w-64 text-white p-5 flex flex-col h-full z-40 sidebar-visible">
             <div class="flex items-center justify-between mb-5">
                 <div class="flex items-center space-x-4 w-full">
                     <div class="w-12 h-12 rounded-full bg-gradient-to-r from-[#4A1E73] to-[#D76D77] flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -308,16 +350,12 @@ $stmt->close();
         </aside>
 
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-moved hover:shadow-lg">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 toggle-moved hover:shadow-lg">
             <i class="fa-solid fa-bars"></i>
         </button>
 
         <!-- Main Content -->
-<<<<<<< HEAD
-        <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-shifted overflow-y-auto">
-=======
         <main id="mainContent" class="flex-1 p-10  content-shifted overflow-y-hidden  h-screen">
->>>>>>> bb86a9320735d005e8f40e406359fd125c1a41b9
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 animate-fade-in">
                 <!-- Report Form Tile -->
                 <div class="glass-card p-8 rounded-xl shadow-lg form-container">
@@ -517,12 +555,12 @@ $stmt->close();
 
                         <!-- Quick Actions -->
                         <div class="grid grid-cols-2 gap-2 mt-3">
-                            <button onclick="shareLocation()" class="p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all text-center group">
-                                <i class="fa-solid fa-location-dot text-blue-600 text-sm group-hover:scale-110 transition-transform"></i>
+                            <button onclick="shareLocation()" class="p-2 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#5A2E83] hover:to-[#E77D87] text-white rounded-lg transition-all text-center group">
+                                <i class="fa-solid fa-location-dot text-white text-sm group-hover:scale-110 transition-transform"></i>
                                 <p class="text-xs font-medium mt-1">Share Location</p>
                             </button>
-                            <button onclick="startLiveStream()" class="p-2 bg-purple-50 rounded-lg hover:bg-purple-100 transition-all text-center group">
-                                <i class="fa-solid fa-video text-purple-600 text-sm group-hover:scale-110 transition-transform"></i>
+                            <button onclick="startLiveStream()" class="p-2 bg-gradient-to-r from-[#4A1E73] to-[#D76D77] hover:from-[#5A2E83] hover:to-[#E77D87] text-white rounded-lg transition-all text-center group">
+                                <i class="fa-solid fa-video text-white text-sm group-hover:scale-110 transition-transform"></i>
                                 <p class="text-xs font-medium mt-1">Live Stream</p>
                             </button>
                         </div>
@@ -568,13 +606,7 @@ $stmt->close();
                 toggleButton.classList.add('toggle-default');
             }
         });
-<<<<<<< HEAD
-    </script>
     
-    <script>
-=======
-    
->>>>>>> bb86a9320735d005e8f40e406359fd125c1a41b9
     function sendEmergencyAlert(team, number) {
     if ("geolocation" in navigator) {
         showNotification('info', `Alerting ${team}...`);
@@ -620,6 +652,11 @@ $stmt->close();
                     timestamp: new Date().toISOString()
                 };
 
+                // Create a shareable location link for WhatsApp
+                const locationLink = `https://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+                const message = encodeURIComponent(`EMERGENCY! I need help! My current location: ${locationLink}`);
+                const whatsappLink = `https://wa.me/?text=${message}`;
+
                 fetch('emergency_handler.php', {
                     method: 'POST',
                     headers: {
@@ -629,23 +666,42 @@ $stmt->close();
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert('Emergency alert sent! Help is on the way.');
-                    if (confirm('Would you like to call emergency services?')) {
-                        window.location.href = 'tel:1800-102-4431';
-                    }
+                    showNotification('success', 'Emergency alert sent! Help is on the way.');
+                    
+                    // Create modal for sharing options
+                    const modal = document.createElement('div');
+                    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                    modal.innerHTML = `
+                        <div class="bg-[#2E2E4E] p-6 rounded-xl shadow-xl max-w-md w-full mx-4">
+                            <h3 class="text-xl font-bold text-white mb-4">Emergency Options</h3>
+                            <p class="text-white mb-4">Alert sent! What would you like to do next?</p>
+                            <div class="grid grid-cols-1 gap-3">
+                                <a href="${whatsappLink}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded flex items-center justify-center">
+                                    <i class="fab fa-whatsapp mr-2"></i> Share Location via WhatsApp
+                                </a>
+                                <a href="tel:1800-102-4431" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded flex items-center justify-center">
+                                    <i class="fas fa-phone-alt mr-2"></i> Call Emergency Services
+                                </a>
+                                <button onclick="this.parentNode.parentNode.parentNode.remove()" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
                 })
                 .catch(error => {
-                    alert('Unable to send alert. Calling emergency services...');
-                    window.location.href = 'tel:1800-102-4431';
+                    showNotification('error', 'Unable to send alert. Trying alternative options...');
+                    window.open(whatsappLink, '_blank');
                 });
             },
             function(error) {
-                alert('Please enable location access for emergency services.');
+                showNotification('error', 'Please enable location access for emergency services.');
                 window.location.href = 'tel:1800-102-4431';
             }
         );
     } else {
-        alert('Your device does not support location services.');
+        showNotification('error', 'Your device does not support location services.');
         window.location.href = 'tel:1800-102-4431';
     }
 }
@@ -656,6 +712,49 @@ $stmt->close();
                 alert('Number copied to clipboard!');
             });
         }
+        
+        function sendEmergencyAlert(contactName, phoneNumber) {
+            showNotification('info', `Sending alert to ${contactName}...`);
+            
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const alertData = {
+                        contact_name: contactName,
+                        phone_number: phoneNumber,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    
+                    fetch('emergency/emergency_handler.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(alertData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification('success', `Alert sent to ${contactName}`);
+                        } else {
+                            showNotification('error', data.message || 'Failed to send alert');
+                            window.location.href = `tel:${phoneNumber}`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('error', 'Failed to send alert. Calling directly...');
+                        window.location.href = `tel:${phoneNumber}`;
+                    });
+                },
+                function(error) {
+                    console.error('Geolocation error:', error);
+                    showNotification('error', 'Could not get your location. Calling directly...');
+                    window.location.href = `tel:${phoneNumber}`;
+                });
+            } else {
+                showNotification('error', 'Your device does not support location services.');
+                window.location.href = `tel:${phoneNumber}`;
+            }
+        }
 
         function shareLocation() {
             if (!("geolocation" in navigator)) {
@@ -665,45 +764,16 @@ $stmt->close();
 
             showNotification('info', 'Getting your location...');
 
-<<<<<<< HEAD
-                    // Also send alert to server in the background
-                    const emergencyData = {
-                        latitude: lat,
-                        longitude: lng,
-                        timestamp: new Date().toISOString()
-                    };
-                    
-                    fetch('emergency_handler.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(emergencyData)
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-                },
-                function(error) {
-                    console.error('Geolocation error:', error);
-                    showNotification('error', 'Please enable location access for emergency services.');
-                    setTimeout(() => {
-                        window.location.href = 'tel:1800-102-4431';
-                    }, 1500);
-                },
-                options
-            );
-        } else {
-            showNotification('error', 'Your device does not support location services.');
-            setTimeout(() => {
-                window.location.href = 'tel:1800-102-4431';
-            }, 1500);
-=======
             navigator.geolocation.getCurrentPosition(function(position) {
                 const locationData = {
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude
                 };
+                
+                // Create a shareable location link for WhatsApp
+                const locationLink = `https://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+                const message = encodeURIComponent(`My current location: ${locationLink}`);
+                const whatsappLink = `https://wa.me/?text=${message}`;
 
                 showNotification('info', 'Sending location...');
 
@@ -716,6 +786,28 @@ $stmt->close();
                 .then(data => {
                     if (data.success) {
                         showNotification('success', data.message);
+                        
+                        // Create modal for sharing options
+                        const modal = document.createElement('div');
+                        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                        modal.innerHTML = `
+                            <div class="bg-[#2E2E4E] p-6 rounded-xl shadow-xl max-w-md w-full mx-4">
+                                <h3 class="text-xl font-bold text-white mb-4">Share Your Location</h3>
+                                <p class="text-white mb-4">Your location has been saved. Would you like to share it with someone?</p>
+                                <div class="grid grid-cols-1 gap-3">
+                                    <a href="${whatsappLink}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded flex items-center justify-center">
+                                        <i class="fab fa-whatsapp mr-2"></i> Share via WhatsApp
+                                    </a>
+                                    <button onclick="navigator.clipboard.writeText('${locationLink}').then(() => showNotification('success', 'Link copied to clipboard!'))" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded flex items-center justify-center">
+                                        <i class="fas fa-copy mr-2"></i> Copy Link
+                                    </button>
+                                    <button onclick="this.parentNode.parentNode.parentNode.remove()" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(modal);
                     } else {
                         showNotification('error', data.message);
                     }
@@ -729,14 +821,70 @@ $stmt->close();
                 console.error('Geolocation error:', error);
                 showNotification('error', 'Please enable location access to share your location.');
             });
-        }      function startLiveStream() {
+        }
+        
+        function activateSOS() {
+            if (!("geolocation" in navigator)) {
+                showNotification('error', 'Your browser doesn\'t support location services.');
+                window.location.href = 'tel:1800-102-4431';
+                return;
+            }
+            
+            showNotification('info', 'SOS activated! Getting your current location...');
+            
+            navigator.geolocation.getCurrentPosition(function(position) {
+                // Create a shareable location link for WhatsApp
+                const locationLink = `https://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+                const emergencyMessage = encodeURIComponent(`EMERGENCY! I need help! My current location: ${locationLink}`);
+                const whatsappLink = `https://wa.me/?text=${emergencyMessage}`;
+                
+                showNotification('success', 'Location acquired! Ready to share.');
+                
+                // Create emergency modal with WhatsApp sharing option
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="bg-[#2E2E4E] p-6 rounded-xl shadow-xl max-w-md w-full mx-4 border-2 border-red-500">
+                        <h3 class="text-xl font-bold text-red-500 mb-4 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i> Emergency Alert
+                        </h3>
+                        <p class="text-white mb-4">Your location has been acquired. Share your live location with emergency contacts via WhatsApp or call emergency services.</p>
+                        <div class="grid grid-cols-1 gap-3">
+                            <a href="${whatsappLink}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded flex items-center justify-center">
+                                <i class="fab fa-whatsapp mr-2"></i> Share Location via WhatsApp
+                            </a>
+                            <button onclick="navigator.clipboard.writeText('${locationLink}').then(() => showNotification('success', 'Location link copied to clipboard!'))" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded flex items-center justify-center">
+                                <i class="fas fa-copy mr-2"></i> Copy Location Link
+                            </button>
+                            <a href="tel:1800-102-4431" class="bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded flex items-center justify-center">
+                                <i class="fas fa-phone-alt mr-2"></i> Call Emergency (1800-102-4431)
+                            </a>
+                            <button onclick="this.parentNode.parentNode.parentNode.remove()" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            },
+            function(error) {
+                console.error('Geolocation error:', error);
+                showNotification('error', 'Could not get your location. Calling emergency number...');
+                window.location.href = 'tel:1800-102-4431';
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        }
+        
+        function startLiveStream() {
             const streamWindow = window.open('live_stream.php', 'SheShield Live Stream', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
             if (streamWindow) {
                 streamWindow.focus();
             } else {
                 showNotification('error', 'Please allow pop-ups to start live stream');
             }
->>>>>>> bb86a9320735d005e8f40e406359fd125c1a41b9
         }
 
         // Safety Tips Rotation
@@ -775,59 +923,6 @@ $stmt->close();
     </script>
 
     <script>
-<<<<<<< HEAD
-        // Location handling for the report form
-        document.addEventListener('DOMContentLoaded', function() {
-            const locationInput = document.getElementById('locationInput');
-            const searchResults = document.getElementById('searchResults');
-            const latitudeInput = document.getElementById('latitude');
-            const longitudeInput = document.getElementById('longitude');
-            
-            // Get current location when the page loads
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    // Store coordinates in hidden fields
-                    latitudeInput.value = position.coords.latitude;
-                    longitudeInput.value = position.coords.longitude;
-                    
-                    // Reverse geocode to get location name
-                    reverseGeocode(position.coords.latitude, position.coords.longitude);
-                }, function(error) {
-                    console.error("Error getting location:", error);
-                });
-            }
-            
-            // Function to reverse geocode coordinates to address
-            function reverseGeocode(lat, lng) {
-                // This is a simple example - in a real app, you might use a geocoding service
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data && data.display_name) {
-                            locationInput.value = data.display_name;
-                        }
-                    })
-                    .catch(error => console.error("Reverse geocoding error:", error));
-            }
-            
-            // When user selects a location from search results
-            searchResults.addEventListener('click', function(e) {
-                if (e.target && e.target.dataset.lat && e.target.dataset.lng) {
-                    // Update hidden fields with coordinates
-                    latitudeInput.value = e.target.dataset.lat;
-                    longitudeInput.value = e.target.dataset.lng;
-                    
-                    // Update location input with selected location name
-                    locationInput.value = e.target.textContent;
-                    
-                    // Hide search results
-                    searchResults.classList.add('hidden');
-                }
-            });
-        });
-    </script>
-
-=======
     document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
@@ -849,7 +944,6 @@ $stmt->close();
     </html>
 
     <script src="sidebar.js"></script>
->>>>>>> bb86a9320735d005e8f40e406359fd125c1a41b9
     <script src="location.js"></script>
 </body>
 </html>
