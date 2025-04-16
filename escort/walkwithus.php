@@ -486,7 +486,7 @@ function showEscortProfile(escortId) {
                 </div>
 
                 <!-- Loading Animation (Initially Hidden) -->
-                <div id="loadingAnimation" class="hidden fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+                <div id="loadingAnimation" class="fixed top-0 left-0 w-full h-full items-center justify-center bg-gray-900 bg-opacity-50 z-50" style="display: none;">
                     <div class="bg-gray-800 p-8 rounded-lg flex flex-col items-center">
                         <div class="loading-spinner mb-4"></div>
                         <p class="text-white text-lg">Finding an escort...</p>

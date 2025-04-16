@@ -1,29 +1,13 @@
+
 <?php
 require_once 'mysqli_db.php';
 
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    // Redirect to login page if user is not logged in
-    header('Location: auth/login.php');
-    exit();
+    die('User not logged in');
 }
-
-// Get user_id and ensure it's an integer
-$user_id = (int)$_SESSION['user_id'];
-
-// Verify user exists in the database
-$check_user = $conn->prepare("SELECT id FROM users WHERE id = ?");
-$check_user->bind_param("i", $user_id);
-$check_user->execute();
-$result = $check_user->get_result();
-
-if ($result->num_rows === 0) {
-    // User doesn't exist in the database
-    session_destroy();
-    header('Location: auth/login.php');
-    exit();
-}
+$user_id = $_SESSION['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate required fields
@@ -50,11 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Combine date and time into a single datetime value
     $date_time = $incident_date . ' ' . $incident_time;
     
-    // Get latitude and longitude if available
-    $latitude = isset($_POST['latitude']) ? $_POST['latitude'] : NULL;
-    $longitude = isset($_POST['longitude']) ? $_POST['longitude'] : NULL;
-    
-    // Insert into database (without latitude and longitude since they don't exist in the table)
+    // Insert into database
     $stmt = $conn->prepare("INSERT INTO incidents (user_id, incident_type, description, location, date_time, status) VALUES (?, ?, ?, ?, ?, 'pending')");
     $stmt->bind_param("issss", $user_id, $incident_type, $description, $location_name, $date_time);
 
@@ -131,6 +111,8 @@ $stmt->close();
             border: 1px solid rgba(215, 109, 119, 0.2);
             transform: translateX(5px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
+            color: #F0F0F0;
         }
         
         .form-input:focus {
@@ -292,29 +274,34 @@ $stmt->close();
             </div>
             <nav>
                 <ul>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="dashboard.php" class="w-full"><i class="fa-solid fa-house"></i> <span>Home</span></a>
+                <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer " onclick="window.location.href='dashboard.php'">
+                        <i class="fa-solid fa-house"></i> <span>Home</span>
                     </li>
-                    <li class="trae-sidebar-item active p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="report.php" class="w-full"><i class="fa-solid fa-file"></i> <span>Report</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer active" onclick="window.location.href='report.php'">
+                        <i class="fa-solid fa-file"></i> <span>Reports</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="analytics.php" class="w-full"><i class="fa-solid fa-chart-bar"></i> <span>Analytics</span></a>
+                    <li>
+                        <a href="analytics.php" class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <i class="fa-solid fa-chart-bar"></i> <span>Analytics</span>
+                        </a>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="map.php" class="w-full"><i class="fa-solid fa-map"></i> <span>Map</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='map.php'">
+                        <i class="fa-solid fa-map"></i> <span>Map</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="safespace.php" class="w-full"><i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='safespace.php'">
+                        <i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="walkwithus.php" class="w-full"><i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='walkwithus.php'">
+                        <i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="templates.php" class="w-full"><i class="fa-solid fa-file-lines"></i> <span>Templates</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='templates.php'">
+                        <i class="fa-solid fa-file-lines"></i> <span>Templates</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="settings.php" class="w-full"><i class="fa-solid fa-gear"></i> <span>Settings</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='settings.php'">
+                        <i class="fa-solid fa-gear"></i> <span>Settings</span>
+                    </li>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='auth/logout.php'">
+                        <i class="fa-solid fa-sign-out-alt"></i> <span>Logout</span>
                     </li>
                 </ul>
             </nav>
@@ -326,7 +313,11 @@ $stmt->close();
         </button>
 
         <!-- Main Content -->
+<<<<<<< HEAD
         <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out content-shifted overflow-y-auto">
+=======
+        <main id="mainContent" class="flex-1 p-10  content-shifted overflow-y-hidden  h-screen">
+>>>>>>> bb86a9320735d005e8f40e406359fd125c1a41b9
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 animate-fade-in">
                 <!-- Report Form Tile -->
                 <div class="glass-card p-8 rounded-xl shadow-lg form-container">
@@ -415,9 +406,6 @@ $stmt->close();
                                 >
                                 <div id="searchResults" class="absolute w-full mt-1 rounded-md shadow-lg hidden glass-effect"></div>
                             </div>
-                            <!-- Hidden fields for coordinates -->
-                            <input type="hidden" name="latitude" id="latitude" value="">
-                            <input type="hidden" name="longitude" id="longitude" value="">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-[#FF9B9B] mb-2">Description</label>
@@ -529,31 +517,23 @@ $stmt->close();
 
                         <!-- Quick Actions -->
                         <div class="grid grid-cols-2 gap-2 mt-3">
-                            <button onclick="shareLocation()" class="p-2 bg-gradient-to-r from-[rgba(74,30,115,0.7)] to-[rgba(215,109,119,0.7)] rounded-lg hover:from-[rgba(74,30,115,0.8)] hover:to-[rgba(215,109,119,0.8)] transition-all text-center group">
-                                <i class="fa-solid fa-location-dot text-white text-sm group-hover:scale-110 transition-transform"></i>
-                                <p class="text-xs font-medium mt-1 text-white">Share Location</p>
+                            <button onclick="shareLocation()" class="p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all text-center group">
+                                <i class="fa-solid fa-location-dot text-blue-600 text-sm group-hover:scale-110 transition-transform"></i>
+                                <p class="text-xs font-medium mt-1">Share Location</p>
                             </button>
-                            <button onclick="startLiveStream()" class="p-2 bg-gradient-to-r from-[rgba(74,30,115,0.7)] to-[rgba(215,109,119,0.7)] rounded-lg hover:from-[rgba(74,30,115,0.8)] hover:to-[rgba(215,109,119,0.8)] transition-all text-center group">
-                                <i class="fa-solid fa-video text-white text-sm group-hover:scale-110 transition-transform"></i>
-                                <p class="text-xs font-medium mt-1 text-white">Live Stream</p>
+                            <button onclick="startLiveStream()" class="p-2 bg-purple-50 rounded-lg hover:bg-purple-100 transition-all text-center group">
+                                <i class="fa-solid fa-video text-purple-600 text-sm group-hover:scale-110 transition-transform"></i>
+                                <p class="text-xs font-medium mt-1">Live Stream</p>
                             </button>
                         </div>
 
-                        <!-- Safety Tips & Emergency Button -->
-                        <div class="p-2 glass-effect rounded-lg border border-[rgba(215,109,119,0.2)] mt-3 hover:border-[rgba(215,109,119,0.4)] transition-all duration-300">
-                            <h3 class="font-semibold text-[#FF9B9B] flex items-center text-xs mb-1">
+                        <!-- Safety Tips -->
+                        <div class="p-2 bg-gray-50 rounded-lg border border-gray-100 mt-3">
+                            <h3 class="font-semibold text-gray-700 flex items-center text-xs mb-1">
                                 <i class="fa-solid fa-shield-heart mr-2 text-[#D12E79]"></i>
                                 Safety Tips
                             </h3>
-                            <div id="safetyTips" class="text-sm text-white font-medium mb-2"></div>
-                            
-                            <!-- Emergency SOS Button -->
-                            <button onclick="activateSOS()" class="w-full mt-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 transform hover:scale-[1.02]">
-                                <div class="relative h-5 w-5 emergency-pulse bg-white rounded-full flex items-center justify-center">
-                                    <i class="fas fa-exclamation-triangle text-red-600 text-xs"></i>
-                                </div>
-                                <span class="font-bold">EMERGENCY SOS</span>
-                            </button>
+                            <div id="safetyTips" class="text-xs text-gray-600"></div>
                         </div>
                     </div>
                 </div>
@@ -588,9 +568,13 @@ $stmt->close();
                 toggleButton.classList.add('toggle-default');
             }
         });
+<<<<<<< HEAD
     </script>
     
     <script>
+=======
+    
+>>>>>>> bb86a9320735d005e8f40e406359fd125c1a41b9
     function sendEmergencyAlert(team, number) {
     if ("geolocation" in navigator) {
         showNotification('info', `Alerting ${team}...`);
@@ -627,105 +611,61 @@ $stmt->close();
 
 
     function activateSOS() {
-        // Create confirmation dialog
-        const confirmDialog = document.createElement('div');
-        confirmDialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-        confirmDialog.innerHTML = `
-            <div class="bg-gradient-to-r from-[#1E1E2E] to-[#2E2E4E] p-6 rounded-xl shadow-lg max-w-md w-full glass-effect border border-[rgba(215,109,119,0.3)]">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold text-[#FF9B9B]">Emergency SOS</h3>
-                    <div class="relative h-8 w-8 emergency-pulse bg-red-500 rounded-full flex items-center justify-center">
-                        <i class="fas fa-exclamation-triangle text-white"></i>
-                    </div>
-                </div>
-                <p class="text-white mb-6">Are you sure you want to activate the emergency SOS? This will alert emergency services and share your location.</p>
-                <div class="flex justify-between">
-                    <button id="cancelSOS" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors">Cancel</button>
-                    <button id="confirmSOS" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors">Activate SOS</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(confirmDialog);
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const emergencyData = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    timestamp: new Date().toISOString()
+                };
 
-        // Handle cancel button
-        document.getElementById('cancelSOS').addEventListener('click', function() {
-            confirmDialog.remove();
-        });
-
-        // Handle confirm button
-        document.getElementById('confirmSOS').addEventListener('click', function() {
-            confirmDialog.remove();
-            sendSOSAlert(); // Directly call sendSOSAlert without countdown
-        });
-    }
-
-    function sendSOSAlert() {
-        if ("geolocation" in navigator) {
-            showNotification('info', 'Getting your location...');
-            
-            // Options for better geolocation accuracy
-            const options = {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            };
-            
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    showNotification('info', 'Preparing WhatsApp link...');
-                    
-                    // Get coordinates
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    // Create a detailed emergency message with Google Maps link
-                    const currentTime = new Date().toLocaleTimeString();
-                    const currentDate = new Date().toLocaleDateString();
-                    const message = `🚨 EMERGENCY ALERT 🚨\n\nI need immediate help at this location!\n\n📍 Location: https://maps.google.com/?q=${lat},${lng}\n\n⏰ Sent at: ${currentTime} on ${currentDate}\n\nPlease contact emergency services if you receive this message.`;
-                    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-                    
-                    // Create status dialog with WhatsApp sharing option
-                    const statusDialog = document.createElement('div');
-                    statusDialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-                    statusDialog.innerHTML = `
-                        <div class="bg-gradient-to-r from-[#1E1E2E] to-[#2E2E4E] p-6 rounded-xl shadow-lg max-w-md w-full glass-effect border border-[rgba(215,109,119,0.3)]">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-xl font-bold text-[#FF9B9B]">Emergency Response</h3>
-                                <div class="relative h-8 w-8 emergency-pulse bg-green-500 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-check text-white"></i>
-                                </div>
-                            </div>
-                            <p class="text-white mb-4">Your location is ready to share.</p>
-                            <div class="bg-gray-800 p-3 rounded mb-4">
-                                <p class="text-sm text-white"><i class="fas fa-map-marker-alt text-[#FF9B9B] mr-2"></i>Your coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}</p>
-                            </div>
-                            <div class="flex flex-col space-y-3">
-                                <button id="shareWhatsApp" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"><i class="fab fa-whatsapp mr-2"></i>Share Location via WhatsApp</button>
-                                <div class="flex justify-between">
-                                    <button id="callEmergency" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"><i class="fas fa-phone mr-2"></i>Call Emergency</button>
-                                    <button id="closeStatus" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(statusDialog);
-                    
-                    // Handle WhatsApp share button - direct WhatsApp sharing
-                    document.getElementById('shareWhatsApp').addEventListener('click', function() {
-                        window.open(whatsappUrl, '_blank');
-                        showNotification('success', 'Opening WhatsApp to share your location');
-                    });
-                    
-                    // Handle call emergency button
-                    document.getElementById('callEmergency').addEventListener('click', function() {
+                fetch('emergency_handler.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(emergencyData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Emergency alert sent! Help is on the way.');
+                    if (confirm('Would you like to call emergency services?')) {
                         window.location.href = 'tel:1800-102-4431';
-                    });
-                    
-                    // Handle close button
-                    document.getElementById('closeStatus').addEventListener('click', function() {
-                        statusDialog.remove();
-                    });
+                    }
+                })
+                .catch(error => {
+                    alert('Unable to send alert. Calling emergency services...');
+                    window.location.href = 'tel:1800-102-4431';
+                });
+            },
+            function(error) {
+                alert('Please enable location access for emergency services.');
+                window.location.href = 'tel:1800-102-4431';
+            }
+        );
+    } else {
+        alert('Your device does not support location services.');
+        window.location.href = 'tel:1800-102-4431';
+    }
+}
 
+
+        function copyNumber(number) {
+            navigator.clipboard.writeText(number).then(() => {
+                alert('Number copied to clipboard!');
+            });
+        }
+
+        function shareLocation() {
+            if (!("geolocation" in navigator)) {
+                showNotification('error', 'Your browser doesn\'t support location sharing.');
+                return;
+            }
+
+            showNotification('info', 'Getting your location...');
+
+<<<<<<< HEAD
                     // Also send alert to server in the background
                     const emergencyData = {
                         latitude: lat,
@@ -758,110 +698,46 @@ $stmt->close();
             setTimeout(() => {
                 window.location.href = 'tel:1800-102-4431';
             }, 1500);
-        }
-    }
-    function copyNumber(number) {
-        navigator.clipboard.writeText(number).then(() => {
-            alert('Number copied to clipboard!');
-        });
-    }
+=======
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const locationData = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                };
 
-    function shareLocation() {
-        if (!("geolocation" in navigator)) {
-            showNotification('error', 'Your browser doesn\'t support location sharing.');
-            return;
-        }
+                showNotification('info', 'Sending location...');
 
-        showNotification('info', 'Getting your location...');
-
-        // Add options for better geolocation accuracy
-        const options = {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        };
-
-        navigator.geolocation.getCurrentPosition(function(position) {
-            const locationData = {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude
-            };
-
-            showNotification('info', 'Sending location...');
-
-            fetch('share_location.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(locationData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    showNotification('success', data.message);
-                } else {
-                    showNotification('error', data.message || 'Failed to share location');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('error', 'Failed to share location: ' + error.message);
+                fetch('share_location.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(locationData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('success', data.message);
+                    } else {
+                        showNotification('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('error', 'Failed to share location');
+                });
+            }, 
+            function(error) {
+                console.error('Geolocation error:', error);
+                showNotification('error', 'Please enable location access to share your location.');
             });
-        }, 
-        function(error) {
-            console.error('Geolocation error:', error);
-            let errorMsg = 'Please enable location access to share your location.';
-            
-            // Provide more specific error messages
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMsg = 'Location permission denied. Please enable location access in your browser settings.';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMsg = 'Location information is unavailable. Please try again later.';
-                    break;
-                case error.TIMEOUT:
-                    errorMsg = 'Location request timed out. Please try again.';
-                    break;
+        }      function startLiveStream() {
+            const streamWindow = window.open('live_stream.php', 'SheShield Live Stream', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
+            if (streamWindow) {
+                streamWindow.focus();
+            } else {
+                showNotification('error', 'Please allow pop-ups to start live stream');
             }
-            
-            showNotification('error', errorMsg);
-        }, options);
-    }
-        
-    function startLiveStream() {
-        showNotification('info', 'Starting live stream...');
-        
-        // Check if browser supports getUserMedia before opening the window
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            showNotification('error', 'Your browser does not support webcam access');
-            return;
+>>>>>>> bb86a9320735d005e8f40e406359fd125c1a41b9
         }
-        
-        // Request camera permission first
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                // Stop the stream immediately, we just needed to check permission
-                stream.getTracks().forEach(track => track.stop());
-                
-                // Now open the live stream window
-                const streamWindow = window.open('live_stream.php', 'SheShield Live Stream', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
-                if (streamWindow) {
-                    streamWindow.focus();
-                    showNotification('success', 'Live stream started');
-                } else {
-                    showNotification('error', 'Please allow pop-ups to start live stream');
-                }
-            })
-            .catch(err => {
-                console.error('Camera access error:', err);
-                showNotification('error', 'Camera access denied. Please allow camera access in your browser settings.');
-            });
-    }
 
         // Safety Tips Rotation
         const tips = [
@@ -899,6 +775,7 @@ $stmt->close();
     </script>
 
     <script>
+<<<<<<< HEAD
         // Location handling for the report form
         document.addEventListener('DOMContentLoaded', function() {
             const locationInput = document.getElementById('locationInput');
@@ -950,6 +827,29 @@ $stmt->close();
         });
     </script>
 
+=======
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        let isSidebarVisible = true;
+    
+        sidebarToggle.addEventListener('click', function() {
+            isSidebarVisible = !isSidebarVisible;
+            sidebar.classList.toggle('sidebar-hidden');
+            sidebar.classList.toggle('sidebar-visible');
+            mainContent.classList.toggle('content-shifted');
+            mainContent.classList.toggle('content-full');
+            sidebarToggle.classList.toggle('toggle-moved');
+            sidebarToggle.classList.toggle('toggle-default');
+        });
+    });
+    </script>
+    </body>
+    </html>
+
+    <script src="sidebar.js"></script>
+>>>>>>> bb86a9320735d005e8f40e406359fd125c1a41b9
     <script src="location.js"></script>
 </body>
 </html>

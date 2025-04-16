@@ -28,6 +28,7 @@ $user_id = $_SESSION['user_id'];
             background: linear-gradient(135deg, #1E1E2E 0%, #2E2E4E 100%);
             min-height: 100vh;
             overflow-x: hidden;
+            overflow-y: hidden;
         }
         
         /* Glassmorphic Effects */
@@ -70,6 +71,7 @@ $user_id = $_SESSION['user_id'];
             border: 1px solid rgba(215, 109, 119, 0.2);
             transform: translateX(5px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, rgba(74, 30, 115, 0.5), rgba(215, 109, 119, 0.5));
             color: #F0F0F0;
         }
         
@@ -132,6 +134,7 @@ $user_id = $_SESSION['user_id'];
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
     <!-- Leaflet.markercluster CSS -->
+    <link href="/src/trae-theme.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     
@@ -174,29 +177,34 @@ $user_id = $_SESSION['user_id'];
             </div>
             <nav>
                 <ul>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="dashboard.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-house"></i> <span>Home</span></a>
+                <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer active" onclick="window.location.href='dashboard.php'">
+                        <i class="fa-solid fa-house"></i> <span>Home</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="report.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-file"></i> <span>Reports</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='report.php'">
+                        <i class="fa-solid fa-file"></i> <span>Reports</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="analytics.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-chart-bar"></i> <span>Analytics</span></a>
+                    <li>
+                        <a href="analytics.php" class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
+                        <i class="fa-solid fa-chart-bar"></i> <span>Analytics</span>
+                        </a>
                     </li>
-                    <li class="trae-sidebar-item active p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="map.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-map"></i> <span>Map</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='map.php'">
+                        <i class="fa-solid fa-map"></i> <span>Map</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="safespace.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='safespace.php'">
+                        <i class="fa-solid fa-shield-heart"></i> <span>Safe Space</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="walkwithus.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='walkwithus.php'">
+                        <i class="fa-solid fa-person-walking"></i> <span>Walk With Us</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="templates.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-file-lines"></i> <span>Templates</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='templates.php'">
+                        <i class="fa-solid fa-file-lines"></i> <span>Templates</span>
                     </li>
-                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer">
-                        <a href="settings.php" class="w-full flex items-center space-x-2"><i class="fa-solid fa-gear"></i> <span>Settings</span></a>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='settings.php'">
+                        <i class="fa-solid fa-gear"></i> <span>Settings</span>
+                    </li>
+                    <li class="trae-sidebar-item p-3 rounded flex items-center space-x-2 cursor-pointer" onclick="window.location.href='auth/logout.php'">
+                        <i class="fa-solid fa-sign-out-alt"></i> <span>Logout</span>
                     </li>
                 </ul>
             </nav>
@@ -209,16 +217,28 @@ $user_id = $_SESSION['user_id'];
 
         <!-- Main Content -->
         <main id="mainContent" class="flex-1 p-10 transition-all duration-300 ease-in-out">
-            <div id="content" class="flex flex-col md:flex-row gap-6 w-full max-w-screen-xl mx-auto px-4">
-                <!-- Map Section -->
-                <div class="w-full md:w-[70%] h-[calc(100vh-10rem)] rounded-lg shadow-lg glass-effect">
+            <div id="content" class="flex flex-col gap-6 w-full max-w-screen-xl mx-auto px-4">
+                <!-- Heat Map Description -->
+                <div class="glass-effect p-6 rounded-lg shadow-lg mb-2">
+                    <h2 class="text-2xl font-bold mb-3 text-gradient flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        Campus Safety Heat Map
+                    </h2>
+                    <p class="text-white leading-relaxed">
+                        This interactive heat map visualizes safety incident density across campus areas. Red zones indicate higher incident concentration, while green areas show lower activity. Use this map to identify safe routes and stay informed about campus safety patterns.
+                    </p>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Map Section -->
+                    <div class="w-full md:w-[70%] h-[calc(100vh-15rem)] rounded-lg shadow-lg glass-effect">
                     <div id="map" class="w-full h-full rounded-lg"></div>
                 </div>
 
                 <!-- Dashboard Tiles -->
-                <div class="w-full md:w-[40%] space-y-6 overflow-y-auto max-h-[calc(100vh-10rem)]">
+                <div class="w-full md:w-[40%] space-y-6 overflow-y-hidden max-h-[calc(100vh-10rem)]">
                     <!-- Active Incidents Tile -->
-                    <div class="glass-effect p-4 rounded-lg shadow-lg mb-6" style="height: 300px; overflow-y: auto;">
+                    <div class="glass-effect p-4 rounded-lg shadow-lg mb-6" style="height: 450px; overflow-y: auto;">
                         <h2 class="text-xl font-bold mb-4 flex items-center space-x-2">
                             <i class="fa-solid fa-bell text-red-500"></i>
                             <span>Active Incidents</span>

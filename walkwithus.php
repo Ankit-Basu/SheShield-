@@ -37,6 +37,60 @@ function getEscortProfile($escortId) {
 Handle sidebar toggle functionality
 
 </script> -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+    const toggleButton = document.getElementById('sidebarToggle');
+    
+    // Get initial state from localStorage or screen size
+    let isSidebarVisible = localStorage.getItem('sidebarVisible') !== null ?
+        localStorage.getItem('sidebarVisible') === 'true' :
+        window.innerWidth >= 768;
+
+    function updateSidebarState(visible, saveState = true) {
+        isSidebarVisible = visible;
+        
+        // Save state to localStorage
+        if (saveState) {
+            localStorage.setItem('sidebarVisible', visible);
+        }
+
+        // Update DOM with CSS classes
+        if (visible) {
+            sidebar.style.transform = 'translateX(0)';
+            sidebar.style.opacity = '1';
+            toggleButton.style.transform = 'translateX(16rem) translateY(-50%)';
+            mainContent.style.marginLeft = '16rem';
+        } else {
+            sidebar.style.transform = 'translateX(-100%)';
+            sidebar.style.opacity = '0';
+            toggleButton.style.transform = 'translateX(0) translateY(-50%)';
+            mainContent.style.marginLeft = '0';
+        }
+    }
+
+    // Set initial state without saving
+    updateSidebarState(isSidebarVisible, false);
+
+    // Handle window resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            const shouldBeVisible = window.innerWidth >= 768;
+            if (shouldBeVisible !== isSidebarVisible) {
+                updateSidebarState(shouldBeVisible);
+            }
+        }, 250);
+    });
+
+    // Handle toggle button click
+    toggleButton.addEventListener('click', function() {
+        updateSidebarState(!isSidebarVisible);
+    });
+});
+</script>
 
     <style>
         body {
@@ -284,12 +338,47 @@ Handle sidebar toggle functionality
             display: block;
             visibility: visible;
         }
-        .sidebar-hidden { transform: translateX(-100%); }
-        .sidebar-visible { transform: translateX(0); }
-        .toggle-moved { transform: translateX(16rem) translateY(-50%); }
-        .toggle-default { transform: translateX(0) translateY(-50%); }
-        .content-shifted { margin-left: 16rem; }
-        .content-full { margin-left: 0; }
+        /* Sidebar behavior */
+        .sidebar-hidden { 
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        .sidebar-visible { 
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .toggle-moved { 
+            transform: translateX(16rem) translateY(-50%);
+        }
+        .toggle-default { 
+            transform: translateX(0) translateY(-50%);
+        }
+        .content-shifted { 
+            margin-left: 16rem;
+            transition: all 0.3s ease-in-out;
+        }
+        .content-full { 
+            margin-left: 0;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        #sidebarToggle {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+        
+        @media (min-width: 768px) {
+            #sidebar {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            #sidebarToggle {
+                transform: translateX(16rem) translateY(-50%);
+            }
+            #mainContent {
+                margin-left: 16rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-[#1E1E2E] text-[#F0F0F0] overflow-hidden">
@@ -299,7 +388,7 @@ Handle sidebar toggle functionality
         <div class="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-gradient-to-r from-[rgba(215,109,119,0.2)] to-[rgba(74,30,115,0.2)] rounded-full blur-3xl -z-10 animate-pulse-slow opacity-70"></div>
     <div class="flex h-screen">
         <!-- Sidebar Toggle Button -->
-        <button id="sidebarToggle" class="fixed left-0 top-1/2 glass-effect bg-gradient-to-r from-[rgba(74,30,115,0.5)] to-[rgba(215,109,119,0.5)] text-white p-3 rounded-r z-50 transition-transform duration-300 ease-in-out toggle-moved hover:shadow-lg">
+        <button id="sidebarToggle" class="fixed left-0 top-1/2 text-white p-3 rounded-r z-50 transition-all duration-300 ease-in-out toggle-default toggle-moved hover:shadow-lg hover:translate-x-1 bg-gradient-to-r from-[rgba(74,30,115,0.8)] to-[rgba(215,109,119,0.8)] backdrop-blur-md border border-[rgba(215,109,119,0.3)]">
             <i class="fas fa-bars"></i>
         </button>
         <!-- Sidebar -->
