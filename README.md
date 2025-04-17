@@ -7,13 +7,13 @@
 </div>
 
 <p align="center">
-  <a href="#key-features">Features</a> •
-  <a href="#application-screenshots">Screenshots</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#installation-and-setup">Installation</a> •
-  <a href="#project-structure">Project Structure</a> •
-  <a href="#security-considerations">Security</a> •
-  <a href="#future-enhancements">Roadmap</a>
+  <a href="#-key-features">Features</a> •
+  <a href="#-application-screenshots">Screenshots</a> •
+  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-installation-and-setup">Installation</a> •
+  <a href="#-project-structure">Project Structure</a> •
+  <a href="#-security-considerations">Security</a> •
+  <a href="#-future-enhancements">Roadmap</a>
 </p>
 
 ## 🌟 Project Overview
