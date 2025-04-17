@@ -67,7 +67,7 @@ if (isset($_GET['escort_id']) || isset($_GET['email'])) {
         require_once 'config/email_config.php';
         
         // Server settings
-        $mail->SMTPDebug = 2; // Enable verbose debug output
+        $mail->SMTPDebug = 3; // Enable more verbose debug output
         $mail->isSMTP();
         $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
@@ -75,6 +75,16 @@ if (isset($_GET['escort_id']) || isset($_GET['email'])) {
         $mail->Password = SMTP_PASSWORD; // Your Gmail password or App Password
         $mail->SMTPSecure = SMTP_ENCRYPTION === 'tls' ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port = SMTP_PORT;
+        
+        // Additional settings to help with connection issues
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+        $mail->Timeout = 60; // Set timeout to 60 seconds
         
         // Recipients
         $mail->setFrom(DEFAULT_FROM_EMAIL, DEFAULT_FROM_NAME);

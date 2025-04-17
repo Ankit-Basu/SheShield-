@@ -250,16 +250,20 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                     </div>
 
                     <!-- Average Response Time -->
-                    <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
-                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r text-[#F0F0F0]  bg-clip-text">Average Response Time</h2>
-                        <canvas id="responseTimeChart"></canvas>
+                    <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)] shadow-lg">
+                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r from-[#D76D77] to-[#AB1E5C] text-transparent bg-clip-text">Average Response Time</h2>
+                        <div class="h-64">
+                            <canvas id="responseTimeChart"></canvas>
+                        </div>
                     </div>
 
 
                 
-                   <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)]">
-                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r text-[#F0F0F0]  bg-clip-text">Safety Score Trend</h2>
-                        <canvas id="safetyScoreChart"></canvas>
+                   <div class="glass-effect p-6 rounded-lg transition-all duration-300 hover:transform hover:scale-105 hover:border-[rgba(215,109,119,0.3)] border border-[rgba(74,30,115,0.2)] shadow-lg">
+                        <h2 class="text-xl font-semibold mb-4 bg-gradient-to-r from-[#D76D77] to-[#AB1E5C] text-transparent bg-clip-text">Safety Score Trend</h2>
+                        <div class="h-64">
+                            <canvas id="safetyScoreChart"></canvas>
+                        </div>
                     </div>
 
                 </div>
@@ -364,20 +368,40 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                             datasets: [{
                                 label: 'Average Response Time (Hours)',
                                 data: <?php echo json_encode(array_values($response_time_data)); ?>,
-                                borderColor: '#36A2EB',
-                                backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                                borderWidth: 2,
+                                borderColor: '#D76D77',
+                                backgroundColor: 'rgba(215, 109, 119, 0.3)',
+                                borderWidth: 3,
+                                pointBackgroundColor: '#AB1E5C',
+                                pointBorderColor: '#fff',
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
                                 fill: true,
                                 tension: 0.4
                             }]
                         },
                         options: {
                             responsive: true,
+                            maintainAspectRatio: false,
                             plugins: {
                                 legend: {
-                                    position: 'bottom'
+                                    position: 'bottom',
+                                    labels: {
+                                        font: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        },
+                                        color: '#F0F0F0'
+                                    }
                                 },
                                 tooltip: {
+                                    backgroundColor: 'rgba(74, 30, 115, 0.8)',
+                                    titleFont: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    },
+                                    bodyFont: {
+                                        size: 14
+                                    },
                                     callbacks: {
                                         label: function(context) {
                                             return `Response Time: ${context.raw.toFixed(1)} hours`;
@@ -388,17 +412,37 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                             scales: {
                                 y: {
                                     beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(255, 255, 255, 0.1)'
+                                    },
+                                    ticks: {
+                                        color: '#F0F0F0',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    },
                                     title: {
                                         display: true,
                                         text: 'Hours',
-                                        font: { weight: 'bold' }
+                                        color: '#F0F0F0',
+                                        font: { weight: 'bold', size: 14 }
                                     }
                                 },
                                 x: {
+                                    grid: {
+                                        color: 'rgba(255, 255, 255, 0.1)'
+                                    },
+                                    ticks: {
+                                        color: '#F0F0F0',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    },
                                     title: {
                                         display: true,
                                         text: 'Date',
-                                        font: { weight: 'bold' }
+                                        color: '#F0F0F0',
+                                        font: { weight: 'bold', size: 14 }
                                     }
                                 }
                             }
@@ -413,20 +457,40 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                             datasets: [{
                                 label: 'Safety Score',
                                 data: <?php echo json_encode(array_values($safety_score_data)); ?>,
-                                borderColor: '#4BC0C0',
-                                backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                                borderWidth: 2,
+                                borderColor: '#AB1E5C',
+                                backgroundColor: 'rgba(171, 30, 92, 0.3)',
+                                borderWidth: 3,
+                                pointBackgroundColor: '#D76D77',
+                                pointBorderColor: '#fff',
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
                                 fill: true,
                                 tension: 0.4
                             }]
                         },
                         options: {
                             responsive: true,
+                            maintainAspectRatio: false,
                             plugins: {
                                 legend: {
-                                    position: 'bottom'
+                                    position: 'bottom',
+                                    labels: {
+                                        font: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        },
+                                        color: '#F0F0F0'
+                                    }
                                 },
                                 tooltip: {
+                                    backgroundColor: 'rgba(74, 30, 115, 0.8)',
+                                    titleFont: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    },
+                                    bodyFont: {
+                                        size: 14
+                                    },
                                     callbacks: {
                                         label: function(context) {
                                             return `Safety Score: ${context.raw}`;
@@ -438,13 +502,32 @@ $recent_incidents = mysqli_fetch_assoc($result)['count'];
                                 y: {
                                     beginAtZero: true,
                                     max: 100,
+                                    grid: {
+                                        color: 'rgba(255, 255, 255, 0.1)'
+                                    },
+                                    ticks: {
+                                        color: '#F0F0F0',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    },
                                     title: {
                                         display: true,
                                         text: 'Score',
-                                        font: { weight: 'bold' }
+                                        color: '#F0F0F0',
+                                        font: { weight: 'bold', size: 14 }
                                     }
                                 },
                                 x: {
+                                    grid: {
+                                        color: 'rgba(255, 255, 255, 0.1)'
+                                    },
+                                    ticks: {
+                                        color: '#F0F0F0',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    },
                                     title: {
                                         display: true,
                                         text: 'Date',

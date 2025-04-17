@@ -47,9 +47,15 @@
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" class="flex-shrink-0">
-                    <circle cx="20" cy="20" r="18" stroke="#D76D77" stroke-width="4"/>
-                    <path d="M20 10L24 16H16L20 10Z" fill="#D76D77"/>
-                    <rect x="18" y="16" width="4" height="14" rx="2" fill="#D76D77"/>
+                    <defs>
+                        <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#4A1E73" />
+                            <stop offset="100%" stop-color="#D76D77" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M20 4C13 8 7 8 4 8C4 20 7 28 20 36C33 28 36 20 36 8C33 8 27 8 20 4Z" fill="url(#shieldGradient)" stroke="#D76D77" stroke-width="1.5"/>
+                    <path d="M20 12C17 12 14.5 14.5 14.5 17.5C14.5 19.5 15.5 21.2 17 22.2V26L20 28L23 26V22.2C24.5 21.2 25.5 19.5 25.5 17.5C25.5 14.5 23 12 20 12Z" fill="white" stroke="#D76D77" stroke-width="0.75"/>
+                    <circle cx="20" cy="17.5" r="2" fill="#D76D77"/>
                 </svg>
                 <span class="text-2xl font-bold text-[#D76D77]">SheShield</span>
             </div>
@@ -194,55 +200,422 @@
                 
             </div>
         </section> -->
-        AI Chatbot
+        
+        <!-- AI Chatbot Component -->
         <div x-data="{ 
             isOpen: false,
             userInput: '',
             selectedLanguage: 'en',
-            messages: [
-                {
-                    id: 1,
-                    type: 'bot',
-                    text: 'Hello! I\'m your SheShield AI assistant. How can I help you today?',
-                    options: [
-                        'I need immediate help',
-                        'Legal information',
-                        'Emotional support',
-                        'Report an incident'
-                    ]
+            messages: [],
+            initialized: false,
+            // Gemini API key
+            geminiApiKey: 'AIzaSyAOoLhBbTHkj3iTq5suNfwIyvmA38jQIwQ',
+            
+            // Track previous messages to prevent duplicates
+            lastUserMessage: '',
+            lastBotResponse: '',
+            isLoading: false,
+            
+            init() {
+                if (!this.initialized) {
+                    this.messages = [
+                        {
+                            id: 1,
+                            type: 'bot',
+                            text: 'Hello! I\'m SheShield\'s AI assistant. I\'m here to help you stay safe and informed. How can I assist you today?',
+                            options: [
+                                'I need immediate help',
+                                'Women safety',
+                                'Legal information',
+                                'Emotional support',
+                                'Report an incident'
+                            ]
+                        }
+                    ];
+                    this.initialized = true;
                 }
-            ],
-            processUserInput(input) {
+            },
+            
+            async processUserInput(input) {
+                // Don't process empty input
+                if (!input || input.trim() === '') {
+                    return { text: '', options: [] };
+                }
+                
+                // Prevent duplicate processing of the same message
+                if (input === this.lastUserMessage) {
+                    return this.lastBotResponse;
+                }
+                
+                // Set loading state
+                this.isLoading = true;
+                
+                this.lastUserMessage = input;
                 input = input.toLowerCase();
                 let responseText = '';
                 let responseOptions = ['Emergency help', 'Legal support', 'Emotional support', 'Report incident'];
                 
-                // Check for emergency keywords
-                if (input.includes('emergency') || input.includes('help') || input.includes('danger') || input.includes('urgent')) {
-                    responseText = 'I understand you need urgent assistance. Please call the emergency helpline at 1091 immediately or use our SOS feature. Would you like me to guide you through using the SOS feature?';
-                    responseOptions = ['Yes, guide me', 'No, I\'ll call instead', 'Show me safety tips', 'Contact someone for me'];
-                }
-                // Check for legal keywords
-                else if (input.includes('legal') || input.includes('rights') || input.includes('law') || input.includes('police')) {
-                    responseText = 'Here\'s some legal information that might help you. You have the right to file an FIR at any police station. Would you like more specific legal guidance?';
-                    responseOptions = ['Rights as a woman', 'How to file FIR', 'Legal aid contacts', 'Workplace rights'];
-                }
-                // Check for emotional support keywords
-                else if (input.includes('emotional') || input.includes('support') || input.includes('talk') || input.includes('feeling')) {
-                    responseText = 'I\'m here to support you. Remember that your feelings are valid, and it\'s okay to seek help. Would you like me to connect you with a counselor?';
-                    responseOptions = ['Connect with counselor', 'Self-care tips', 'Support groups', 'Coping strategies'];
-                }
-                // Check for reporting keywords
-                else if (input.includes('report') || input.includes('incident') || input.includes('happened') || input.includes('complaint')) {
-                    responseText = 'I can help you report an incident. Would you like to file an anonymous report or provide your contact details?';
-                    responseOptions = ['Anonymous report', 'Detailed report', 'Evidence guidelines', 'Track existing report'];
-                }
-                // Default response
-                else {
-                    responseText = 'How can I assist you today? Please let me know what kind of help you need.';
+                try {
+                    // Try to use Gemini API for response generation
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.geminiApiKey}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: `You are a helpful AI assistant for SheShield, a women's safety app. Respond to the following user query with helpful, supportive information. Keep responses concise, focused on women's safety, and avoid repeating information: ${input}`
+                                }]
+                            }]
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                            responseText = data.candidates[0].content.parts[0].text;
+                            
+                            // Format response text to replace asterisks with proper HTML bullet points and improve formatting
+                            responseText = responseText
+                                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // Bold text between ** **
+                                .replace(/\* /g, '• ') // Convert * bullets to • bullets
+                                .replace(/\*([^\n]+)/g, '• $1') // Also catch asterisks without space
+                                .replace(/\n/g, '<br>'); // Convert newlines to <br> tags
+                            
+                            // Determine appropriate options based on the input context
+                            if (input.includes('emergency') || input.includes('help') || input.includes('danger') || input.includes('urgent')) {
+                                responseOptions = ['Yes, guide me', 'No, I\'ll call instead', 'Show me safety tips', 'Contact someone for me'];
+                            } else if (input.includes('legal') || input.includes('rights') || input.includes('law') || input.includes('police')) {
+                                responseOptions = ['Rights as a woman', 'How to file FIR', 'Legal aid contacts', 'Workplace rights'];
+                            } else if (input.includes('emotional') || input.includes('support') || input.includes('talk') || input.includes('feeling')) {
+                                responseOptions = ['Connect with counselor', 'Self-care tips', 'Support groups', 'Coping strategies'];
+                    } else if (input.includes('report') || input.includes('incident') || input.includes('happened') || input.includes('complaint')) {
+                        responseOptions = ['Anonymous report', 'Detailed report', 'Evidence guidelines', 'Track existing report'];
+                    }
+                            
+                            const result = { text: responseText, options: responseOptions };
+                            this.lastBotResponse = result;
+                            return result;
+                        }
+                    }
+                    
+                    // If API call fails or returns invalid response, fall back to local logic
+                    throw new Error('API response not valid');
+                    
+                } catch (error) {
+                    console.log('Gemini API error, using fallback:', error);
+                    
+                    // Fallback to original logic
+                    if (input.includes('emergency') || input.includes('help') || input.includes('danger') || input.includes('urgent')) {
+                        responseText = 'I understand you need urgent assistance. Please call the emergency helpline at 1091 immediately or use our SOS feature. Would you like me to guide you through using the SOS feature?';
+                        responseOptions = ['Yes, guide me', 'No, I\'ll call instead', 'Show me safety tips', 'Contact someone for me'];
+                    } else if (input.includes('legal') || input.includes('rights') || input.includes('law') || input.includes('police')) {
+                        // Provide detailed legal information based on specific queries
+                        if (input.includes('woman') && input.includes('rights')) {
+                            responseText = `<strong>Rights as a Woman in India</strong><br><br>
+                            
+                            <strong>Constitutional Rights:</strong><br>
+                            • Right to equality (Article 14)<br>
+                            • Right against discrimination (Article 15)<br>
+                            • Right to equal opportunity (Article 16)<br>
+                            • Right to dignity and freedom (Article 21)<br><br>
+                            
+                            <strong>Legal Protection Acts:</strong><br>
+                            • Protection of Women from Domestic Violence Act, 2005<br>
+                            • Sexual Harassment of Women at Workplace Act, 2013<br>
+                            • Maternity Benefit Act, 1961 (Amended 2017)<br>
+                            • Equal Remuneration Act, 1976<br>
+                            • Prohibition of Child Marriage Act, 2006<br><br>
+                            
+                            <strong>Criminal Law Protections:</strong><br>
+                            • Protection against rape (Section 375, 376 IPC)<br>
+                            • Protection against stalking (Section 354D IPC)<br>
+                            • Protection against voyeurism (Section 354C IPC)<br>
+                            • Protection against acid attacks (Section 326A, 326B IPC)<br><br>
+                            
+                            Would you like more specific information about any of these rights?`;
+                        } else if (input.includes('file') && (input.includes('fir') || input.includes('complaint'))) {
+                            responseText = `<strong>How to File an FIR (First Information Report)</strong><br><br>
+                            
+                            <strong>Step-by-Step Process:</strong><br>
+                            1. Visit any police station - You have the right to file at ANY police station regardless of where the incident occurred (Zero FIR)<br>
+                            2. Provide your statement - Be clear, concise and include all relevant details<br>
+                            3. Review the written FIR before signing - Ensure all details are correctly recorded<br>
+                            4. Collect your free copy of the FIR - This is your legal right<br>
+                            5. Note the FIR number for future reference<br><br>
+                            
+                            <strong>Important Rights When Filing:</strong><br>
+                            • Right to file in your preferred language<br>
+                            • Right to have a female officer present (for women)<br>
+                            • Right to medical examination in sexual assault cases<br>
+                            • Right to legal aid if needed<br>
+                            • Right to file online FIR for certain offenses<br><br>
+                            
+                            <strong>If Police Refuse to File:</strong><br>
+                            • Approach the Superintendent of Police<br>
+                            • File a complaint with the State Women's Commission<br>
+                            • Approach a Magistrate directly under Section 156(3) CrPC<br><br>
+                            
+                            Need assistance with filing an FIR? SheShield can connect you with legal support.`;
+                        } else if (input.includes('legal aid') || input.includes('lawyer') || input.includes('contacts')) {
+                            responseText = `<strong>Legal Aid Contacts & Resources</strong><br><br>
+                            
+                            <strong>National Legal Services Authority (NALSA):</strong><br>
+                            • Helpline: 1516<br>
+                            • Website: nalsa.gov.in<br>
+                            • Free legal services for eligible women<br>
+                            • Email: nalsa-dla@nic.in<br><br>
+                            
+                            <strong>Women's Helplines:</strong><br>
+                            • National Commission for Women: 1091<br>
+                            • Women in Distress: 181<br>
+                            • Police Emergency: 100<br>
+                            • Domestic Violence Helpline: 181<br><br>
+                            
+                            <strong>NGOs Providing Legal Support:</strong><br>
+                            • Majlis Legal Centre (Mumbai): 022-26662394<br>
+                            • Lawyers Collective: 011-24373904/24372923<br>
+                            • MARG (Delhi): 011-26496925<br>
+                            • Shakti Shalini (Delhi): 011-24373737<br>
+                            • Action India (Delhi): 011-23379181<br>
+                            • Jagori (Delhi): 011-26692700<br>
+                            • Vimochana (Bangalore): 080-25492781/82<br>
+                            • Swayam (Kolkata): 033-24863367/68<br><br>
+                            
+                            <strong>District Legal Services Authority:</strong><br>
+                            • Every district has a DLSA office providing free legal aid<br>
+                            • Contact your local court complex for details<br>
+                            • Services include free legal representation, counseling, and mediation<br><br>
+                            
+                            <strong>Online Resources:</strong><br>
+                            • National Legal Services Authority: nalsa.gov.in<br>
+                            • National Commission for Women: ncw.nic.in<br>
+                            • Ministry of Women & Child Development: wcd.nic.in<br>
+                            • Legal Services India: legalservicesindia.com<br><br>
+                            
+                            Would you like me to help you connect with legal aid in your specific location?`;
+                        } else if (input.includes('workplace') || input.includes('office') || input.includes('job')) {
+                            responseText = `<strong>Workplace Rights for Women</strong><br><br>
+                            
+                            <strong>Sexual Harassment Protection:</strong><br>
+                            • Right to a safe working environment<br>
+                            • Mandatory Internal Complaints Committee (ICC) in organizations with 10+ employees<br>
+                            • Protection against retaliation for filing complaints<br>
+                            • Confidentiality of complaint proceedings<br><br>
+                            
+                            <strong>Maternity Benefits:</strong><br>
+                            • 26 weeks of paid maternity leave<br>
+                            • Work from home options (where applicable)<br>
+                            • Creche facilities in establishments with 50+ employees<br>
+                            • Protection against dismissal during pregnancy<br><br>
+                            
+                            <strong>Equal Pay & Opportunity:</strong><br>
+                            • Equal pay for equal work (Equal Remuneration Act)<br>
+                            • Protection against discriminatory hiring practices<br>
+                            • Equal opportunity for promotions and training<br><br>
+                            
+                            <strong>If Your Rights Are Violated:</strong><br>
+                            • Document all incidents with dates and details<br>
+                            • Report to the Internal Committee or Local Committee<br>
+                            • File a complaint with the Labour Commissioner<br>
+                            • Seek legal counsel through Women's Commission<br><br>
+                            
+                            Would you like specific guidance on filing a workplace harassment complaint?`;
+                        } else {
+                            responseText = `<strong>Legal Information & Resources</strong><br><br>
+                            
+                            Here are comprehensive legal resources to help you understand and protect your rights:<br><br>
+                            
+                            <strong>1. FUNDAMENTAL RIGHTS:</strong><br>
+                            • Right to file an FIR at any police station (Zero FIR)<br>
+                            • Right to legal representation<br>
+                            • Right to medical examination in cases of assault<br>
+                            • Right to privacy and confidentiality<br><br>
+                            
+                            <strong>2. WORKPLACE RIGHTS:</strong><br>
+                            • Protection against harassment<br>
+                            • Maternity benefits<br>
+                            • Equal pay for equal work<br>
+                            • Safe working environment<br><br>
+                            
+                            <strong>3. DOMESTIC RIGHTS:</strong><br>
+                            • Protection against domestic violence<br>
+                            • Right to residence in shared household<br>
+                            • Right to maintenance and support<br>
+                            • Protection orders against abusers<br><br>
+                            
+                            <strong>4. LEGAL RESOURCES:</strong><br>
+                            • Women's Helpline: 1091<br>
+                            • Legal Services Authority: 1516<br>
+                            • Domestic Violence Helpline: 181<br><br>
+                            
+                            What specific legal information would you like to know more about?`;
+                        }
+                        
+                        responseOptions = ['Rights as a woman', 'How to file FIR', 'Legal aid contacts', 'Workplace rights'];
+                    } else if (input.includes('emotional') || input.includes('support') || input.includes('talk') || input.includes('feeling')) {
+                        responseText = `<strong>Emotional Support</strong><br><br>
+                            
+                            I understand this may be a difficult time for you. Remember that your feelings are valid, and it's okay to seek help.<br><br>
+                            
+                            <strong>Immediate Support Resources:</strong><br>
+                            • 24/7 Emotional Support Helpline: 1098<br>
+                            • Crisis Counseling: Available through our partner organizations<br>
+                            • Online Support Groups: Connect with others who understand<br>
+                            • Professional Counselors: Available for confidential sessions<br><br>
+                            
+                            <strong>Coping Strategies:</strong><br>
+                            • Practice deep breathing: Inhale for 4 counts, hold for 4, exhale for 6<br>
+                            • Grounding technique: Name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, 1 you can taste<br>
+                            • Mindfulness: Focus on the present moment without judgment<br>
+                            • Self-care: Ensure you're getting proper rest, nutrition, and gentle movement<br><br>
+                            
+                            Would you like me to connect you with a counselor or provide more specific coping techniques?`;
+                        responseOptions = ['Connect with counselor', 'Self-care tips', 'Support groups', 'Coping strategies'];
+                    } else if (input.includes('legal') || input.includes('rights') || input.includes('law') || input.includes('justice')) {
+                        responseText = `<strong>Legal Information & Resources</strong><br><br>
+                            
+                            Here are comprehensive legal resources to help you understand and protect your rights:<br><br>
+                            
+                            <strong>1. FUNDAMENTAL RIGHTS:</strong><br>
+                            • Right to file an FIR at any police station (Zero FIR)<br>
+                            • Right to legal representation<br>
+                            • Right to medical examination in cases of assault<br>
+                            • Right to privacy and confidentiality<br><br>
+                            
+                            <strong>2. WORKPLACE RIGHTS:</strong><br>
+                            • Protection against harassment<br>
+                            • Maternity benefits<br>
+                            • Equal pay for equal work<br>
+                            • Safe working environment<br><br>
+                            
+                            <strong>3. DOMESTIC RIGHTS:</strong><br>
+                            • Protection against domestic violence<br>
+                            • Right to residence in shared household<br>
+                            • Right to maintenance and support<br>
+                            • Protection orders against abusers<br><br>
+                            
+                            <strong>4. LEGAL RESOURCES:</strong><br>
+                            • Women's Helpline: 1091<br>
+                            • Legal Services Authority: 1516<br>
+                            • Domestic Violence Helpline: 181<br><br>
+                            
+                            What specific legal information would you like to know more about?`;
+                        responseOptions = ['Rights as a woman', 'How to file FIR', 'Legal aid contacts', 'Workplace rights', 'Report an incident'];
+                    } else if (input.includes('report') || input.includes('incident') || input.includes('happened') || input.includes('complaint')) {
+                        responseText = 'I can help you report an incident. Would you like to file an anonymous report or provide your contact details?';
+                        responseOptions = ['Anonymous report', 'Detailed report', 'Evidence guidelines', 'Track existing report'];
+                    } else if (input.includes('women') || input.includes('safety') || input.includes('protection') || input.includes('secure')) {
+                        responseText = `<strong>Women's Safety Information</strong><br><br>
+                            
+                            Here are essential safety resources and information to help you stay protected:<br><br>
+                            
+                            <strong>1. PERSONAL SAFETY TIPS:</strong><br>
+                            • Share your location with trusted contacts when traveling<br>
+                            • Use SheShield's SOS feature in emergencies<br>
+                            • Consider self-defense training and carry legal safety tools<br>
+                            • Trust your instincts and be aware of your surroundings<br><br>
+                            
+                            <strong>2. DIGITAL SAFETY:</strong><br>
+                            • Use strong, unique passwords for all accounts<br>
+                            • Enable two-factor authentication<br>
+                            • Be cautious about sharing personal information online<br>
+                            • Regularly check privacy settings on social media<br><br>
+                            
+                            <strong>3. TRAVEL SAFETY:</strong><br>
+                            • Use SheShield's Walk With Us feature for safer commuting<br>
+                            • Share ride details with trusted contacts<br>
+                            • Avoid isolated areas, especially at night<br>
+                            • Use verified transportation services<br><br>
+                            
+                            <strong>4. EMERGENCY RESOURCES:</strong><br>
+                            • Women's Helpline: 1091<br>
+                            • Police Emergency: 100<br>
+                            • SheShield Emergency Button: Tap SOS in the app<br><br>
+                            
+                            What specific safety information would you like to know more about?`;
+                        responseOptions = ['Personal safety tips', 'Digital safety', 'Travel safety', 'Emergency contacts', 'Report an incident'];
+                    } else if (input.includes('women') || input.includes('safety') || input.includes('protection') || input.includes('secure')) {
+                        responseText = `<strong>Women's Safety Information</strong><br><br>
+                            
+                            Here are essential safety resources and information to help you stay protected:<br><br>
+                            
+                            <strong>1. PERSONAL SAFETY TIPS:</strong><br>
+                            • Share your location with trusted contacts when traveling<br>
+                            • Use SheShield's SOS feature in emergencies<br>
+                            • Consider self-defense training and carry legal safety tools<br>
+                            • Trust your instincts and be aware of your surroundings<br><br>
+                            
+                            <strong>2. DIGITAL SAFETY:</strong><br>
+                            • Use strong, unique passwords for all accounts<br>
+                            • Enable two-factor authentication<br>
+                            • Be cautious about sharing personal information online<br>
+                            • Regularly check privacy settings on social media<br><br>
+                            
+                            <strong>3. TRAVEL SAFETY:</strong><br>
+                            • Use SheShield's Walk With Us feature for safer commuting<br>
+                            • Share ride details with trusted contacts<br>
+                            • Avoid isolated areas, especially at night<br>
+                            • Use verified transportation services<br><br>
+                            
+                            <strong>4. EMERGENCY RESOURCES:</strong><br>
+                            • Women's Helpline: 1091<br>
+                            • Police Emergency: 100<br>
+                            • SheShield Emergency Button: Tap SOS in the app<br><br>
+                            
+                            What specific safety information would you like to know more about?`;
+                        responseOptions = ['Personal safety tips', 'Digital safety', 'Travel safety', 'Emergency contacts', 'Report an incident'];
+                    } else if (input.includes('women safety') || input.includes('woman safety') || input.includes('safe women') || input.includes('female safety')) {
+                        responseText = `<strong>Women's Safety Resources & Information</strong><br><br>
+                            
+                            Here are comprehensive resources to help women stay safe:<br><br>
+                            
+                            <strong>1. IMMEDIATE SAFETY MEASURES:</strong><br>
+                            • Use SheShield's SOS button for emergencies<br>
+                            • Share your live location with trusted contacts<br>
+                            • Call Women's Helpline: 1091 for immediate assistance<br>
+                            • Use the 'Walk With Us' feature when traveling alone<br><br>
+                            
+                            <strong>2. PREVENTIVE SAFETY:</strong><br>
+                            • Check area safety using our Safety Heat Map<br>
+                            • Join self-defense workshops (available in-app)<br>
+                            • Connect with verified safe spaces in your area<br>
+                            • Set up regular safety check-ins with contacts<br><br>
+                            
+                            <strong>3. REPORTING MECHANISMS:</strong><br>
+                            • Report incidents through SheShield for faster response<br>
+                            • Document evidence securely in the app<br>
+                            • Access legal resources and support<br>
+                            • Connect with support communities<br><br>
+                            
+                            What specific women's safety information would you like to know more about?`;
+                        responseOptions = ['Personal safety tips', 'Safe travel advice', 'Harassment prevention', 'Legal rights', 'Emergency protocols'];
+                    } else {
+                        responseText = 'How can I assist you today? Please let me know what kind of help you need.';
+                    }
+                    
+                    // Format response text to replace asterisks with proper HTML bullet points and improve formatting
+                    responseText = responseText
+                        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // Bold text between ** **
+                        .replace(/\*\* /g, '<strong>') // Handle opening bold tags
+                        .replace(/ \*\*/g, '</strong>') // Handle closing bold tags
+                        .replace(/\* ([^\n]+)/g, '• $1') // Convert * bullets to • bullets
+                        .replace(/\*([^\n]+)/g, '• $1') // Also catch asterisks without space
+                        .replace(/•\s*\*\*/g, '• <strong>') // Fix bullet points with bold text
+                        .replace(/\*\*\s*•/g, '</strong> •') // Fix bold text with bullet points
+                        .replace(/\n\s*\n/g, '<br>') // Add proper spacing between paragraphs
+                        .replace(/\n([0-9]+\. )/g, '<br>$1') // Preserve numbered lists formatting
+                        .replace(/•\s*([^<]+)\*/g, '• $1') // Remove trailing asterisks from bullet points
+                        .replace(/\*([^\s]+)\*/g, '<em>$1</em>') // Convert *text* to italics
+                        .replace(/\*:/g, ':') // Remove stray asterisks before colons
+                        .replace(/\n/g, '<br>') // Convert all remaining newlines to <br> tags
                 }
                 
-                return { text: responseText, options: responseOptions };
+                const result = { text: responseText, options: responseOptions };
+                this.lastBotResponse = result;
+                this.isLoading = false;
+                return result;
             }
         }" 
         class="fixed bottom-4 right-4 z-50 flex flex-col items-end">
@@ -266,7 +639,8 @@
                  x-transition:leave-start="opacity-100 transform scale-100"
                  x-transition:leave-end="opacity-0 transform scale-90"
                  class="bg-white rounded-lg shadow-xl w-96 max-w-full mb-4"
-                 @click.away="isOpen = false">
+                 @click.away="isOpen = false"
+                 x-init="init()">
                 <!-- Chat Header -->
                 <div class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white p-4 rounded-t-lg">
                     <div class="flex justify-between items-center">
@@ -293,11 +667,31 @@
                                 'bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white': message.type === 'user',
                                 'bg-gray-100 text-gray-800': message.type === 'bot'
                             }" class="rounded-lg px-4 py-2 max-w-[80%]">
-                                <p x-text="message.text"></p>
+                                <p x-html="message.text"></p>
                                 <template x-if="message.type === 'bot' && message.options">
                                     <div class="mt-2 space-y-2">
                                         <template x-for="option in message.options" :key="option">
-                                            <button @click="userInput = option; $nextTick(() => { messages.push({ id: Date.now(), type: 'user', text: option }); const response = processUserInput(option); messages.push({ id: Date.now() + 1, type: 'bot', text: response.text, options: response.options }); })"
+                                            <button @click="userInput = option; $nextTick(() => { 
+                                                    if (!isLoading) {
+                                                        isLoading = true;
+                                                        messages.push({ id: Date.now(), type: 'user', text: option }); 
+                                                        processUserInput(option).then(response => { 
+                                                            // Only add bot response if it's not empty
+                                                            if (response.text) {
+                                                                // Add a single comprehensive response instead of nested options
+                                                                messages.push({ 
+                                                                    id: Date.now() + 1, 
+                                                                    type: 'bot', 
+                                                                    text: response.text, 
+                                                                    // Only include options for initial responses, not for follow-ups
+                                                                    options: userInput === option ? [] : response.options
+                                                                }); 
+                                                            }
+                                                            isLoading = false;
+                                                            $nextTick(() => { document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight; });
+                                                        }); 
+                                                    }
+                                                })"
                                                     class="block w-full text-left text-sm text-[#D76D77] hover:bg-pink-50 rounded px-2 py-1 transition-colors">
                                                 <span x-text="option"></span>
                                             </button>
@@ -307,6 +701,15 @@
                             </div>
                         </div>
                     </template>
+                    <div x-show="isLoading" class="flex mb-3">
+                        <div class="bg-gray-100 text-gray-800 rounded-lg px-4 py-2 max-w-[80%] flex items-center">
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-[#D76D77] rounded-full animate-bounce"></div>
+                                <div class="w-2 h-2 bg-[#D76D77] rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                <div class="w-2 h-2 bg-[#D76D77] rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Chat Input -->
@@ -314,13 +717,64 @@
                     <div class="flex space-x-2">
                         <input type="text" 
                                x-model="userInput" 
-                               @keydown.enter="if(userInput.trim()) { messages.push({ id: Date.now(), type: 'user', text: userInput }); const response = processUserInput(userInput); messages.push({ id: Date.now() + 1, type: 'bot', text: response.text, options: response.options }); userInput = ''; }"
+                               :disabled="isLoading"
+                               @keydown.enter="if(userInput.trim() && !isLoading) { 
+                                   const currentInput = userInput; 
+                                   messages.push({ id: Date.now(), type: 'user', text: currentInput }); 
+                                   userInput = ''; 
+                                   isLoading = true;
+                                   $nextTick(() => { 
+                                       document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight; 
+                                   }); 
+                                   processUserInput(currentInput).then(response => { 
+                                       isLoading = false;
+                                       // Provide a comprehensive response without nested options for follow-up messages
+                                       messages.push({ 
+                                           id: Date.now() + 1, 
+                                           type: 'bot', 
+                                           text: response.text, 
+                                           // Only include options for initial responses, not for follow-ups to avoid nested responses
+                                           options: [] 
+                                       }); 
+                                       $nextTick(() => { 
+                                           document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight; 
+                                       }); 
+                                   }); 
+                               }"
                                placeholder="Type your message..."
                                class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#4A1E73]">
-                        <button @click="if(userInput.trim()) { messages.push({ id: Date.now(), type: 'user', text: userInput }); const response = processUserInput(userInput); messages.push({ id: Date.now() + 1, type: 'bot', text: response.text, options: response.options }); userInput = ''; }"
-                                class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white rounded-lg px-4 py-2 hover:from-[#5A2E83] hover:to-[#E77D87] transition-colors">
+                        <button :disabled="isLoading || !userInput.trim()" 
+                                @click="if(userInput.trim() && !isLoading) { 
+                                    const currentInput = userInput; 
+                                    messages.push({ id: Date.now(), type: 'user', text: currentInput }); 
+                                    userInput = ''; 
+                                    isLoading = true;
+                                    $nextTick(() => { 
+                                        document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight; 
+                                    }); 
+                                    processUserInput(currentInput).then(response => { 
+                                        isLoading = false;
+                                        // Add 'Report an incident' and 'I need immediate help' to options if not already present
+                                        let updatedOptions = response.options || [];
+                                        if (updatedOptions.length > 0) {
+                                            if (!updatedOptions.includes('Report an incident') && 
+                                                !currentInput.toLowerCase().includes('report') && !currentInput.toLowerCase().includes('incident')) {
+                                                updatedOptions.push('Report an incident');
+                                            }
+                                            if (!updatedOptions.includes('I need immediate help') && 
+                                                !currentInput.toLowerCase().includes('immediate help') && !currentInput.toLowerCase().includes('emergency')) {
+                                                updatedOptions.push('I need immediate help');
+                                            }
+                                        }
+                                        messages.push({ id: Date.now() + 1, type: 'bot', text: response.text, options: updatedOptions }); 
+                                        $nextTick(() => { 
+                                            document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight; 
+                                        }); 
+                                    }); 
+                                }"
+                                class="bg-gradient-to-r from-[#4A1E73] to-[#D76D77] text-white rounded-lg px-4 py-2 hover:from-[#5A2E83] hover:to-[#E77D87] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7"/>
                             </svg>
                         </button>
                     </div>
@@ -514,77 +968,48 @@
                     },
                     "legal": {
                         keywords: ["legal", "rights", "law", "justice"],
-                        reply: `Understanding your legal rights is crucial. Here's what you need to know:
-    
-    1. FUNDAMENTAL RIGHTS:
-       • Right to file an FIR
-       • Right to zero FIR (file anywhere)
-       • Right to legal representation
-       • Right to medical examination
-       • Right to privacy and confidentiality
-    
-    2. WORKPLACE RIGHTS:
-       • Protection against harassment
-       • Safe working environment
-       • Equal opportunities
-       • Maternity benefits
-       • Sexual harassment committee
-    
-    3. DOMESTIC RIGHTS:
-       • Protection against domestic violence
-       • Right to residence
-       • Maintenance and alimony
-       • Child custody rights
-       • Protection orders
-    
-    4. LEGAL RESOURCES:
-       • Free legal aid
-       • Women's commission support
-       • NGO assistance
-       • Police assistance
-       • Court support services
-    
-    Would you like to:
-    • Learn more about specific rights
-    • Connect with legal aid
-    • Get guidance on filing complaints
-    • Understand protection orders
-    • Find legal resources near you
-    
-    How can I help you with legal matters?`
+                        reply: `<strong>Legal Information</strong><br><br>
+                            
+                            <strong>Constitutional Rights:</strong><br>
+                            • Right to equality (Article 14)<br>
+                            • Right against discrimination (Article 15)<br>
+                            • Right to equal opportunity (Article 16)<br>
+                            • Right to dignity and freedom (Article 21)<br><br>
+                            
+                            <strong>Legal Protection Acts:</strong><br>
+                            • Protection of Women from Domestic Violence Act, 2005<br>
+                            • Sexual Harassment of Women at Workplace Act, 2013<br>
+                            • Maternity Benefit Act, 1961 (Amended 2017)<br>
+                            • Equal Remuneration Act, 1976<br>
+                            • Prohibition of Child Marriage Act, 2006<br><br>
+                            
+                            <strong>Criminal Law Protections:</strong><br>
+                            • Protection against rape (Section 375, 376 IPC)<br>
+                            • Protection against stalking (Section 354D IPC)<br>
+                            • Protection against voyeurism (Section 354C IPC)<br>
+                            • Protection against acid attacks (Section 326A, 326B IPC)<br><br>
+                            
+                            Would you like more specific information about any of these rights?`
                     },
                     "support": {
                         keywords: ["emotional", "counseling", "therapy", "talk"],
-                        reply: `You're not alone. Here's how we can support you:
-    
-    1. IMMEDIATE SUPPORT:
-       • 24/7 Emotional Support Helpline: 1098
-       • Crisis Counseling: Available Now
-       • Online Support Groups
-       • Professional Counselors
-    
-    2. SUPPORT SERVICES:
-       • One-on-one counseling
-       • Group therapy sessions
-       • Trauma support
-       • Family counseling
-       • Peer support groups
-    
-    3. COPING STRATEGIES:
-       • Deep breathing exercises
-       • Grounding techniques
-       • Mindfulness practices
-       • Stress management
-       • Self-care routines
-    
-    Would you like to:
-    • Talk to a counselor now
-    • Join a support group
-    • Learn coping techniques
-    • Find local support services
-    • Get self-help resources
-    
-    How can I best support you right now?`
+                        reply: `<strong>Emotional Support</strong><br><br>
+                            
+                            I understand this may be a difficult time for you. Remember that your feelings are valid, and it's okay to seek help.<br><br>
+                            
+                            <strong>Immediate Support Resources:</strong><br>
+                            • 24/7 Emotional Support Helpline: 1098<br>
+                            • Crisis Counseling: Available through our partner organizations<br>
+                            • Online Support Groups: Connect with others who understand<br>
+                            • Professional Counselors: Available for confidential sessions<br><br>
+                            
+                            <strong>Coping Strategies:</strong><br>
+                            • Practice deep breathing: Inhale for 4 counts, hold for 4, exhale for 6<br>
+                            • Grounding technique: Name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, 1 you can taste<br>
+                            • Mindfulness: Focus on the present moment without judgment<br>
+                            • Self-care: Ensure you're getting proper rest, nutrition, and gentle movement<br><br>
+                            
+                            Would you like me to connect you with a counselor or provide more specific coping techniques?`
                     }
                 },
     
