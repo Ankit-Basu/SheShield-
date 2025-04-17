@@ -25,3 +25,6 @@ vendor/
 # Ignore OS generated files
 .DS_Store
 Thumbs.db
+
+# Ignore Women_Safety_App directory (separate application)
+Women_Safety_App/
