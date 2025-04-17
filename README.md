@@ -383,12 +383,3 @@ We welcome contributions from developers, designers, safety experts, and communi
 5. Open a Pull Request
 
 Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
-
-## 📞 Contact
-
-For any inquiries, please reach out to us:
-
-- **Email:** [support@sheshield.org](mailto:support@sheshield.org)
-- **Website:** [www.sheshield.org](https://www.sheshield.org)
-
-For security vulnerabilities, please email [security@sheshield.org](mailto:security@sheshield.org) directly instead of opening a public issue.

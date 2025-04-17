@@ -40,6 +40,8 @@
     <script defer src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Load environment configuration -->
+    <script src="../js/env-config.js"></script>
     <!-- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> -->
 </head>
 <body class="font-[Inter] bg-[#1E1E2E]">
@@ -208,8 +210,8 @@
             selectedLanguage: 'en',
             messages: [],
             initialized: false,
-            // Gemini API key
-            geminiApiKey: 'AIzaSyAOoLhBbTHkj3iTq5suNfwIyvmA38jQIwQ',
+            // Gemini API key from environment config
+            geminiApiKey: '',
             
             // Track previous messages to prevent duplicates
             lastUserMessage: '',
@@ -218,6 +220,9 @@
             
             init() {
                 if (!this.initialized) {
+                    // Get API key from environment configuration
+                    this.geminiApiKey = window.ENV_CONFIG?.GEMINI_API_KEY || '';
+                    
                     this.messages = [
                         {
                             id: 1,
@@ -281,7 +286,7 @@
                                 .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // Bold text between ** **
                                 .replace(/\* /g, '• ') // Convert * bullets to • bullets
                                 .replace(/\*([^\n]+)/g, '• $1') // Also catch asterisks without space
-                                .replace(/\n/g, '<br>'); // Convert newlines to <br> tags
+                                .replace(/\n/g, '<br>') // Convert newlines to <br> tags
                             
                             // Determine appropriate options based on the input context
                             if (input.includes('emergency') || input.includes('help') || input.includes('danger') || input.includes('urgent')) {
@@ -524,10 +529,12 @@
                             • Regularly check privacy settings on social media<br><br>
                             
                             <strong>3. TRAVEL SAFETY:</strong><br>
-                            • Use SheShield's Walk With Us feature for safer commuting<br>
-                            • Share ride details with trusted contacts<br>
-                            • Avoid isolated areas, especially at night<br>
-                            • Use verified transportation services<br><br>
+                            • Plan routes in advance<br>
+                            • Stay in well-lit areas<br>
+                            • Use trusted transportation<br>
+                            • Share trip details with trusted contacts<br>
+                            • Keep emergency numbers handy<br>
+                            • Use SheShield's tracking feature<br><br>
                             
                             <strong>4. EMERGENCY RESOURCES:</strong><br>
                             • Women's Helpline: 1091<br>
