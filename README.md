@@ -381,5 +381,3 @@ We welcome contributions from developers, designers, safety experts, and communi
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
