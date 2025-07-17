@@ -1,9 +1,25 @@
 <?php
 class Database {
-    private $host = "localhost";
-    private $db_name = "sheshield";
-    private $username = "root";
-    private $password = "";
+    // Parse database URL if available (for Render.com)
+    private function getDbConfig() {
+        if (getenv('DATABASE_URL')) {
+            $db = parse_url(getenv('DATABASE_URL'));
+            return [
+                'host' => $db['host'],
+                'db'   => ltrim($db['path'], '/'),
+                'user' => $db['user'],
+                'pass' => $db['pass'],
+                'port' => $db['port']
+            ];
+        }
+        return [
+            'host' => 'localhost',
+            'db'   => 'sheshield',
+            'user' => 'root',
+            'pass' => '',
+            'port' => 5432
+        ];
+    }
     public $conn;
 
     public function getConnection() {
@@ -11,10 +27,12 @@ class Database {
 
         try {
             // First try to connect to MySQL server
+            $dbConfig = $this->getDbConfig();
+            $dsn = "pgsql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['db']};";
             $this->conn = new PDO(
-                "mysql:host=" . $this->host,
-                $this->username,
-                $this->password,
+                $dsn,
+                $dbConfig['user'],
+                $dbConfig['pass'],
                 array(
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_EMULATE_PREPARES => false
