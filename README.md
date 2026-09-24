@@ -4,6 +4,7 @@
   <h1>🛡️ SheShield</h1>
   <h3>Empowering Women's Safety Through Technology</h3>
   <p><em>24/7 emergency support, real-time tracking, incident reporting, and community-driven protection — all in one platform.</em></p>
+  <a href="https://github.com/Ankit-Basu/SheShield-/actions/workflows/main.yml"><img src="https://github.com/Ankit-Basu/SheShield-/actions/workflows/main.yml/badge.svg?branch=master" alt="CI/CD Pipeline"></a>
   <br>
   <a href="#-key-features">Features</a> •
   <a href="#-screenshots">Screenshots</a> •
