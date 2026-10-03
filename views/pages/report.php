@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <h3 style="font-size:14px;font-weight:600;color:#f87171"><i class="fa-solid fa-phone-volume" style="margin-right:6px"></i> Emergency</h3>
               <span class="tag-pill red" style="animation:pulse 2s infinite">24/7</span>
             </div>
-            <button class="sos-btn" onclick="window.location.href='tel:112'" style="margin-bottom:12px">🔴 ACTIVATE SOS</button>
+            <button class="sos-btn" onclick="activateSOS()" style="margin-bottom:12px">🔴 ACTIVATE SOS</button>
             <p style="font-size:10px;color:rgba(255,255,255,0.3);text-align:center">Alerts all emergency contacts instantly</p>
           </div>
 
@@ -169,6 +169,175 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
 </div>
+
+<!-- SOS Emergency Modal -->
+<div id="sosModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);align-items:center;justify-content:center">
+  <div style="background:linear-gradient(145deg,#1a1a2e,#16162a);border:1px solid rgba(239,68,68,0.3);border-radius:24px;padding:32px;max-width:440px;width:90%;position:relative;animation:sosModalIn 0.4s ease">
+    <!-- Close -->
+    <button onclick="closeSOS()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.5);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:24px">
+      <div id="sosPulseRing" style="width:80px;height:80px;margin:0 auto 16px;position:relative">
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#991b1b);display:flex;align-items:center;justify-content:center;font-size:32px;position:relative;z-index:2;animation:sosBtnPulse 1.5s infinite">🆘</div>
+        <div style="position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(239,68,68,0.4);animation:sosRingPulse 1.5s infinite"></div>
+        <div style="position:absolute;inset:-18px;border-radius:50%;border:1px solid rgba(239,68,68,0.2);animation:sosRingPulse 1.5s infinite 0.3s"></div>
+      </div>
+      <h2 style="font-size:20px;font-weight:700;color:#f87171;margin-bottom:4px">EMERGENCY SOS ACTIVATED</h2>
+      <p id="sosStatus" style="font-size:12px;color:rgba(255,255,255,0.4)">Fetching your location...</p>
+    </div>
+
+    <!-- Location Info -->
+    <div id="sosLocationCard" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <i class="fa-solid fa-location-dot" style="color:#f87171;font-size:16px"></i>
+        <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.7)">Your Live Location</span>
+        <span style="margin-left:auto;font-size:10px;color:#22c55e;background:rgba(34,197,94,0.1);padding:2px 8px;border-radius:20px"><span style="display:inline-block;width:6px;height:6px;background:#22c55e;border-radius:50%;margin-right:4px;animation:blink 1s infinite"></span>LIVE</span>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:12px">
+        <div style="flex:1;background:rgba(255,255,255,0.03);border-radius:10px;padding:10px">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Latitude</div>
+          <div id="sosLat" style="font-size:14px;font-weight:700;color:#e91e8c;font-family:monospace">—</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,0.03);border-radius:10px;padding:10px">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Longitude</div>
+          <div id="sosLng" style="font-size:14px;font-weight:700;color:#7c3aed;font-family:monospace">—</div>
+        </div>
+      </div>
+      <a id="sosMapLink" href="#" target="_blank" style="display:block;text-align:center;font-size:11px;color:#60a5fa;text-decoration:none;background:rgba(96,165,250,0.08);padding:8px;border-radius:8px;transition:background 0.2s" onmouseover="this.style.background='rgba(96,165,250,0.15)'" onmouseout="this.style.background='rgba(96,165,250,0.08)'">
+        <i class="fa-solid fa-map-location-dot" style="margin-right:4px"></i> View on Google Maps
+      </a>
+    </div>
+
+    <!-- Timestamp -->
+    <div id="sosTimestamp" style="display:none;text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:16px">
+      <i class="fa-regular fa-clock" style="margin-right:4px"></i> Triggered at <span id="sosTime"></span>
+    </div>
+
+    <!-- Action Buttons -->
+    <div id="sosActions" style="display:none;flex-direction:column;gap:10px">
+      <button onclick="shareWhatsApp()" style="width:100%;padding:14px;border:none;border-radius:12px;background:#25D366;color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(37,211,102,0.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+        <i class="fa-brands fa-whatsapp" style="font-size:18px"></i> Share Location via WhatsApp
+      </button>
+      <div style="display:flex;gap:10px">
+        <button onclick="copyLocation()" id="sosCopyBtn" style="flex:1;padding:12px;border:1px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(255,255,255,0.05);color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+          <i class="fa-regular fa-copy" style="margin-right:4px"></i> Copy Location
+        </button>
+        <a href="tel:112" style="flex:1;padding:12px;border:1px solid rgba(239,68,68,0.2);border-radius:12px;background:rgba(239,68,68,0.1);color:#f87171;font-size:12px;font-weight:600;text-decoration:none;text-align:center;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.1)'">
+          <i class="fa-solid fa-phone"></i> Call 112
+        </a>
+      </div>
+      <button onclick="shareSMS()" style="width:100%;padding:12px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+        <i class="fa-solid fa-message" style="margin-right:4px"></i> Share via SMS
+      </button>
+    </div>
+
+    <!-- Error state -->
+    <div id="sosError" style="display:none;text-align:center;padding:16px">
+      <p style="color:#f87171;font-size:13px;margin-bottom:12px" id="sosErrorMsg"></p>
+      <button onclick="activateSOS()" style="padding:10px 24px;border:1px solid rgba(239,68,68,0.3);border-radius:10px;background:rgba(239,68,68,0.1);color:#f87171;font-size:12px;font-weight:600;cursor:pointer">
+        <i class="fa-solid fa-rotate-right" style="margin-right:4px"></i> Retry
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes sosModalIn{from{opacity:0;transform:scale(0.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes sosBtnPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes sosRingPulse{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.4);opacity:0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+</style>
+
+<script>
+let sosLat = null, sosLng = null;
+
+function activateSOS() {
+  const modal = document.getElementById('sosModal');
+  modal.style.display = 'flex';
+  document.getElementById('sosLocationCard').style.display = 'none';
+  document.getElementById('sosActions').style.display = 'none';
+  document.getElementById('sosTimestamp').style.display = 'none';
+  document.getElementById('sosError').style.display = 'none';
+  document.getElementById('sosStatus').textContent = 'Fetching your location...';
+
+  if (!navigator.geolocation) {
+    showSOSError('Geolocation is not supported by your browser.');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      sosLat = pos.coords.latitude.toFixed(6);
+      sosLng = pos.coords.longitude.toFixed(6);
+
+      document.getElementById('sosLat').textContent = sosLat;
+      document.getElementById('sosLng').textContent = sosLng;
+      document.getElementById('sosMapLink').href = 'https://www.google.com/maps?q=' + sosLat + ',' + sosLng;
+      document.getElementById('sosStatus').textContent = 'Location captured — share with your emergency contacts';
+      document.getElementById('sosStatus').style.color = '#22c55e';
+
+      const now = new Date();
+      document.getElementById('sosTime').textContent = now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' — ' + now.toLocaleDateString('en-IN');
+      document.getElementById('sosTimestamp').style.display = 'block';
+
+      document.getElementById('sosLocationCard').style.display = 'block';
+      document.getElementById('sosActions').style.display = 'flex';
+    },
+    function(err) {
+      let msg = 'Unable to fetch location. ';
+      if (err.code === 1) msg += 'Please allow location access in your browser.';
+      else if (err.code === 2) msg += 'Location unavailable. Check your GPS.';
+      else if (err.code === 3) msg += 'Location request timed out. Try again.';
+      showSOSError(msg);
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+}
+
+function showSOSError(msg) {
+  document.getElementById('sosStatus').textContent = 'Failed to get location';
+  document.getElementById('sosStatus').style.color = '#f87171';
+  document.getElementById('sosErrorMsg').textContent = msg;
+  document.getElementById('sosError').style.display = 'block';
+}
+
+function shareWhatsApp() {
+  const msg = '🆘 *SOS EMERGENCY — SheShield Alert*%0A%0A' +
+    '⚠️ I need immediate help!%0A%0A' +
+    '📍 *My Live Location:*%0A' +
+    'Latitude: ' + sosLat + '%0A' +
+    'Longitude: ' + sosLng + '%0A%0A' +
+    '🗺️ *Google Maps:*%0A' +
+    'https://www.google.com/maps?q=' + sosLat + ',' + sosLng + '%0A%0A' +
+    '🕐 Time: ' + new Date().toLocaleString('en-IN') + '%0A' +
+    '— Sent via SheShield 🛡️';
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+function shareSMS() {
+  const msg = 'SOS EMERGENCY! I need help. My location: https://www.google.com/maps?q=' + sosLat + ',' + sosLng + ' — Sent via SheShield';
+  window.open('sms:?body=' + encodeURIComponent(msg), '_blank');
+}
+
+function copyLocation() {
+  const text = 'SOS Emergency — My Location: https://www.google.com/maps?q=' + sosLat + ',' + sosLng;
+  navigator.clipboard.writeText(text).then(function() {
+    const btn = document.getElementById('sosCopyBtn');
+    btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px;color:#22c55e"></i> Copied!';
+    btn.style.borderColor = 'rgba(34,197,94,0.3)';
+    setTimeout(function() {
+      btn.innerHTML = '<i class="fa-regular fa-copy" style="margin-right:4px"></i> Copy Location';
+      btn.style.borderColor = 'rgba(255,255,255,0.1)';
+    }, 2000);
+  });
+}
+
+function closeSOS() {
+  document.getElementById('sosModal').style.display = 'none';
+}
+</script>
+
 <?php include __DIR__.'/toast.php'; ?>
 </body>
 </html>

@@ -77,7 +77,7 @@ if(isset($conn)&&!$conn->connect_error){
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 <script>
 const map=L.map('safeMap').setView([31.2533,75.7050],15);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles © Esri — Esri, HERE, Garmin, © OpenStreetMap contributors',maxZoom:19}).addTo(map);
 setTimeout(()=>map.invalidateSize(),300);
 
 const drawnItems=new L.FeatureGroup();map.addLayer(drawnItems);

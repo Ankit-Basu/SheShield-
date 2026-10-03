@@ -57,7 +57,7 @@ if(isset($conn)&&!$conn->connect_error&&$user_id>0){$r=$conn->query("SELECT * FR
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 <script>
 const map=L.map('map').setView([31.2533,75.7050],15);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles © Esri — Esri, HERE, Garmin, © OpenStreetMap contributors',maxZoom:19}).addTo(map);
 setTimeout(()=>map.invalidateSize(),300);
 
 const icons={
